@@ -30,6 +30,7 @@ dependencies {
 	compile group: 'mirrg', name: 'mirrg.helium.swing.phosphorus.canvas', version: '0.0.13+'
 	compile group: 'mirrg', name: 'mirrg.helium.swing.nitrogen.util', version: '+'
 	compile group: 'mirrg', name: 'mirrg.helium.math.hydrogen.complex', version: '+'
+	compile group: 'mirrg', name: 'mirrg.helium.compile.oxygen.editor', version: '+'
 
 }
 
