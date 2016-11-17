@@ -27,7 +27,9 @@ dependencies {
 	compile group: 'mirrg', name: 'mirrg.helium.standard.hydrogen.struct', version: '+'
 	compile group: 'mirrg', name: 'mirrg.helium.standard.hydrogen.event', version: '+'
 	compile group: 'mirrg', name: 'mirrg.helium.standard.hydrogen.util', version: '+'
-	compile group: 'mirrg', name: 'mirrg.helium.swing.phosphorus.canvas', version: '+'
+	compile group: 'mirrg', name: 'mirrg.helium.swing.phosphorus.canvas', version: '0.0.13+'
+	compile group: 'mirrg', name: 'mirrg.helium.swing.nitrogen.util', version: '+'
+	compile group: 'mirrg', name: 'mirrg.helium.math.hydrogen.complex', version: '+'
 
 }
 
