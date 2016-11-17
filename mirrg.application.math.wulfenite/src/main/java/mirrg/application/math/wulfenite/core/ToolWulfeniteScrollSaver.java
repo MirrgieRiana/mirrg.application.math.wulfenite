@@ -30,6 +30,7 @@ public class ToolWulfeniteScrollSaver extends Tool<Wulfenite>
 			image.createGraphics().drawImage(game.layerMath.getImageLayer().getImage(), 0, 0, null);
 		});
 		registerGameEvent(EventPhosphorusGame.ViewChange.Post.class, e -> {
+			if (rectangle == null) return;
 			Graphics2D g = game.layerMath.getImageLayer().getGraphics();
 
 			RectangleScreen rectangle2 = game.getView().convert(rectangle);
