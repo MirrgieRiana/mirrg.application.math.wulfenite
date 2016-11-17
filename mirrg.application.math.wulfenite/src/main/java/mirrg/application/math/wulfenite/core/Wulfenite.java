@@ -151,7 +151,6 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 		addTool(new ToolWulfenite(this));
 		addTool(new ToolWulfeniteScrollSaver(this));
 
-		addEntity(dataEntityWulfeniteFunction = new DataEntityWulfeniteFunction());
 	}
 
 	public XStream getXStream()
@@ -175,7 +174,7 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 
 	public IWulfeniteFunction getFunction()
 	{
-		return dataEntityWulfeniteFunction.wulfeniteFunction;
+		return dataEntityWulfeniteFunction == null ? null : dataEntityWulfeniteFunction.wulfeniteFunction;
 	}
 
 	public void setFunction(IWulfeniteFunction wulfeniteFunction)
@@ -196,10 +195,15 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 	public static Data<Wulfenite> createData()
 	{
 		Data<Wulfenite> data = new Data<>();
-		DataViewSkewed dataViewSkewed = new DataViewSkewed();
-		dataViewSkewed.zoomX = 0.01;
-		dataViewSkewed.zoomY = -0.01;
-		data.view = dataViewSkewed;
+		{
+			DataViewSkewed dataViewSkewed = new DataViewSkewed();
+			dataViewSkewed.zoomX = 0.01;
+			dataViewSkewed.zoomY = -0.01;
+			data.view = dataViewSkewed;
+		}
+		{
+			data.entities.add(new DataEntityWulfeniteFunction());
+		}
 		return data;
 	}
 
