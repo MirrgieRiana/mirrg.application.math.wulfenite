@@ -40,7 +40,8 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 
 	public Wulfenite(JFrame frame, PhosphorusCanvas canvas, JMenuBar menuBar)
 	{
-		super(canvas, createData());
+		super(canvas, new Data<>());
+		setData(createData());
 
 		{
 			JMenu menu = new JMenu("ファイル(F)");
