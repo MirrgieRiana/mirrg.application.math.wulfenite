@@ -97,8 +97,8 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 			menuBar.add(menu);
 		}
 		{
-			JMenu menu = new JMenu("表示(S)");
-			menu.setMnemonic('S');
+			JMenu menu = new JMenu("表示(V)");
+			menu.setMnemonic('V');
 			{
 				JMenuItem menuItem = new JCheckBoxMenuItem("グリッドを表示(G)");
 				menuItem.setMnemonic('G');
@@ -138,6 +138,19 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 			}
 			menuBar.add(menu);
 		}
+		{
+			JMenu menu = new JMenu("関数(S)");
+			menu.setMnemonic('S');
+			{
+				JMenuItem menuItem = new JMenuItem("設定画面...(S)");
+				menuItem.setMnemonic('S');
+				menuItem.addActionListener(e -> {
+					getFunction().toggleDialog();
+				});
+				menu.add(menuItem);
+			}
+			menuBar.add(menu);
+		}
 
 		layerMath = createLayer();
 		layerMath.setAutoClear(false);
@@ -163,13 +176,13 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 	@Override
 	public synchronized void setData(Data<Wulfenite> data)
 	{
-		event().post(new EventWulfenite.ChangeFunction.Pre());
-		if (getFunction() != null) getFunction().dispose();
-		super.setData(data);
-		dataEntityWulfeniteFunction = HLambda.filter(getEntities(), DataEntityWulfeniteFunction.class)
-			.findFirst()
-			.get();
-		event().post(new EventWulfenite.ChangeFunction.Post());
+		fireChangeFunction(() -> {
+			if (getFunction() != null) getFunction().dispose();
+			super.setData(data);
+			dataEntityWulfeniteFunction = HLambda.filter(getEntities(), DataEntityWulfeniteFunction.class)
+				.findFirst()
+				.get();
+		});
 	}
 
 	public IWulfeniteFunction getFunction()
@@ -179,9 +192,10 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 
 	public void setFunction(IWulfeniteFunction wulfeniteFunction)
 	{
-		event().post(new EventWulfenite.ChangeFunction.Pre());
-		dataEntityWulfeniteFunction.wulfeniteFunction = wulfeniteFunction;
-		event().post(new EventWulfenite.ChangeFunction.Post());
+		fireChangeFunction(() -> {
+			dataEntityWulfeniteFunction.wulfeniteFunction.dispose();
+			dataEntityWulfeniteFunction.wulfeniteFunction = wulfeniteFunction;
+		});
 	}
 
 	public void invokeLater(Runnable runnable)
@@ -239,6 +253,13 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 	public void setXML(String xml)
 	{
 		setData((Data<Wulfenite>) getXStream().fromXML(xml));
+	}
+
+	public void fireChangeFunction(Runnable inner)
+	{
+		event().post(new EventWulfenite.ChangeFunction.Pre());
+		inner.run();
+		event().post(new EventWulfenite.ChangeFunction.Post());
 	}
 
 }

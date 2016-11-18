@@ -1,5 +1,7 @@
 package mirrg.application.math.wulfenite.core;
 
+import mirrg.helium.math.hydrogen.complex.StructureComplex;
+
 public class WulfeniteFunctionDefault implements IWulfeniteFunction
 {
 
@@ -10,13 +12,13 @@ public class WulfeniteFunctionDefault implements IWulfeniteFunction
 	}
 
 	@Override
-	public void getValue(double[] dest, double coordinateX, double coordinateY)
+	public void getValue(StructureComplex buffer)
 	{
 
 	}
 
 	@Override
-	public int getColor(double coordinateX, double coordinateY)
+	public int getColor(StructureComplex coordinate)
 	{
 		return 0xff000000;
 	}

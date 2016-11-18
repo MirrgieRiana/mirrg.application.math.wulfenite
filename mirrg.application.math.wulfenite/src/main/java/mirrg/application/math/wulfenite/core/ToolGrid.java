@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import com.sun.glass.events.KeyEvent;
 
+import mirrg.helium.math.hydrogen.complex.StructureComplex;
 import mirrg.helium.standard.hydrogen.util.HMath;
 import mirrg.helium.standard.hydrogen.util.HString;
 import mirrg.helium.swing.phosphorus.canvas.EventPhosphorusCanvas;
@@ -164,14 +165,13 @@ public class ToolGrid extends Tool<Wulfenite>
 			if (enabledCursor) {
 
 				if (game.getFunction().isValuePresent()) {
-					double[] value = new double[2];
-					game.getFunction().getValue(
-						value,
+					StructureComplex buffer = new StructureComplex(
 						game.getView().getCoordinateX(point.x),
 						game.getView().getCoordinateY(point.y));
+					game.getFunction().getValue(buffer);
 
 					{
-						String str = "Re: " + value[0];
+						String str = "Re: " + buffer.re;
 
 						g.setFont(font);
 						drawBoldString(g, str,
@@ -180,7 +180,7 @@ public class ToolGrid extends Tool<Wulfenite>
 							Color.white, Color.black);
 					}
 					{
-						String str = "Im: " + value[1];
+						String str = "Im: " + buffer.im;
 
 						g.setFont(font);
 						drawBoldString(g, str,

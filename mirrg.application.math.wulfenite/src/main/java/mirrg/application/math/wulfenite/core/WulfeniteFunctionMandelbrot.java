@@ -1,20 +1,26 @@
 package mirrg.application.math.wulfenite.core;
 
+import mirrg.helium.math.hydrogen.complex.StructureComplex;
 import mirrg.helium.swing.nitrogen.util.HColor;
 
-public class WulfeniteFunctionMandelbrot implements IWulfeniteFunction
+public class WulfeniteFunctionMandelbrot extends WulfeniteFunctionBase
 {
 
-	@Override
-	public int getColor(double coordinateX, double coordinateY)
+	public WulfeniteFunctionMandelbrot(Wulfenite wulfenite)
 	{
-		return getMandelbrot(coordinateX, coordinateY);
+		super(wulfenite);
 	}
 
-	private int getMandelbrot(double coordinateX, double coordinateY)
+	@Override
+	public int getColor(StructureComplex coordinate)
+	{
+		return getMandelbrot(coordinate);
+	}
+
+	private int getMandelbrot(StructureComplex coordinate)
 	{
 		double[] value = new double[2];
-		getValue(value, coordinateX, coordinateY);
+		getValue(coordinate);
 
 		return HColor.createColor(128 - 128 * Math.cos(value[0] * 3.1415 / 90), 0, 0).getRGB(); // TODO
 	}
@@ -26,14 +32,14 @@ public class WulfeniteFunctionMandelbrot implements IWulfeniteFunction
 	}
 
 	@Override
-	public void getValue(double[] dest, double coordinateX, double coordinateY)
+	public void getValue(StructureComplex buffer)
 	{
 		int t = 0;
 		double x2 = 0;
 		double y2 = 0;
 		while (t < 360 * 4) {
-			x2 += coordinateX;
-			y2 += coordinateY;
+			x2 += buffer.re;
+			y2 += buffer.im;
 			double a = x2 * x2;
 			double b = y2 * y2;
 			if (a + b > 4) break;
@@ -43,8 +49,8 @@ public class WulfeniteFunctionMandelbrot implements IWulfeniteFunction
 			t++;
 		}
 
-		dest[0] = t;
-		dest[1] = 0;
+		buffer.re = t;
+		buffer.im = 0;
 	}
 
 	@Override

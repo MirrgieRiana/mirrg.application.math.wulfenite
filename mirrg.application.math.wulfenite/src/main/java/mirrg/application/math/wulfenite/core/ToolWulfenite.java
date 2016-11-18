@@ -2,6 +2,7 @@ package mirrg.application.math.wulfenite.core;
 
 import com.sun.glass.events.KeyEvent;
 
+import mirrg.application.math.wulfenite.script.WulfeniteFunctionScript;
 import mirrg.helium.swing.phosphorus.canvas.EventPhosphorusCanvas;
 import mirrg.helium.swing.phosphorus.canvas.game.existence.Tool;
 
@@ -47,9 +48,11 @@ public class ToolWulfenite extends Tool<Wulfenite>
 
 			// 関数制御
 			if (e.event.getKeyCode() == KeyEvent.VK_1) {
-				game.setFunction(new WulfeniteFunctionMandelbrot());
+				game.setFunction(new WulfeniteFunctionMandelbrot(game));
 			} else if (e.event.getKeyCode() == KeyEvent.VK_2) {
-				game.setFunction(new WulfeniteFunctionComplex());
+				game.setFunction(new WulfeniteFunctionComplex(game));
+			} else if (e.event.getKeyCode() == KeyEvent.VK_3) {
+				game.setFunction(new WulfeniteFunctionScript(game));
 			}
 
 		});

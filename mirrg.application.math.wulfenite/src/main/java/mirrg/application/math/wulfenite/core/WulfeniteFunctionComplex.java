@@ -1,36 +1,21 @@
 package mirrg.application.math.wulfenite.core;
 
+import mirrg.helium.math.hydrogen.complex.StructureComplex;
 import mirrg.helium.swing.nitrogen.util.HColor;
 
-public class WulfeniteFunctionComplex implements IWulfeniteFunction
+public class WulfeniteFunctionComplex extends WulfeniteFunctionBase
 {
 
-	@Override
-	public int getColor(double coordinateX, double coordinateY)
+	public WulfeniteFunctionComplex(Wulfenite wulfenite)
 	{
-		double[] value = new double[2];
-		getValue(value, coordinateX, coordinateY);
-
-		double abs = Math.sqrt(value[0] * value[0] + value[1] * value[1]);
-		double arg = Math.atan2(value[1], value[0]);
-
-		return 0xff000000 | getColorIntFromPolar(abs, arg);
+		super(wulfenite);
 	}
 
-	public int getColorIntFromPolar(double abs, double arg)
+	@Override
+	public int getColor(StructureComplex coordinate)
 	{
-		double R = Math.cos(arg);
-		double G = Math.cos(arg - 120.0 / 180 * Math.PI);
-		double B = Math.cos(arg - 240.0 / 180 * Math.PI);
-
-		double brightness = 0.5 - 0.5 * Math.cos(abs * 2 * Math.PI);
-
-		brightness = 1 - Math.pow(brightness, 2);
-
-		return HColor.getColorInt(
-			(int) ((128 + (126 * R)) * brightness),
-			(int) ((128 + (126 * G)) * brightness),
-			(int) ((128 + (126 * B)) * brightness));
+		getValue(coordinate);
+		return 0xff000000 | getColorIntFromComplex(coordinate);
 	}
 
 	@Override
@@ -40,10 +25,10 @@ public class WulfeniteFunctionComplex implements IWulfeniteFunction
 	}
 
 	@Override
-	public void getValue(double[] dest, double coordinateX, double coordinateY)
+	public void getValue(StructureComplex buffer)
 	{
-		dest[0] = 1 * coordinateX;
-		dest[1] = 1 * coordinateY;
+		buffer.re = 1 * buffer.re;
+		buffer.im = 1 * buffer.im;
 	}
 
 	@Override
@@ -56,6 +41,27 @@ public class WulfeniteFunctionComplex implements IWulfeniteFunction
 	public void dispose()
 	{
 
+	}
+
+	public static int getColorIntFromComplex(StructureComplex coordinate)
+	{
+		return getColorIntFromPolar(coordinate.getAbstract(), coordinate.getArgument());
+	}
+
+	public static int getColorIntFromPolar(double abs, double arg)
+	{
+		double R = Math.cos(arg);
+		double G = Math.cos(arg - 120.0 / 180 * Math.PI);
+		double B = Math.cos(arg - 240.0 / 180 * Math.PI);
+
+		double brightness = 0.5 - 0.5 * Math.cos(abs * 2 * Math.PI);
+
+		brightness = 1 - brightness * brightness;
+
+		return HColor.getColorInt(
+			(int) ((128 + (126 * R)) * brightness),
+			(int) ((128 + (126 * G)) * brightness),
+			(int) ((128 + (126 * B)) * brightness));
 	}
 
 }

@@ -1,5 +1,6 @@
 package mirrg.application.math.wulfenite.core;
 
+import mirrg.helium.math.hydrogen.complex.StructureComplex;
 import mirrg.helium.swing.phosphorus.canvas.EventPhosphorusCanvas;
 import mirrg.helium.swing.phosphorus.canvas.game.EventPhosphorusGame;
 import mirrg.helium.swing.phosphorus.canvas.game.existence.Tool;
@@ -49,10 +50,20 @@ public class ToolWulfenitePainter extends Tool<Wulfenite>
 	{
 		if (isPainting) {
 			long start = System.currentTimeMillis();
+			StructureComplex buffer = new StructureComplex();
 
 			while (true) {
+				IWulfeniteFunction function = game.getFunction();
+				buffer.set(getCoordinateX(), getCoordinateY());
+				int color;
+				try {
+					color = function.getColor(buffer);
+				} catch (RuntimeException e) {
+					e.printStackTrace();
 
-				int color = game.getFunction().getColor(getCoordinateX(), getCoordinateY());
+					finishPainting();
+					break;
+				}
 				try {
 					game.layerMath.getImageLayer().getImage().setRGB(x, y, color);
 				} catch (ArrayIndexOutOfBoundsException e) {
@@ -71,12 +82,7 @@ public class ToolWulfenitePainter extends Tool<Wulfenite>
 
 				// 全て塗り替えた
 				if (x == updatedBeginX && y == updatedBeginY) {
-					x = 0;
-					y = 0;
-					updatedBeginX = 0;
-					updatedBeginY = 0;
-					isPainting = false;
-
+					finishPainting();
 					break;
 				}
 
@@ -85,6 +91,15 @@ public class ToolWulfenitePainter extends Tool<Wulfenite>
 			}
 
 		}
+	}
+
+	private void finishPainting()
+	{
+		x = 0;
+		y = 0;
+		updatedBeginX = 0;
+		updatedBeginY = 0;
+		isPainting = false;
 	}
 
 	//

@@ -1,13 +1,23 @@
 package mirrg.application.math.wulfenite.core;
 
+import mirrg.helium.math.hydrogen.complex.StructureComplex;
+
 public interface IWulfeniteFunction
 {
 
-	public int getColor(double coordinateX, double coordinateY);
+	/**
+	 * @param coordinate
+	 *            破壊してもよい
+	 */
+	public int getColor(StructureComplex coordinate);
 
 	public boolean isValuePresent();
 
-	public void getValue(double[] dest, double coordinateX, double coordinateY);
+	/**
+	 * @param buffer
+	 *            入出力兼用
+	 */
+	public void getValue(StructureComplex buffer);
 
 	public void toggleDialog();
 
