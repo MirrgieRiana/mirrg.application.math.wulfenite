@@ -5,8 +5,6 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.util.Optional;
 
-import com.sun.glass.events.KeyEvent;
-
 import mirrg.helium.math.hydrogen.complex.StructureComplex;
 import mirrg.helium.standard.hydrogen.util.HMath;
 import mirrg.helium.standard.hydrogen.util.HString;
@@ -37,16 +35,6 @@ public class ToolGrid extends Tool<Wulfenite>
 		registerEvent(EventPhosphorusCanvas.EventMouseMotion.Dragged.class, e -> {
 			point = new PointScreen(e.event.getPoint());
 			dirty(game.layerOverlay);
-		});
-
-		registerEvent(EventPhosphorusCanvas.EventKey.Pressed.class, e -> {
-			if (e.event.getKeyCode() == KeyEvent.VK_Z) {
-				enabledGrid = !enabledGrid;
-				dirty(game.layerOverlay);
-			} else if (e.event.getKeyCode() == KeyEvent.VK_X) {
-				enabledCursor = !enabledCursor;
-				dirty(game.layerOverlay);
-			}
 		});
 
 		registerGameEvent(EventWulfenite.ChangeFunction.Post.class, e -> {

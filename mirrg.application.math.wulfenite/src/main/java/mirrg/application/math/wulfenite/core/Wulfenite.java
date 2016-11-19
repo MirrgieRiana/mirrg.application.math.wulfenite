@@ -26,6 +26,7 @@ import javax.swing.WindowConstants;
 import com.thoughtworks.xstream.XStream;
 
 import mirrg.application.math.wulfenite.script.DataWulfeniteFunctionScript;
+import mirrg.helium.standard.hydrogen.struct.Struct1;
 import mirrg.helium.swing.phosphorus.canvas.PhosphorusCanvas;
 import mirrg.helium.swing.phosphorus.canvas.game.Data;
 import mirrg.helium.swing.phosphorus.canvas.game.EventPhosphorusGame;
@@ -44,10 +45,20 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 	{
 		RESET,
 		RESET_COORDINATE,
+		TEMPORARY_SAVE,
+		TEMPORARY_LOAD,
 		OPEN_CONFIG_DIALOG,
 		OPEN_QUERY_DIALOG,
 		MIRROR_VERTICAL,
 		MIRROR_HORIZONTAL,
+		ZOOM_IN,
+		ZOOM_OUT,
+		MOVE_UP,
+		MOVE_DOWN,
+		MOVE_LEFT,
+		MOVE_RIGHT,
+		SHOW_GRID,
+		SHOW_CURSOR_INFO,
 	}
 
 	public final JFrame frame;
@@ -60,6 +71,8 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 
 	public final ActionMap actionMap;
 	public final InputMap inputMap;
+
+	private String xml;
 
 	public Wulfenite(JFrame frame, PhosphorusCanvas canvas, JMenuBar menuBar)
 	{
@@ -85,6 +98,27 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 					});
 				})));
 			menu.addSeparator();
+
+			menu.add(new JMenuItem(createAction(
+				ActionKey.TEMPORARY_SAVE,
+				"一時保存(S)",
+				"現在のアプリケーションの状態をメモリ上にバックアップします。",
+				'S',
+				KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0),
+				e -> {
+					xml = getXML();
+					System.out.println(xml);
+				})));
+			menu.add(new JMenuItem(createAction(
+				ActionKey.TEMPORARY_LOAD,
+				"一時保存から復元(L)",
+				"バックアップからデータを読み込みます。",
+				'L',
+				KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0),
+				e -> {
+					if (xml != null) invokeLater(() -> setXML(xml));
+				})));
+
 			menu.add(new JMenuItem(createAction(
 				ActionKey.OPEN_QUERY_DIALOG,
 				"クエリの表示(Q)",
@@ -122,30 +156,92 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 				'R',
 				KeyStroke.getKeyStroke(KeyEvent.VK_R, 0),
 				e -> resetPosition())));
+			menu.addSeparator();
+			menu.add(new JMenuItem(createAction(
+				ActionKey.ZOOM_IN,
+				"拡大(E)",
+				"ホイール1段階分ズームインします。",
+				'E',
+				KeyStroke.getKeyStroke(KeyEvent.VK_X, 0),
+				e -> toolZoom.doZoom(-1))));
+			menu.add(new JMenuItem(createAction(
+				ActionKey.ZOOM_OUT,
+				"縮小(Q)",
+				"ホイール1段階分ズームアウトします。",
+				'Q',
+				KeyStroke.getKeyStroke(KeyEvent.VK_Z, 0),
+				e -> toolZoom.doZoom(1))));
+
+			menu.add(new JMenuItem(createAction(
+				ActionKey.MOVE_UP,
+				"↑(W)",
+				"上方向に50ピクセル分スクロールします。",
+				'E',
+				KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),
+				e -> getView().setY(getView().getY() - 50 * getView().getZoomY()))));
+			menu.add(new JMenuItem(createAction(
+				ActionKey.MOVE_DOWN,
+				"↓(S)",
+				"下方向に50ピクセル分スクロールします。",
+				'Q',
+				KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
+				e -> getView().setY(getView().getY() + 50 * getView().getZoomY()))));
+			menu.add(new JMenuItem(createAction(
+				ActionKey.MOVE_LEFT,
+				"←(A)",
+				"左方向に50ピクセル分スクロールします。",
+				'E',
+				KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0),
+				e -> getView().setX(getView().getX() - 50 * getView().getZoomX()))));
+			menu.add(new JMenuItem(createAction(
+				ActionKey.MOVE_RIGHT,
+				"→(D)",
+				"右方向に50ピクセル分スクロールします。",
+				'Q',
+				KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0),
+				e -> getView().setX(getView().getX() + 50 * getView().getZoomX()))));
+
 			menuBar.add(menu);
 		}
 		{
 			JMenu menu = new JMenu("表示(V)");
 			menu.setMnemonic('V');
+
 			{
-				JMenuItem menuItem = new JCheckBoxMenuItem("グリッドを表示(G)");
-				menuItem.setMnemonic('G');
-				menuItem.setSelected(true);
-				menuItem.addActionListener(e -> {
-					toolGrid.enabledGrid = menuItem.isSelected();
-					getLayers().forEach(Layer::dirty);
-				});
-				menu.add(menuItem);
+				Struct1<JMenuItem> menuItem = new Struct1<>();
+				menuItem.x = new JCheckBoxMenuItem(createAction(
+					ActionKey.SHOW_GRID,
+					"グリッドの表示(G)",
+					"グリッド線の表示を切り替えます。",
+					'G',
+					KeyStroke.getKeyStroke(KeyEvent.VK_G, 0),
+					e -> {
+						if (!(e.getSource() instanceof JCheckBoxMenuItem)) {
+							menuItem.x.setSelected(!menuItem.x.isSelected());
+						}
+						toolGrid.enabledGrid = menuItem.x.isSelected();
+						getLayers().forEach(Layer::dirty);
+					}));
+				menuItem.x.setSelected(true);
+				menu.add(menuItem.x);
 			}
 			{
-				JMenuItem menuItem = new JCheckBoxMenuItem("カーソル情報を表示(C)");
-				menuItem.setMnemonic('C');
-				menuItem.setSelected(true);
-				menuItem.addActionListener(e -> {
-					toolGrid.enabledCursor = menuItem.isSelected();
-					getLayers().forEach(Layer::dirty);
-				});
-				menu.add(menuItem);
+				Struct1<JMenuItem> menuItem = new Struct1<>();
+				menuItem.x = new JCheckBoxMenuItem(createAction(
+					ActionKey.SHOW_CURSOR_INFO,
+					"カーソル情報の表示(C)",
+					"カーソル情報の表示を切り替えます。",
+					'C',
+					KeyStroke.getKeyStroke(KeyEvent.VK_G, Event.CTRL_MASK),
+					e -> {
+						if (!(e.getSource() instanceof JCheckBoxMenuItem)) {
+							menuItem.x.setSelected(!menuItem.x.isSelected());
+						}
+						toolGrid.enabledCursor = menuItem.x.isSelected();
+						getLayers().forEach(Layer::dirty);
+					}));
+				menuItem.x.setSelected(true);
+				menu.add(menuItem.x);
 			}
 			menu.addSeparator();
 			menu.add(new JMenuItem(createAction(
@@ -174,6 +270,28 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 				'C',
 				KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0),
 				e -> getFunction().toggleDialog())));
+			menu.addSeparator();
+			menu.add(new JMenuItem(createAction(
+				null,
+				"Script(1)...",
+				"関数を設定します。",
+				'1',
+				KeyStroke.getKeyStroke(KeyEvent.VK_1, 0),
+				e -> setFunction(new DataWulfeniteFunctionScript()))));
+			menu.add(new JMenuItem(createAction(
+				null,
+				"Complex(2)...",
+				"関数を設定します。",
+				'2',
+				KeyStroke.getKeyStroke(KeyEvent.VK_2, 0),
+				e -> setFunction(new DataWulfeniteFunctionComplex()))));
+			menu.add(new JMenuItem(createAction(
+				null,
+				"Mandelbrot(3)...",
+				"関数を設定します。",
+				'3',
+				KeyStroke.getKeyStroke(KeyEvent.VK_3, 0),
+				e -> setFunction(new DataWulfeniteFunctionMandelbrot()))));
 			menuBar.add(menu);
 		}
 
@@ -186,7 +304,6 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 		addTool(toolZoom = new ToolZoom(this));
 		addTool(new ToolWulfenitePainter(this, 45));
 		addTool(toolGrid = new ToolGrid(this));
-		addTool(new ToolWulfenite(this));
 		addTool(new ToolWulfeniteScrollSaver(this));
 
 	}
@@ -248,9 +365,10 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 	public void setFunction(DataWulfeniteFunctionBase wulfeniteFunction)
 	{
 		fireChangeFunction(() -> {
-			getData().wulfeniteFunction.dispose();
+			DataWulfeniteFunctionBase tmp = getData().wulfeniteFunction;
+			wulfeniteFunction.initialize(this);
 			getData().wulfeniteFunction = wulfeniteFunction;
-			getData().wulfeniteFunction.initialize(this);
+			tmp.dispose();
 		});
 	}
 
@@ -271,7 +389,11 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 			dataViewSkewed.zoomY = -0.01;
 			data.view = dataViewSkewed;
 		}
-		data.wulfeniteFunction = new DataWulfeniteFunctionScript();
+		{
+			DataWulfeniteFunctionScript dataWulfeniteFunctionScript = new DataWulfeniteFunctionScript();
+			dataWulfeniteFunctionScript.source = "(_ + 1 + 1i) * (_ - 1 - 1i) / (_ - 1 + 1i) / (_ + 1 - 1i)";
+			data.wulfeniteFunction = dataWulfeniteFunctionScript;
+		}
 		return data;
 	}
 

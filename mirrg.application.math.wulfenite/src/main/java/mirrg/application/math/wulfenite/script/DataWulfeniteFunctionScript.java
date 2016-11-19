@@ -38,37 +38,37 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 		private void onChangeSource()
 		{
 			ResultOxygen<IWulfeniteScript> result = WulfeniteScript.getSyntax().matches(source);
-			game.fireChangeFunction(() -> {
-				if (result.isValid) {
+			if (result.isValid) {
 
-					// VM初期化
-					{
-						environment = new Environment();
+				// VM初期化
+				{
+					environment = new Environment();
 
-						Variable variable = environment.addVariable("_", StructureComplex.class);
-						input = new StructureComplex();
-						variable.value = input;
+					Variable variable = environment.addVariable("_", StructureComplex.class);
+					input = new StructureComplex();
+					variable.value = input;
 
-						Loader.loadFunction(environment);
+					Loader.loadFunction(environment);
 
-					}
-
-					// 意味解析
-					if (result.node.value.validate(environment)) {
-						consumer = Optional.of(result.node.value);
-					} else {
-						consumer = Optional.empty();
-						dialog.textPaneOut.setText(environment.getErrors()
-							.map(t -> "[" + DialogWulfeniteScript.toPosition(source, t.getY().getBegin()) + "] " + t.getX())
-							.collect(Collectors.joining("\n")));
-						dialog.textPaneOut.setBackground(Color.decode("#ffddbb"));
-					}
-
-				} else {
-					environment = null;
-					consumer = Optional.empty();
 				}
-			});
+
+				// 意味解析
+				if (result.node.value.validate(environment)) {
+					game.fireChangeFunction(() -> {
+						consumer = Optional.of(result.node.value);
+					});
+				} else {
+					consumer = Optional.empty();
+					dialog.textPaneOut.setText(environment.getErrors()
+						.map(t -> "[" + DialogWulfeniteScript.toPosition(source, t.getY().getBegin()) + "] " + t.getX())
+						.collect(Collectors.joining("\n")));
+					dialog.textPaneOut.setBackground(Color.decode("#ffddbb"));
+				}
+
+			} else {
+				environment = null;
+				consumer = Optional.empty();
+			}
 		}
 
 		@Override

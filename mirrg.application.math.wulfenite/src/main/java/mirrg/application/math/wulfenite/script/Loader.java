@@ -37,7 +37,7 @@ public class Loader
 		}));
 	}
 
-	public static class WsfIII extends WulfeniteScriptFunction
+	private static class WsfIII extends WulfeniteScriptFunction
 	{
 
 		private I i;
@@ -67,7 +67,7 @@ public class Loader
 
 	}
 
-	public static class WsfDDD extends WulfeniteScriptFunction
+	private static class WsfDDD extends WulfeniteScriptFunction
 	{
 
 		private I i;
@@ -97,7 +97,7 @@ public class Loader
 
 	}
 
-	public static class WsfCCC extends WulfeniteScriptFunction
+	private static class WsfCCC extends WulfeniteScriptFunction
 	{
 
 		private I i;

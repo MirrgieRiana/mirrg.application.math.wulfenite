@@ -117,20 +117,20 @@ public class WulfeniteScript
 			return left;
 		});
 
-	public Syntax<IWulfeniteScript> operatorAdd = createOperatorLeft(operatorMethod, c -> {
-		c.accept("+", "_operatorPlus");
-		c.accept("-", "_operatorMinus");
-	});
-
-	public Syntax<IWulfeniteScript> operatorMul = createOperatorLeft(operatorAdd, c -> {
+	public Syntax<IWulfeniteScript> operatorMul = createOperatorLeft(operatorMethod, c -> {
 		c.accept("*", "_operatorAsterisk");
 		c.accept("/", "_operatorSlash");
+	});
+
+	public Syntax<IWulfeniteScript> operatorAdd = createOperatorLeft(operatorMul, c -> {
+		c.accept("+", "_operatorPlus");
+		c.accept("-", "_operatorMinus");
 	});
 
 	// root
 
 	{
-		expression.syntax = operatorMul;
+		expression.syntax = operatorAdd;
 	}
 
 	public Syntax<IWulfeniteScript> root = extract((IWulfeniteScript) null)
