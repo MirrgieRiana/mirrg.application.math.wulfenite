@@ -48,6 +48,10 @@ public class ToolGrid extends Tool<Wulfenite>
 				dirty(game.layerOverlay);
 			}
 		});
+
+		registerGameEvent(EventWulfenite.ChangeFunction.Post.class, e -> {
+			dirty(game.layerOverlay);
+		});
 	}
 
 	// TODO 再編集
@@ -164,28 +168,19 @@ public class ToolGrid extends Tool<Wulfenite>
 			// labels cursor
 			if (enabledCursor) {
 
-				if (game.getFunction().isValuePresent()) {
+				{
 					StructureComplex buffer = new StructureComplex(
 						game.getView().getCoordinateX(point.x),
 						game.getView().getCoordinateY(point.y));
-					game.getFunction().getValue(buffer);
+					String[] valueInformation = game.getFunction().getValueInformation(buffer);
 
-					{
-						String str = "Re: " + buffer.re;
-
-						g.setFont(font);
-						drawBoldString(g, str,
-							(int) (point.x + 2),
-							(int) (point.y - 2 - g.getFont().getSize() * 3),
-							Color.white, Color.black);
-					}
-					{
-						String str = "Im: " + buffer.im;
+					for (int i = 0; i < valueInformation.length; i++) {
+						String str = valueInformation[i];
 
 						g.setFont(font);
 						drawBoldString(g, str,
 							(int) (point.x + 2),
-							(int) (point.y - 2 - g.getFont().getSize() * 2),
+							(int) (point.y - 2 - g.getFont().getSize() * ((1 + valueInformation.length) - i)),
 							Color.white, Color.black);
 					}
 				}

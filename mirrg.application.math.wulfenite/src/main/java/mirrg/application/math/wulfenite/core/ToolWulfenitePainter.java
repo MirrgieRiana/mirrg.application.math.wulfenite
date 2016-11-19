@@ -53,11 +53,11 @@ public class ToolWulfenitePainter extends Tool<Wulfenite>
 			StructureComplex buffer = new StructureComplex();
 
 			while (true) {
-				IWulfeniteFunction function = game.getFunction();
+				IEntityWulfeniteFunction function = game.getFunction();
 				buffer.set(getCoordinateX(), getCoordinateY());
 				int color;
 				try {
-					color = function.getColor(buffer);
+					color = 0xff000000 | function.getColor(buffer);
 				} catch (RuntimeException e) {
 					e.printStackTrace();
 

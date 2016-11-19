@@ -16,7 +16,6 @@ import javax.swing.WindowConstants;
 
 import com.thoughtworks.xstream.XStream;
 
-import mirrg.helium.standard.hydrogen.util.HLambda;
 import mirrg.helium.swing.phosphorus.canvas.PhosphorusCanvas;
 import mirrg.helium.swing.phosphorus.canvas.game.Data;
 import mirrg.helium.swing.phosphorus.canvas.game.EventPhosphorusGame;
@@ -31,17 +30,18 @@ import mirrg.helium.swing.phosphorus.canvas.game.view.ViewSkewed;
 public class Wulfenite extends PhosphorusGame<Wulfenite>
 {
 
+	public final JFrame frame;
+
 	public final Layer layerMath;
 	public final Layer layerOverlay;
 
 	public ToolGrid toolGrid;
 	public ToolZoom toolZoom;
-	private DataEntityWulfeniteFunction dataEntityWulfeniteFunction;
 
 	public Wulfenite(JFrame frame, PhosphorusCanvas canvas, JMenuBar menuBar)
 	{
-		super(canvas, new Data<>());
-		setData(createData());
+		super(canvas, createData());
+		this.frame = frame;
 
 		{
 			JMenu menu = new JMenu("ファイル(F)");
@@ -174,27 +174,31 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 	}
 
 	@Override
+	public DataWulfenite getData()
+	{
+		return (DataWulfenite) super.getData();
+	}
+
+	@Override
 	public synchronized void setData(Data<Wulfenite> data)
 	{
+		DataWulfenite data2 = (DataWulfenite) data;
 		fireChangeFunction(() -> {
-			if (getFunction() != null) getFunction().dispose();
-			super.setData(data);
-			dataEntityWulfeniteFunction = HLambda.filter(getEntities(), DataEntityWulfeniteFunction.class)
-				.findFirst()
-				.get();
+			super.setData(data2);
 		});
 	}
 
-	public IWulfeniteFunction getFunction()
+	public IEntityWulfeniteFunction getFunction()
 	{
-		return dataEntityWulfeniteFunction == null ? null : dataEntityWulfeniteFunction.wulfeniteFunction;
+		return (IEntityWulfeniteFunction) getData().wulfeniteFunction.getEntity();
 	}
 
-	public void setFunction(IWulfeniteFunction wulfeniteFunction)
+	public void setFunction(DataWulfeniteFunctionBase wulfeniteFunction)
 	{
 		fireChangeFunction(() -> {
-			dataEntityWulfeniteFunction.wulfeniteFunction.dispose();
-			dataEntityWulfeniteFunction.wulfeniteFunction = wulfeniteFunction;
+			getData().wulfeniteFunction.dispose();
+			getData().wulfeniteFunction = wulfeniteFunction;
+			getData().wulfeniteFunction.initialize(this);
 		});
 	}
 
@@ -206,17 +210,14 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 		});
 	}
 
-	public static Data<Wulfenite> createData()
+	public static DataWulfenite createData()
 	{
-		Data<Wulfenite> data = new Data<>();
+		DataWulfenite data = new DataWulfenite();
 		{
 			DataViewSkewed dataViewSkewed = new DataViewSkewed();
 			dataViewSkewed.zoomX = 0.01;
 			dataViewSkewed.zoomY = -0.01;
 			data.view = dataViewSkewed;
-		}
-		{
-			data.entities.add(new DataEntityWulfeniteFunction());
 		}
 		return data;
 	}
@@ -250,6 +251,7 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 		return getXStream().toXML(getData());
 	}
 
+	@SuppressWarnings("unchecked")
 	public void setXML(String xml)
 	{
 		setData((Data<Wulfenite>) getXStream().fromXML(xml));

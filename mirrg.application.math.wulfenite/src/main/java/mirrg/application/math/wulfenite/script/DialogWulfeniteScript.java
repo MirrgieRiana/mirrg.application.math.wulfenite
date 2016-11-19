@@ -4,17 +4,14 @@ import static mirrg.helium.swing.nitrogen.util.HSwing.*;
 
 import java.awt.Dimension;
 import java.awt.Font;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
+import java.awt.Frame;
 import java.util.stream.Collectors;
 
 import javax.swing.JDialog;
 import javax.swing.JTextPane;
 import javax.swing.WindowConstants;
 
+import mirrg.application.math.wulfenite.Mirrg;
 import mirrg.helium.compile.oxygen.editor.EventTextPaneOxygen;
 import mirrg.helium.compile.oxygen.editor.TextPaneOxygen;
 import mirrg.helium.standard.hydrogen.util.HString;
@@ -26,8 +23,10 @@ public class DialogWulfeniteScript extends JDialog
 	public TextPaneOxygen<?> textPaneOxygen;
 	public JTextPane textPaneOut;
 
-	public DialogWulfeniteScript(String source)
+	public DialogWulfeniteScript(Frame parent, String source)
 	{
+		super(parent);
+
 		add(createSplitPaneVertical(
 			createScrollPane(get(() -> {
 				textPaneOxygen = new TextPaneOxygen<>(WulfeniteScript.getSyntax());
@@ -52,7 +51,7 @@ public class DialogWulfeniteScript extends JDialog
 				});
 				textPaneOxygen.event().register(EventTextPaneOxygen.Syntax.Error.class, e -> {
 					if (textPaneOut == null) return;
-					textPaneOut.setText("" + toString(e.exception));
+					textPaneOut.setText("" + Mirrg.toString(e.exception));
 				});
 				return textPaneOxygen;
 			})),
@@ -88,31 +87,6 @@ public class DialogWulfeniteScript extends JDialog
 			line,
 			HString.rept(" ", column) + "^",
 		};
-	}
-
-	// TODO mirrg
-	private static String toString(Exception e)
-	{
-		ArrayList<Byte> bytes = new ArrayList<>();
-		try {
-			e.printStackTrace(new PrintStream(new OutputStream() {
-
-				@Override
-				public void write(int b) throws IOException
-				{
-					bytes.add((byte) b);
-				}
-
-			}, true, "UTF-8"));
-		} catch (UnsupportedEncodingException e1) {
-			e1.printStackTrace();
-		}
-		byte[] bytes2 = new byte[bytes.size()];
-		for (int i = 0; i < bytes.size(); i++) {
-			bytes2[i] = bytes.get(i);
-		}
-		String string = new String(bytes2);
-		return string;
 	}
 
 }
