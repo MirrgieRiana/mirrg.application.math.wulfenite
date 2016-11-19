@@ -1,5 +1,6 @@
 package mirrg.application.math.wulfenite;
 
+import javax.swing.ImageIcon;
 import javax.swing.JMenuBar;
 import javax.swing.WindowConstants;
 
@@ -17,6 +18,12 @@ public class Main
 		HSwing.setWindowsLookAndFeel();
 
 		FrameCanvas frame = new FrameCanvas(600, 600);
+
+		frame.setTitle("Wulfenite");
+		{
+			ImageIcon imageIcon = new ImageIcon(Main.class.getResource("icon.png"));
+			frame.setIconImage(imageIcon.getImage());
+		}
 
 		JMenuBar menuBar = new JMenuBar();
 		frame.setJMenuBar(menuBar);

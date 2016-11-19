@@ -2,6 +2,7 @@ package mirrg.application.math.wulfenite.script;
 
 import static mirrg.helium.swing.nitrogen.util.HSwing.*;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
@@ -13,28 +14,28 @@ import javax.swing.WindowConstants;
 
 import mirrg.application.math.wulfenite.Mirrg;
 import mirrg.helium.compile.oxygen.editor.EventTextPaneOxygen;
-import mirrg.helium.compile.oxygen.editor.TextPaneOxygen;
 import mirrg.helium.standard.hydrogen.util.HString;
 import mirrg.helium.standard.hydrogen.util.HString.LineProvider;
 
 public class DialogWulfeniteScript extends JDialog
 {
 
-	public TextPaneOxygen<?> textPaneOxygen;
+	public TextPaneOxygenWulfeniteScript textPaneOxygen;
 	public JTextPane textPaneOut;
 
 	public DialogWulfeniteScript(Frame parent, String source)
 	{
-		super(parent);
+		super(parent, "Wulfenite Script");
 
 		add(createSplitPaneVertical(
 			createScrollPane(get(() -> {
-				textPaneOxygen = new TextPaneOxygen<>(WulfeniteScript.getSyntax());
+				textPaneOxygen = new TextPaneOxygenWulfeniteScript(WulfeniteScript.getSyntax());
 				textPaneOxygen.setText(source);
 				textPaneOxygen.setPreferredSize(new Dimension(500, 100));
 				textPaneOxygen.event().register(EventTextPaneOxygen.Syntax.Success.Main.class, e -> {
 					if (textPaneOut == null) return;
-					textPaneOut.setText("" + textPaneOxygen.getValue());
+					textPaneOut.setText("Compiled Successfully");
+					textPaneOut.setBackground(Color.decode("#bbffbb"));
 				});
 				textPaneOxygen.event().register(EventTextPaneOxygen.Syntax.Failure.class, e -> {
 					if (textPaneOut == null) return;
@@ -48,10 +49,12 @@ public class DialogWulfeniteScript extends JDialog
 							.distinct()
 							.collect(Collectors.joining(" ")),
 						String.join("\n", getPositionString(lineProvider, index))));
+					textPaneOut.setBackground(Color.decode("#ffbbbb"));
 				});
 				textPaneOxygen.event().register(EventTextPaneOxygen.Syntax.Error.class, e -> {
 					if (textPaneOut == null) return;
 					textPaneOut.setText("" + Mirrg.toString(e.exception));
+					textPaneOut.setBackground(Color.decode("#ffbbbb"));
 				});
 				return textPaneOxygen;
 			})),
@@ -67,6 +70,11 @@ public class DialogWulfeniteScript extends JDialog
 		pack();
 		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		setLocationByPlatform(true);
+	}
+
+	public static String toPosition(String source, int characterIndex)
+	{
+		return toPosition(HString.getLineProvider(source), characterIndex);
 	}
 
 	public static String toPosition(LineProvider lineProvider, int characterIndex)

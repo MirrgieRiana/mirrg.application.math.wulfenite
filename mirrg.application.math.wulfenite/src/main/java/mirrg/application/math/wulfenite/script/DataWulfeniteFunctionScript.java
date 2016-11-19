@@ -1,6 +1,8 @@
 package mirrg.application.math.wulfenite.script;
 
+import java.awt.Color;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import mirrg.application.math.wulfenite.core.DataWulfeniteFunctionBase;
 import mirrg.application.math.wulfenite.core.Wulfenite;
@@ -30,11 +32,42 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 
 		private Optional<IWulfeniteScript> consumer;
 
+		private Environment environment;
+		private StructureComplex input;
+
 		private void onChangeSource()
 		{
 			ResultOxygen<IWulfeniteScript> result = WulfeniteScript.getSyntax().matches(source);
 			game.fireChangeFunction(() -> {
-				consumer = result.isValid ? Optional.of(result.node.value) : Optional.empty();
+				if (result.isValid) {
+
+					// VM初期化
+					{
+						environment = new Environment();
+
+						Variable variable = environment.addVariable("_", StructureComplex.class);
+						input = new StructureComplex();
+						variable.value = input;
+
+						Loader.loadFunction(environment);
+
+					}
+
+					// 意味解析
+					if (result.node.value.validate(environment)) {
+						consumer = Optional.of(result.node.value);
+					} else {
+						consumer = Optional.empty();
+						dialog.textPaneOut.setText(environment.getErrors()
+							.map(t -> "[" + DialogWulfeniteScript.toPosition(source, t.getY().getBegin()) + "] " + t.getX())
+							.collect(Collectors.joining("\n")));
+						dialog.textPaneOut.setBackground(Color.decode("#ffddbb"));
+					}
+
+				} else {
+					environment = null;
+					consumer = Optional.empty();
+				}
 			});
 		}
 
@@ -42,7 +75,10 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 		public Object getValue(StructureComplex coordinate)
 		{
 			if (consumer == null) onChangeSource();
-			if (consumer.isPresent()) return consumer.get().getValue();
+			if (consumer.isPresent()) {
+				input.set(coordinate);
+				return consumer.get().getValue();
+			}
 			return null;
 		}
 
@@ -58,6 +94,16 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 				});
 				dialog.textPaneOxygen.event().register(EventTextPaneOxygen.Syntax.Success.class, e -> {
 					onChangeSource();
+				});
+				dialog.textPaneOxygen.event().register(EventTextPaneOxygen.Highlight.Post.class, e -> {
+					if (environment != null) {
+						environment.getErrors()
+							.forEach(t -> {
+								dialog.textPaneOxygen.setUnderline(
+									t.getY().getBegin(),
+									t.getY().getEnd() - t.getY().getBegin());
+							});
+					}
 				});
 			}
 			dialog.setVisible(!dialog.isVisible());

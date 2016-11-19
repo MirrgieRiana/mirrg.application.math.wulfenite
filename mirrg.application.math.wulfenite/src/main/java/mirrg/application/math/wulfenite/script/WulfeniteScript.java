@@ -2,144 +2,188 @@ package mirrg.application.math.wulfenite.script;
 
 import static mirrg.helium.compile.oxygen.parser.HSyntaxOxygen.*;
 
-import mirrg.application.math.wulfenite.core.SlotColor;
-import mirrg.application.math.wulfenite.core.SlotDouble;
-import mirrg.application.math.wulfenite.core.SlotInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import mirrg.application.math.wulfenite.script.nodes.LiteralColor;
+import mirrg.application.math.wulfenite.script.nodes.LiteralComplex;
+import mirrg.application.math.wulfenite.script.nodes.LiteralDouble;
+import mirrg.application.math.wulfenite.script.nodes.LiteralInteger;
+import mirrg.application.math.wulfenite.script.nodes.OperationFunction;
+import mirrg.application.math.wulfenite.script.nodes.OperationVariable;
+import mirrg.helium.compile.oxygen.parser.core.Node;
 import mirrg.helium.compile.oxygen.parser.core.Syntax;
+import mirrg.helium.compile.oxygen.parser.syntaxes.SyntaxOr;
 import mirrg.helium.compile.oxygen.parser.syntaxes.SyntaxSlot;
+import mirrg.helium.standard.hydrogen.struct.Struct2;
+import mirrg.helium.standard.hydrogen.struct.Struct3;
 
 public class WulfeniteScript
 {
 
 	public static Syntax<IWulfeniteScript> getSyntax()
 	{
-		SyntaxSlot<IWulfeniteScript> expression = slot();
+		return new WulfeniteScript().root;
+	}
 
-		Syntax<String> comment = named(regex("[ \t\r\n]*"), "Comment");
+	public Syntax<String> comment = named(regex("[ \t\r\n]*"), "Comment");
 
-		Syntax<IWulfeniteScript> literalDouble = pack(named(regex("[0-9]+\\.[0-9]+"), "Double"),
-			t -> new LiteralDouble(Double.parseDouble(t)));
-		Syntax<IWulfeniteScript> literalInteger = pack(named(regex("[0-9]+"), "Integer"),
-			t -> new LiteralInteger(Integer.parseInt(t, 10)));
-		Syntax<IWulfeniteScript> literalColor = named(extract((IWulfeniteScript) null)
-			.and(string("#"))
-			.extract(or((IWulfeniteScript) null)
-				.or(pack(regex("[0-9a-zA-Z]{6}"),
-					t -> new LiteralColor(Integer.parseInt(t, 16))))
-				.or(pack(regex("[0-9a-zA-Z]{3}"),
-					t -> new LiteralColor(Integer.parseInt("" +
-						t.charAt(0) + t.charAt(0) +
-						t.charAt(1) + t.charAt(1) +
-						t.charAt(2) + t.charAt(2), 16))))), "Color");
-		Syntax<IWulfeniteScript> bracket = extract((IWulfeniteScript) null)
+	public Syntax<String> identifier = named(regex("[a-zA-Z_][a-zA-Z0-9_]*"), "Identifier");
+
+	public Syntax<String> tokenInteger = named(regex("[0-9]+"), "Integer");
+
+	public Syntax<String> tokenDouble = named(regex("[0-9]+\\.[0-9]+"), "Double");
+
+	public SyntaxSlot<IWulfeniteScript> expression = slot();
+
+	// factor
+
+	public Syntax<IWulfeniteScript> literalImaginary = packNode(extract((String) null)
+		.extract(or((String) null)
+			.or(tokenDouble)
+			.or(tokenInteger))
+		.and(string("i")),
+		n -> new LiteralComplex(n, n.value));
+	public Syntax<IWulfeniteScript> literalDouble = packNode(tokenDouble,
+		n -> new LiteralDouble(n, n.value));
+	public Syntax<IWulfeniteScript> literalInteger = packNode(tokenInteger,
+		n -> new LiteralInteger(n, n.value));
+	public Syntax<IWulfeniteScript> literalColor = packNode(named(extract((String) null)
+		.and(string("#"))
+		.extract(regex("[0-9a-zA-Z]+")), "Color"),
+		n -> new LiteralColor(n, n.value));
+	public Syntax<IWulfeniteScript> function = packNode(serial(Struct3<String, ArrayList<IWulfeniteScript>, Node<?>>::new)
+		.and(identifier, Struct3::setX)
+		.and(comment)
+		.and(string("("))
+		.and(createArgument(), Struct3::setY)
+		.and(packNode(string(")"),
+			n -> n), Struct3::setZ),
+		n -> {
+			IWulfeniteScript[] args = new IWulfeniteScript[n.value.y.size()];
+			for (int i = 0; i < n.value.y.size(); i++) {
+				args[i] = n.value.y.get(i);
+			}
+			return new OperationFunction(n.begin, n.end, n.value.x, args);
+		});
+	public Syntax<IWulfeniteScript> variable = packNode(identifier,
+		n -> new OperationVariable(n, n.value));
+	public Syntax<IWulfeniteScript> bracket = extract((IWulfeniteScript) null)
+		.and(string("("))
+		.and(comment)
+		.extract(expression)
+		.and(comment)
+		.and(string(")"));
+
+	public Syntax<IWulfeniteScript> factor = or((IWulfeniteScript) null)
+		.or(literalImaginary)
+		.or(literalDouble)
+		.or(literalInteger)
+		.or(literalColor)
+		.or(function)
+		.or(variable)
+		.or(bracket);
+
+	// operator
+
+	public Syntax<IWulfeniteScript> operatorMethod = packNode(serial(Struct2<IWulfeniteScript, ArrayList<Struct3<String, ArrayList<IWulfeniteScript>, Node<?>>>>::new)
+		.and(factor, Struct2::setX)
+		.and(repeat(serial(Struct3<String, ArrayList<IWulfeniteScript>, Node<?>>::new)
+			.and(comment)
+			.and(string("."))
+			.and(comment)
+			.and(identifier, Struct3::setX)
+			.and(comment)
 			.and(string("("))
-			.and(comment)
-			.extract(expression)
-			.and(comment)
-			.and(string(")"));
-		Syntax<IWulfeniteScript> factor = or((IWulfeniteScript) null)
-			.or(literalDouble)
-			.or(literalInteger)
-			.or(literalColor)
-			.or(bracket);
+			.and(createArgument(), Struct3::setY)
+			.and(packNode(string(")"),
+				n -> n), Struct3::setZ)), Struct2::setY),
+		n -> {
+			IWulfeniteScript left = n.value.x;
 
-		expression.syntax = factor;
+			for (Struct3<String, ArrayList<IWulfeniteScript>, Node<?>> right : n.value.y) {
+				IWulfeniteScript[] args = new IWulfeniteScript[right.y.size() + 1];
+				args[0] = left;
+				for (int i = 0; i < right.y.size(); i++) {
+					args[i + 1] = right.y.get(i);
+				}
+				left = new OperationFunction(left.getBegin(), right.z.end, right.x, args);
+			}
 
-		return extract((IWulfeniteScript) null)
-			.and(comment)
-			.extract(expression)
-			.and(comment)
-			.and(named(string(""), "EOF"));
+			return left;
+		});
+
+	public Syntax<IWulfeniteScript> operatorAdd = createOperatorLeft(operatorMethod, c -> {
+		c.accept("+", "_operatorPlus");
+		c.accept("-", "_operatorMinus");
+	});
+
+	public Syntax<IWulfeniteScript> operatorMul = createOperatorLeft(operatorAdd, c -> {
+		c.accept("*", "_operatorAsterisk");
+		c.accept("/", "_operatorSlash");
+	});
+
+	// root
+
+	{
+		expression.syntax = operatorMul;
 	}
 
-	public static class LiteralInteger implements IWulfeniteScript
+	public Syntax<IWulfeniteScript> root = extract((IWulfeniteScript) null)
+		.and(comment)
+		.extract(expression)
+		.and(comment)
+		.and(named(string(""), "EOF"));
+
+	protected Syntax<IWulfeniteScript> createOperatorLeft(
+		Syntax<IWulfeniteScript> term,
+		Consumer<BiConsumer<String, String>> tokenMap)
 	{
+		SyntaxOr<String> tokens = or((String) null);
+		tokenMap.accept((token, name) -> tokens.or(pack(string(token), t -> name)));
 
-		private SlotInteger slot;
-
-		public LiteralInteger(int value)
-		{
-			slot = new SlotInteger(value);
-		}
-
-		@Override
-		public Object getValue()
-		{
-			return slot;
-		}
-
-		@Override
-		public boolean validate()
-		{
-			return true;
-		}
-
-		@Override
-		public Class<?> getType()
-		{
-			return SlotInteger.class;
-		}
-
+		return pack(serial(
+			Struct2<IWulfeniteScript, ArrayList<Struct2<String, IWulfeniteScript>>>::new)
+				.and(term, Struct2::setX)
+				.and(repeat(serial(Struct2<String, IWulfeniteScript>::new)
+					.and(comment)
+					.and(tokens, Struct2::setX)
+					.and(comment)
+					.and(term, Struct2::setY)), Struct2::setY),
+			t -> {
+				IWulfeniteScript left = t.x;
+				for (Struct2<String, IWulfeniteScript> right : t.y) {
+					left = new OperationFunction(left.getBegin(), right.y.getEnd(), right.x, left, right.y);
+				}
+				return left;
+			});
 	}
 
-	public static class LiteralColor implements IWulfeniteScript
+	protected Syntax<ArrayList<IWulfeniteScript>> createArgument()
 	{
-
-		private SlotColor slot;
-
-		public LiteralColor(int value)
-		{
-			slot = new SlotColor(value);
-		}
-
-		@Override
-		public Object getValue()
-		{
-			return slot;
-		}
-
-		@Override
-		public boolean validate()
-		{
-			return true;
-		}
-
-		@Override
-		public Class<?> getType()
-		{
-			return SlotColor.class;
-		}
-
-	}
-
-	public static class LiteralDouble implements IWulfeniteScript
-	{
-
-		private SlotDouble slot;
-
-		public LiteralDouble(double value)
-		{
-			slot = new SlotDouble(value);
-		}
-
-		@Override
-		public Object getValue()
-		{
-			return slot;
-		}
-
-		@Override
-		public boolean validate()
-		{
-			return true;
-		}
-
-		@Override
-		public Class<?> getType()
-		{
-			return SlotDouble.class;
-		}
-
+		return extract((ArrayList<IWulfeniteScript>) null)
+			.extract(or((ArrayList<IWulfeniteScript>) null)
+				.or(pack(serial(Struct2<IWulfeniteScript, ArrayList<IWulfeniteScript>>::new)
+					.and(comment)
+					.and(expression, Struct2::setX)
+					.and(repeat(extract((IWulfeniteScript) null)
+						.and(comment)
+						.and(string(","))
+						.and(comment)
+						.extract(expression)), Struct2::setY),
+					t -> Stream.concat(Stream.of(t.x), t.y.stream())
+						.collect(Collectors.toCollection(ArrayList::new))))
+				.or(pack(extract((IWulfeniteScript) null)
+					.and(comment)
+					.extract(expression),
+					t -> new ArrayList<>(Arrays.asList(t))))
+				.or(pack(string(""),
+					t -> new ArrayList<>())))
+			.and(comment);
 	}
 
 }

@@ -2,8 +2,16 @@ package mirrg.application.math.wulfenite.core;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
@@ -12,10 +20,12 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JTextPane;
+import javax.swing.KeyStroke;
 import javax.swing.WindowConstants;
 
 import com.thoughtworks.xstream.XStream;
 
+import mirrg.application.math.wulfenite.script.DataWulfeniteFunctionScript;
 import mirrg.helium.swing.phosphorus.canvas.PhosphorusCanvas;
 import mirrg.helium.swing.phosphorus.canvas.game.Data;
 import mirrg.helium.swing.phosphorus.canvas.game.EventPhosphorusGame;
@@ -30,6 +40,16 @@ import mirrg.helium.swing.phosphorus.canvas.game.view.ViewSkewed;
 public class Wulfenite extends PhosphorusGame<Wulfenite>
 {
 
+	public static enum ActionKey
+	{
+		RESET,
+		RESET_COORDINATE,
+		OPEN_CONFIG_DIALOG,
+		OPEN_QUERY_DIALOG,
+		MIRROR_VERTICAL,
+		MIRROR_HORIZONTAL,
+	}
+
 	public final JFrame frame;
 
 	public final Layer layerMath;
@@ -38,29 +58,40 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 	public ToolGrid toolGrid;
 	public ToolZoom toolZoom;
 
+	public final ActionMap actionMap;
+	public final InputMap inputMap;
+
 	public Wulfenite(JFrame frame, PhosphorusCanvas canvas, JMenuBar menuBar)
 	{
 		super(canvas, createData());
 		this.frame = frame;
 
+		actionMap = frame.getRootPane().getActionMap();
+		inputMap = frame.getRootPane().getInputMap();
+
 		{
 			JMenu menu = new JMenu("ファイル(F)");
 			menu.setMnemonic('F');
-			{
-				JMenuItem menuItem = new JMenuItem("リセット(R)");
-				menuItem.setMnemonic('R');
-				menuItem.addActionListener(e -> {
+			menu.add(new JMenuItem(createAction(
+				ActionKey.RESET,
+				"リセット(R)",
+				"関数の設定と表示位置を初期化します。",
+				'R',
+				KeyStroke.getKeyStroke(KeyEvent.VK_R, Event.CTRL_MASK | Event.SHIFT_MASK),
+				e -> {
 					event().registerRemovable(EventPhosphorusGame.Move.Post.class, e2 -> {
 						setData(createData());
 						return false;
 					});
-				});
-				menu.add(menuItem);
-			}
-			{
-				JMenuItem menuItem = new JMenuItem("クエリの表示(D)");
-				menuItem.setMnemonic('D');
-				menuItem.addActionListener(e -> {
+				})));
+			menu.addSeparator();
+			menu.add(new JMenuItem(createAction(
+				ActionKey.OPEN_QUERY_DIALOG,
+				"クエリの表示(Q)",
+				"現在のアプリケーションの状態を表すXML表現を表示します。",
+				'Q',
+				KeyStroke.getKeyStroke(KeyEvent.VK_Q, 0),
+				e -> {
 					// TODO
 					JDialog dialog = new JDialog(frame, "クエリ");
 
@@ -78,22 +109,19 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 					dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 					dialog.setLocationByPlatform(true);
 					dialog.setVisible(true);
-				});
-				menu.add(menuItem);
-			}
+				})));
 			menuBar.add(menu);
 		}
 		{
 			JMenu menu = new JMenu("座標(C)");
 			menu.setMnemonic('C');
-			{
-				JMenuItem menuItem = new JMenuItem("位置と倍率を初期化(R)");
-				menuItem.setMnemonic('R');
-				menuItem.addActionListener(e -> {
-					resetPosition();
-				});
-				menu.add(menuItem);
-			}
+			menu.add(new JMenuItem(createAction(
+				ActionKey.RESET_COORDINATE,
+				"位置と倍率の初期化(R)",
+				"表示位置を初期化します。",
+				'R',
+				KeyStroke.getKeyStroke(KeyEvent.VK_R, 0),
+				e -> resetPosition())));
 			menuBar.add(menu);
 		}
 		{
@@ -120,35 +148,32 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 				menu.add(menuItem);
 			}
 			menu.addSeparator();
-			{
-				JMenuItem menuItem = new JMenuItem("水平方向に反転(H)");
-				menuItem.setMnemonic('H');
-				menuItem.addActionListener(e -> {
-					turnHorizontal();
-				});
-				menu.add(menuItem);
-			}
-			{
-				JMenuItem menuItem = new JMenuItem("垂直方向に反転(V)");
-				menuItem.setMnemonic('V');
-				menuItem.addActionListener(e -> {
-					turnVertical();
-				});
-				menu.add(menuItem);
-			}
+			menu.add(new JMenuItem(createAction(
+				ActionKey.MIRROR_HORIZONTAL,
+				"水平方向に反転(H)",
+				"左右の軸を反転します。",
+				'H',
+				KeyStroke.getKeyStroke(KeyEvent.VK_H, 0),
+				e -> turnHorizontal())));
+			menu.add(new JMenuItem(createAction(
+				ActionKey.MIRROR_VERTICAL,
+				"垂直方向に反転(V)",
+				"上下の軸を反転します。",
+				'V',
+				KeyStroke.getKeyStroke(KeyEvent.VK_V, 0),
+				e -> turnVertical())));
 			menuBar.add(menu);
 		}
 		{
 			JMenu menu = new JMenu("関数(S)");
 			menu.setMnemonic('S');
-			{
-				JMenuItem menuItem = new JMenuItem("設定画面...(S)");
-				menuItem.setMnemonic('S');
-				menuItem.addActionListener(e -> {
-					getFunction().toggleDialog();
-				});
-				menu.add(menuItem);
-			}
+			menu.add(new JMenuItem(createAction(
+				ActionKey.OPEN_CONFIG_DIALOG,
+				"設定画面(C)...",
+				"関数の設定画面を表示します。",
+				'C',
+				KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0),
+				e -> getFunction().toggleDialog())));
 			menuBar.add(menu);
 		}
 
@@ -164,6 +189,33 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 		addTool(new ToolWulfenite(this));
 		addTool(new ToolWulfeniteScrollSaver(this));
 
+	}
+
+	public Action createAction(
+		ActionKey actionKey,
+		String name,
+		String shortDescription,
+		char mnemonicKey,
+		KeyStroke acceleratorKey,
+		ActionListener listener)
+	{
+		AbstractAction action = new AbstractAction() {
+
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				listener.actionPerformed(e);
+			}
+
+		};
+		action.putValue(Action.NAME, name);
+		action.putValue(Action.MNEMONIC_KEY, Integer.valueOf(mnemonicKey));
+		action.putValue(Action.SHORT_DESCRIPTION, shortDescription);
+		action.putValue(Action.ACCELERATOR_KEY, acceleratorKey);
+		actionMap.put(actionKey, action);
+		inputMap.put(acceleratorKey, actionKey);
+
+		return action;
 	}
 
 	public XStream getXStream()
@@ -219,6 +271,7 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 			dataViewSkewed.zoomY = -0.01;
 			data.view = dataViewSkewed;
 		}
+		data.wulfeniteFunction = new DataWulfeniteFunctionScript();
 		return data;
 	}
 
