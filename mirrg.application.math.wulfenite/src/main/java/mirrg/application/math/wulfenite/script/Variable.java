@@ -1,12 +1,14 @@
 package mirrg.application.math.wulfenite.script;
 
+import mirrg.application.math.wulfenite.core.types.Type;
+
 public class Variable<T>
 {
 
-	public final Class<T> type;
+	public final Type<T> type;
 	public T value;
 
-	public Variable(Class<T> type)
+	public Variable(Type<T> type)
 	{
 		this.type = type;
 	}

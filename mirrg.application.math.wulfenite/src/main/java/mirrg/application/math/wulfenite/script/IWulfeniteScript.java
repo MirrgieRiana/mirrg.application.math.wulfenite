@@ -1,11 +1,13 @@
 package mirrg.application.math.wulfenite.script;
 
+import mirrg.application.math.wulfenite.core.types.Type;
+
 public interface IWulfeniteScript
 {
 
 	public boolean validate(Environment environment);
 
-	public Class<?> getType();
+	public Type<?> getType();
 
 	public Object getValue();
 

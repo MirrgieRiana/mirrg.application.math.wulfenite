@@ -1,6 +1,7 @@
 package mirrg.application.math.wulfenite.script.nodes;
 
 import mirrg.application.math.wulfenite.core.types.SlotInteger;
+import mirrg.application.math.wulfenite.core.types.Type;
 import mirrg.application.math.wulfenite.script.Environment;
 import mirrg.application.math.wulfenite.script.ScriptNodeBase;
 import mirrg.helium.compile.oxygen.parser.core.Node;
@@ -31,9 +32,9 @@ public class LiteralInteger extends ScriptNodeBase
 	}
 
 	@Override
-	public Class<?> getType()
+	public Type<?> getType()
 	{
-		return SlotInteger.class;
+		return Type.INTEGER;
 	}
 
 	@Override

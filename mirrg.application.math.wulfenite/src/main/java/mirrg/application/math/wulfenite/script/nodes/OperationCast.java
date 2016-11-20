@@ -1,5 +1,6 @@
 package mirrg.application.math.wulfenite.script.nodes;
 
+import mirrg.application.math.wulfenite.core.types.Type;
 import mirrg.application.math.wulfenite.script.Environment;
 import mirrg.application.math.wulfenite.script.IWulfeniteScript;
 import mirrg.application.math.wulfenite.script.ScriptNodeBase;
@@ -8,9 +9,9 @@ public abstract class OperationCast extends ScriptNodeBase
 {
 
 	protected IWulfeniteScript from;
-	protected Class<?> to;
+	protected Type<?> to;
 
-	public OperationCast(IWulfeniteScript from, Class<?> to)
+	public OperationCast(IWulfeniteScript from, Type<?> to)
 	{
 		super(from.getBegin(), from.getEnd());
 		this.from = from;
@@ -25,7 +26,7 @@ public abstract class OperationCast extends ScriptNodeBase
 	}
 
 	@Override
-	public Class<?> getType()
+	public Type<?> getType()
 	{
 		return to;
 	}

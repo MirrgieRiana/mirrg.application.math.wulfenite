@@ -50,7 +50,7 @@ public abstract class ScriptNodeBase implements IWulfeniteScript, IProviderColor
 	public Color getColor()
 	{
 		if (isValid) {
-			return Type.getTokenColor(getType());
+			return TypeHelper.getTokenColor(getType());
 		} else {
 			return Color.red;
 		}

@@ -10,11 +10,12 @@ import java.util.stream.Stream;
 
 import javax.swing.JLabel;
 
+import mirrg.application.math.wulfenite.core.types.Type;
 import mirrg.application.math.wulfenite.script.Environment;
 import mirrg.application.math.wulfenite.script.IWulfeniteScript;
 import mirrg.application.math.wulfenite.script.IWulfeniteScriptFunction;
 import mirrg.application.math.wulfenite.script.ScriptNodeBase;
-import mirrg.application.math.wulfenite.script.Type;
+import mirrg.application.math.wulfenite.script.TypeHelper;
 import mirrg.helium.compile.oxygen.editor.IProviderChildren;
 import mirrg.helium.compile.oxygen.editor.Proposal;
 import mirrg.helium.compile.oxygen.parser.core.Node;
@@ -73,10 +74,10 @@ public class OperationFunction extends ScriptNodeBase implements IProviderChildr
 						public void decorateListCellRendererComponent(JLabel label)
 						{
 							label.setText(s.getX() + "(" + s.getY().getArgumentsType().stream()
-								.map(t -> t.getSimpleName())
+								.map(t -> t.getName())
 								.collect(Collectors.joining(", ")) + ")");
 
-							label.setForeground(Type.getTokenColor(s.getY().getType()));
+							label.setForeground(TypeHelper.getTokenColor(s.getY().getType()));
 
 							if (!s.getZ()) label.setBackground(Color.decode("#dddddd"));
 						}
@@ -93,13 +94,13 @@ public class OperationFunction extends ScriptNodeBase implements IProviderChildr
 			} else if (functions.size() == 0) {
 				environment.reportError("No such function: " + name + "(" + Stream.of(args)
 					.map(IWulfeniteScript::getType)
-					.map(Class::getSimpleName)
+					.map(Type::getName)
 					.collect(Collectors.joining(", ")) + ")", this);
 				flag = false;
 			} else {
 				environment.reportError("Ambiguous function call: " + name + "(" + Stream.of(args)
 					.map(IWulfeniteScript::getType)
-					.map(Class::getSimpleName)
+					.map(Type::getName)
 					.collect(Collectors.joining(", ")) + ")", this);
 				flag = true;
 			}
@@ -110,7 +111,7 @@ public class OperationFunction extends ScriptNodeBase implements IProviderChildr
 	}
 
 	@Override
-	public Class<?> getType()
+	public Type<?> getType()
 	{
 		return function.getType();
 	}

@@ -172,10 +172,27 @@ public class WulfeniteScript
 		c.accept("||", "_operatorPipePipe");
 	});
 
+	public SyntaxSlot<IWulfeniteScript> operatorIif = slot();
+	{
+		operatorIif.syntax = or((IWulfeniteScript) null)
+			.or(operatorOr)
+			.or(pack(serial(Struct3<IWulfeniteScript, IWulfeniteScript, IWulfeniteScript>::new)
+				.and(operatorOr, Struct3::setX)
+				.and(comment)
+				.and(string("?"))
+				.and(comment)
+				.and(operatorIif, Struct3::setY)
+				.and(comment)
+				.and(string(":"))
+				.and(comment)
+				.and(operatorIif, Struct3::setZ),
+				t -> new OperationFunction(t.getX().getBegin(), t.getZ().getEnd(), "_ternaryQuestionColon", t.getX(), t.getY(), t.getZ())));
+	}
+
 	// root
 
 	{
-		expression.syntax = operatorOr;
+		expression.syntax = operatorIif;
 	}
 
 	public Syntax<IWulfeniteScript> root = extract((IWulfeniteScript) null)

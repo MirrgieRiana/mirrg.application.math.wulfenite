@@ -5,9 +5,10 @@ import java.util.stream.Stream;
 
 import javax.swing.JLabel;
 
+import mirrg.application.math.wulfenite.core.types.Type;
 import mirrg.application.math.wulfenite.script.Environment;
 import mirrg.application.math.wulfenite.script.ScriptNodeBase;
-import mirrg.application.math.wulfenite.script.Type;
+import mirrg.application.math.wulfenite.script.TypeHelper;
 import mirrg.application.math.wulfenite.script.Variable;
 import mirrg.helium.compile.oxygen.editor.IProviderProposal;
 import mirrg.helium.compile.oxygen.editor.Proposal;
@@ -40,8 +41,8 @@ public class OperationVariable extends ScriptNodeBase implements IProviderPropos
 					@Override
 					public void decorateListCellRendererComponent(JLabel label)
 					{
-						label.setText(t.getX() + " : " + t.getY().type.getSimpleName());
-						label.setForeground(Type.getTokenColor(t.getY().type));
+						label.setText(t.getX() + " : " + t.getY().type.getName());
+						label.setForeground(TypeHelper.getTokenColor(t.getY().type));
 					}
 				});
 
@@ -58,7 +59,7 @@ public class OperationVariable extends ScriptNodeBase implements IProviderPropos
 	}
 
 	@Override
-	public Class<?> getType()
+	public Type<?> getType()
 	{
 		return variable.type;
 	}

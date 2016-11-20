@@ -3,26 +3,28 @@ package mirrg.application.math.wulfenite.script;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import mirrg.application.math.wulfenite.core.types.Type;
+
 public abstract class WulfeniteScriptFunction implements IWulfeniteScriptFunction
 {
 
-	public Class<?> type;
-	public ArrayList<Class<?>> args;
+	public Type<?> type;
+	public ArrayList<Type<?>> args;
 
-	public WulfeniteScriptFunction(Class<?> type, Class<?>... args)
+	public WulfeniteScriptFunction(Type<?> type, Type<?>... args)
 	{
 		this.type = type;
 		this.args = new ArrayList<>(Arrays.asList(args));
 	}
 
 	@Override
-	public Class<?> getType()
+	public Type<?> getType()
 	{
 		return type;
 	}
 
 	@Override
-	public ArrayList<Class<?>> getArgumentsType()
+	public ArrayList<Type<?>> getArgumentsType()
 	{
 		return args;
 	}

@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import mirrg.application.math.wulfenite.core.DataWulfeniteFunctionBase;
 import mirrg.application.math.wulfenite.core.Wulfenite;
+import mirrg.application.math.wulfenite.core.types.Type;
 import mirrg.helium.compile.oxygen.editor.EventTextPaneOxygen;
 import mirrg.helium.compile.oxygen.parser.core.ResultOxygen;
 import mirrg.helium.math.hydrogen.complex.StructureComplex;
@@ -55,7 +56,7 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 				{
 					resultValidate.environment = new Environment();
 
-					Variable<StructureComplex> variable = resultValidate.environment.addVariable("_", StructureComplex.class);
+					Variable<StructureComplex> variable = resultValidate.environment.addVariable("_", Type.COMPLEX);
 					resultValidate.input = new StructureComplex();
 					variable.value = resultValidate.input;
 

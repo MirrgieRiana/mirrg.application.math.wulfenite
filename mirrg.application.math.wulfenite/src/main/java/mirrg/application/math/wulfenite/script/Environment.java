@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import mirrg.application.math.wulfenite.core.types.Type;
 import mirrg.helium.standard.hydrogen.struct.Tuple;
 import mirrg.helium.standard.hydrogen.struct.Tuple3;
 
@@ -14,7 +15,7 @@ public class Environment
 
 	private Hashtable<String, Variable<?>> variables = new Hashtable<>();
 
-	public <T> Variable<T> addVariable(String name, Class<T> type)
+	public <T> Variable<T> addVariable(String name, Type<T> type)
 	{
 		Variable<T> variable = new Variable<>(type);
 		variables.put(name, variable);
@@ -83,11 +84,11 @@ public class Environment
 
 			// 各引数のキャスト時の距離と関数を取得
 			.map(f -> {
-				ArrayList<Class<?>> argumentsType = f.getY().getArgumentsType();
+				ArrayList<Type<?>> argumentsType = f.getY().getArgumentsType();
 				int distance = 0;
 				ArrayList<IWulfeniteScript> argumentsNew = new ArrayList<>();
 				for (int i = 0; i < argumentsType.size(); i++) {
-					Tuple<Integer, IWulfeniteScript> casted = Type.cast(args[i], argumentsType.get(i));
+					Tuple<Integer, IWulfeniteScript> casted = TypeHelper.cast(args[i], argumentsType.get(i));
 					if (casted == null) return null;
 					distance += casted.getX();
 					argumentsNew.add(casted.getY());

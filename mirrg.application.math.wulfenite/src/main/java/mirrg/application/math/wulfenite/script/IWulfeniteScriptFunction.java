@@ -3,12 +3,14 @@ package mirrg.application.math.wulfenite.script;
 import java.util.ArrayList;
 import java.util.function.Function;
 
+import mirrg.application.math.wulfenite.core.types.Type;
+
 public interface IWulfeniteScriptFunction
 {
 
-	public Class<?> getType();
+	public Type<?> getType();
 
-	public ArrayList<Class<?>> getArgumentsType();
+	public ArrayList<Type<?>> getArgumentsType();
 
 	public Function<Object[], Object> createValueProvider();
 
