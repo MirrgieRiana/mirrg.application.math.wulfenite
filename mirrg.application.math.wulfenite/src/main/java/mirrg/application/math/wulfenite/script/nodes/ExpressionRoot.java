@@ -10,11 +10,11 @@ import mirrg.application.math.wulfenite.script.Environment;
 import mirrg.application.math.wulfenite.script.node.IWSFormula;
 import mirrg.application.math.wulfenite.script.node.IWSLine;
 import mirrg.application.math.wulfenite.script.node.IWSNode;
-import mirrg.application.math.wulfenite.script.node.WSFormulaBase;
+import mirrg.application.math.wulfenite.script.node.WSNodeBase;
 import mirrg.helium.compile.oxygen.editor.IProviderChildren;
 import mirrg.helium.compile.oxygen.parser.core.Node;
 
-public class ExpressionRoot extends WSFormulaBase implements IProviderChildren
+public class ExpressionRoot extends WSNodeBase implements IWSFormula, IProviderChildren
 {
 
 	public ArrayList<IWSLine> lines;
@@ -49,6 +49,7 @@ public class ExpressionRoot extends WSFormulaBase implements IProviderChildren
 	@Override
 	public Object getValue()
 	{
+		lines.forEach(l -> l.invoke());
 		return formula.getValue();
 	}
 
@@ -58,7 +59,7 @@ public class ExpressionRoot extends WSFormulaBase implements IProviderChildren
 		return Stream.concat(
 			lines.stream(),
 			Stream.of(formula))
-			.map(IWSNode::createNode)
+			.map(IWSNode::getNode)
 			.collect(Collectors.toCollection(ArrayList::new));
 	}
 

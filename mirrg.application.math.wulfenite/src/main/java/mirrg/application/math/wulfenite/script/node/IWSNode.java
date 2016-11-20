@@ -12,9 +12,6 @@ public interface IWSNode
 
 	public int getEnd();
 
-	public default Node<? extends IWSNode> createNode()
-	{
-		return new Node<>(null, null, getBegin(), getEnd(), this);
-	}
+	public Node<?> getNode();
 
 }

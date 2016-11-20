@@ -36,6 +36,11 @@ public class WulfeniteScript
 		return new WulfeniteScript().root;
 	}
 
+	public SyntaxSlot<IWSFormula> expression = slot();
+	public SyntaxSlot<IWSFormula> formula = slot();
+
+	//
+
 	public Syntax<String> comment = named(regex("[ \t\r\n]*"), "Comment");
 
 	public Syntax<String> identifier = named(regex("[a-zA-Z_][a-zA-Z0-9_]*"), "Identifier");
@@ -54,8 +59,6 @@ public class WulfeniteScript
 			.or(regex("[^\"]"))))
 		.and(string("\"")),
 		t -> String.join("", t)), "String");
-
-	public SyntaxSlot<IWSFormula> expression = slot();
 
 	// factor
 
@@ -94,7 +97,7 @@ public class WulfeniteScript
 	public Syntax<IWSFormula> bracket = extract((IWSFormula) null)
 		.and(string("("))
 		.and(comment)
-		.extract(expression)
+		.extract(formula)
 		.and(comment)
 		.and(string(")"));
 
@@ -193,7 +196,11 @@ public class WulfeniteScript
 			.or(operatorOr);
 	}
 
-	public Syntax<IWSFormula> formula = operatorIif;
+	// lines
+
+	{
+		formula.syntax = operatorIif;
+	}
 
 	public Syntax<IWSLine> lineAssignment = packNode(serial(Struct2<String, IWSFormula>::new)
 		.and(identifier, Struct2::setX)
@@ -335,17 +342,17 @@ public class WulfeniteScript
 			.extract(or((ArrayList<IWSFormula>) null)
 				.or(pack(serial(Struct2<IWSFormula, ArrayList<IWSFormula>>::new)
 					.and(comment)
-					.and(expression, Struct2::setX)
+					.and(formula, Struct2::setX)
 					.and(repeat(extract((IWSFormula) null)
 						.and(comment)
 						.and(string(","))
 						.and(comment)
-						.extract(expression)), Struct2::setY),
+						.extract(formula)), Struct2::setY),
 					t -> Stream.concat(Stream.of(t.x), t.y.stream())
 						.collect(Collectors.toCollection(ArrayList::new))))
 				.or(pack(extract((IWSFormula) null)
 					.and(comment)
-					.extract(expression),
+					.extract(formula),
 					t -> new ArrayList<>(Arrays.asList(t))))
 				.or(pack(string(""),
 					t -> new ArrayList<>())))

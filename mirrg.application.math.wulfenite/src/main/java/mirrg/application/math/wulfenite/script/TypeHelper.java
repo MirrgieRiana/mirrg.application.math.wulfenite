@@ -9,7 +9,7 @@ import java.util.function.BiConsumer;
 
 import mirrg.application.math.wulfenite.core.types.Type;
 import mirrg.application.math.wulfenite.script.node.IWSFormula;
-import mirrg.application.math.wulfenite.script.nodes.OperationCast;
+import mirrg.application.math.wulfenite.script.nodes.OperationSilentCast;
 import mirrg.helium.standard.hydrogen.struct.Tuple;
 
 public class TypeHelper
@@ -17,11 +17,11 @@ public class TypeHelper
 
 	private static Hashtable<Type<?>, Color> colors = new Hashtable<>();
 	static {
-		colors.put(Type.INTEGER, Color.decode("#f08000"));
-		colors.put(Type.DOUBLE, Color.decode("#000080"));
-		colors.put(Type.COMPLEX, Color.decode("#600000"));
-		colors.put(Type.COLOR, Color.decode("#ff8000"));
-		colors.put(Type.BOOLEAN, Color.decode("#808000"));
+		colors.put(Type.INTEGER, Color.decode("#ff8800"));
+		colors.put(Type.DOUBLE, Color.decode("#000088"));
+		colors.put(Type.COMPLEX, Color.decode("#880000"));
+		colors.put(Type.COLOR, Color.decode("#00aa00"));
+		colors.put(Type.BOOLEAN, Color.decode("#888800"));
 		colors.put(Type.STRING, Color.decode("#ff00ff"));
 	}
 
@@ -83,7 +83,7 @@ public class TypeHelper
 		public IWSFormula apply(IWSFormula from)
 		{
 			O slot = to.create();
-			return new OperationCast(from, to) {
+			return new OperationSilentCast(from, to) {
 
 				@SuppressWarnings("unchecked")
 				@Override

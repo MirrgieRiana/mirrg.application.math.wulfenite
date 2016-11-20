@@ -1,6 +1,7 @@
 package mirrg.application.math.wulfenite.script.nodes;
 
 import mirrg.application.math.wulfenite.script.Environment;
+import mirrg.application.math.wulfenite.script.Variable;
 import mirrg.application.math.wulfenite.script.node.IWSFormula;
 import mirrg.application.math.wulfenite.script.node.WSLineBase;
 import mirrg.helium.compile.oxygen.parser.core.Node;
@@ -18,6 +19,8 @@ public class LineAssignment extends WSLineBase
 		this.formula = formula;
 	}
 
+	private Variable<?> variable;
+
 	@Override
 	protected boolean validateImpl(Environment environment)
 	{
@@ -26,9 +29,16 @@ public class LineAssignment extends WSLineBase
 			environment.reportError("Duplicate variable: " + name, this);
 			return false;
 		}
-		environment.addVariable(name, formula.getType());
+		variable = environment.addVariable(name, formula.getType());
 
 		return true;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void invoke()
+	{
+		((Variable<Object>) variable).value = formula.getValue();
 	}
 
 }

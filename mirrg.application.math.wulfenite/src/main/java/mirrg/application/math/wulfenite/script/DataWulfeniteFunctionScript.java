@@ -77,6 +77,7 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 		}
 
 		private ResultValidate resultValidate;
+		private Environment environment;
 		private StructureComplex input;
 		private IWSFormula formula;
 
@@ -85,9 +86,11 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 			game.fireChangeFunction(() -> {
 				this.resultValidate = resultValidate;
 				if (resultValidate.isValid) {
+					environment = resultValidate.environment;
 					input = resultValidate.input;
 					formula = resultValidate.formula;
 				} else {
+					environment = null;
 					input = null;
 					formula = null;
 				}

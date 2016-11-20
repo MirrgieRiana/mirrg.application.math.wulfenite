@@ -2,51 +2,22 @@ package mirrg.application.math.wulfenite.script.node;
 
 import java.awt.Color;
 
-import mirrg.application.math.wulfenite.script.Environment;
 import mirrg.application.math.wulfenite.script.TypeHelper;
 import mirrg.helium.compile.oxygen.editor.IProviderColor;
 import mirrg.helium.compile.oxygen.parser.core.Node;
 
-public abstract class WSFormulaBase implements IWSFormula, IProviderColor
+public abstract class WSFormulaBase extends WSNodeBase implements IWSFormula, IProviderColor
 {
-
-	public final int begin;
-	public final int end;
-
-	public WSFormulaBase(Node<?> node)
-	{
-		begin = node.begin;
-		end = node.end;
-	}
 
 	public WSFormulaBase(int begin, int end)
 	{
-		this.begin = begin;
-		this.end = end;
+		super(begin, end);
 	}
 
-	@Override
-	public int getBegin()
+	public WSFormulaBase(Node<?> node)
 	{
-		return begin;
+		super(node);
 	}
-
-	@Override
-	public int getEnd()
-	{
-		return end;
-	}
-
-	public boolean isValid;
-
-	@Override
-	public boolean validate(Environment environment)
-	{
-		isValid = validateImpl(environment);
-		return isValid;
-	}
-
-	protected abstract boolean validateImpl(Environment environment);
 
 	@Override
 	public Color getColor()

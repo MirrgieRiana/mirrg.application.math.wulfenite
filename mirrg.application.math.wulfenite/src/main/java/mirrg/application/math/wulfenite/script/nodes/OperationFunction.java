@@ -15,6 +15,7 @@ import mirrg.application.math.wulfenite.script.Environment;
 import mirrg.application.math.wulfenite.script.TypeHelper;
 import mirrg.application.math.wulfenite.script.function.IWSFunction;
 import mirrg.application.math.wulfenite.script.node.IWSFormula;
+import mirrg.application.math.wulfenite.script.node.IWSNode;
 import mirrg.application.math.wulfenite.script.node.WSFormulaBase;
 import mirrg.helium.compile.oxygen.editor.IProviderChildren;
 import mirrg.helium.compile.oxygen.editor.Proposal;
@@ -134,11 +135,11 @@ public class OperationFunction extends WSFormulaBase implements IProviderChildre
 			return Stream.concat(
 				Stream.of(oTokenIdentifier.get().node),
 				Stream.of(args)
-					.map(IWSFormula::createNode))
+					.map(IWSNode::getNode))
 				.collect(Collectors.toCollection(ArrayList::new));
 		} else {
 			return Stream.of(args)
-				.map(IWSFormula::createNode)
+				.map(IWSNode::getNode)
 				.collect(Collectors.toCollection(ArrayList::new));
 		}
 	}
