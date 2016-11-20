@@ -294,8 +294,8 @@ public class WulfeniteScript
 				.and(term, Struct2::setY),
 			t -> {
 				IWSFormula right = t.y;
-				for (Struct2<IWSFormula, String> left : t.x) {
-					right = new OperationFunction(left.x.getBegin(), right.getEnd(), left.y, left.x, right);
+				for (int i = t.x.size() - 1; i >= 0; i--) {
+					right = new OperationFunction(t.x.get(i).x.getBegin(), right.getEnd(), t.x.get(i).y, t.x.get(i).x, right);
 				}
 				return right;
 			});
