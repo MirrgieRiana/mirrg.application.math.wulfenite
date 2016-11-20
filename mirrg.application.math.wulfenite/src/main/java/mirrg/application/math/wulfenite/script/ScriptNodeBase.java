@@ -5,7 +5,7 @@ import java.awt.Color;
 import mirrg.helium.compile.oxygen.editor.IProviderColor;
 import mirrg.helium.compile.oxygen.parser.core.Node;
 
-public abstract class ScriptNodeBase implements IWulfeniteScript, IProviderColor
+public abstract class ScriptNodeBase implements IWulfeniteFormula, IProviderColor
 {
 
 	public final int begin;

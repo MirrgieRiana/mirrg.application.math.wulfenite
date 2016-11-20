@@ -12,7 +12,7 @@ import javax.swing.JLabel;
 
 import mirrg.application.math.wulfenite.core.types.Type;
 import mirrg.application.math.wulfenite.script.Environment;
-import mirrg.application.math.wulfenite.script.IWulfeniteScript;
+import mirrg.application.math.wulfenite.script.IWulfeniteFormula;
 import mirrg.application.math.wulfenite.script.IWulfeniteScriptFunction;
 import mirrg.application.math.wulfenite.script.ScriptNodeBase;
 import mirrg.application.math.wulfenite.script.TypeHelper;
@@ -26,9 +26,9 @@ public class OperationFunction extends ScriptNodeBase implements IProviderChildr
 
 	private String name;
 	private Optional<TokenIdentifier> oTokenIdentifier;
-	private IWulfeniteScript[] args;
+	private IWulfeniteFormula[] args;
 
-	public OperationFunction(int begin, int end, String name, IWulfeniteScript... args)
+	public OperationFunction(int begin, int end, String name, IWulfeniteFormula... args)
 	{
 		super(begin, end);
 		this.name = name;
@@ -37,7 +37,7 @@ public class OperationFunction extends ScriptNodeBase implements IProviderChildr
 		args2 = new Object[args.length];
 	}
 
-	public OperationFunction(int begin, int end, TokenIdentifier tokenIdentifier, IWulfeniteScript... args)
+	public OperationFunction(int begin, int end, TokenIdentifier tokenIdentifier, IWulfeniteFormula... args)
 	{
 		super(begin, end);
 		this.name = tokenIdentifier.string;
@@ -47,7 +47,7 @@ public class OperationFunction extends ScriptNodeBase implements IProviderChildr
 	}
 
 	private IWulfeniteScriptFunction function;
-	private IWulfeniteScript[] args3;
+	private IWulfeniteFormula[] args3;
 	private Function<Object[], Object> function2;
 
 	@Override
@@ -57,7 +57,7 @@ public class OperationFunction extends ScriptNodeBase implements IProviderChildr
 
 		// validate args
 		{
-			for (IWulfeniteScript wulfeniteScript : args) {
+			for (IWulfeniteFormula wulfeniteScript : args) {
 				if (!wulfeniteScript.validate(environment)) flag = false;
 			}
 		}
@@ -75,7 +75,7 @@ public class OperationFunction extends ScriptNodeBase implements IProviderChildr
 						{
 							label.setText(s.getX() + "(" + s.getY().getArgumentsType().stream()
 								.map(t -> t.getName())
-								.collect(Collectors.joining(", ")) + ")");
+								.collect(Collectors.joining(", ")) + ") : " + s.getY().getType().getName());
 
 							label.setForeground(TypeHelper.getTokenColor(s.getY().getType()));
 
@@ -84,22 +84,22 @@ public class OperationFunction extends ScriptNodeBase implements IProviderChildr
 					});
 			}
 
-			ArrayList<Tuple3<String, IWulfeniteScriptFunction, ArrayList<IWulfeniteScript>>> functions = environment.getFunctions(name, args)
+			ArrayList<Tuple3<String, IWulfeniteScriptFunction, ArrayList<IWulfeniteFormula>>> functions = environment.getFunctions(name, args)
 				.collect(Collectors.toCollection(ArrayList::new));
 
 			if (functions.size() == 1) {
 				function = functions.get(0).getY();
-				args3 = functions.get(0).getZ().toArray(new IWulfeniteScript[0]);
+				args3 = functions.get(0).getZ().toArray(new IWulfeniteFormula[0]);
 				function2 = function.createValueProvider();
 			} else if (functions.size() == 0) {
 				environment.reportError("No such function: " + name + "(" + Stream.of(args)
-					.map(IWulfeniteScript::getType)
+					.map(IWulfeniteFormula::getType)
 					.map(Type::getName)
 					.collect(Collectors.joining(", ")) + ")", this);
 				flag = false;
 			} else {
 				environment.reportError("Ambiguous function call: " + name + "(" + Stream.of(args)
-					.map(IWulfeniteScript::getType)
+					.map(IWulfeniteFormula::getType)
 					.map(Type::getName)
 					.collect(Collectors.joining(", ")) + ")", this);
 				flag = true;

@@ -228,9 +228,9 @@ public class Loader
 	}
 
 	private Environment environment;
-	private WulfeniteScriptFunction prev;
+	private WulfeniteScriptFunction<?> prev;
 
-	private void a(String name, WulfeniteScriptFunction wulfeniteScriptFunction)
+	private void a(String name, WulfeniteScriptFunction<?> wulfeniteScriptFunction)
 	{
 		environment.addFunction(name, wulfeniteScriptFunction);
 		prev = wulfeniteScriptFunction;
@@ -242,7 +242,7 @@ public class Loader
 	}
 
 	@SuppressWarnings("unused")
-	private static class Wsf0<Z> extends WulfeniteScriptFunction
+	private static class Wsf0<Z> extends WulfeniteScriptFunction<Z>
 	{
 
 		private I<Z> i;
@@ -253,11 +253,10 @@ public class Loader
 			this.i = i;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public Function<Object[], Object> createValueProvider()
 		{
-			Z slot = (Z) type.supplier.get();
+			Z slot = type.create();
 			return args -> {
 				i.getValue(slot);
 				return slot;
@@ -273,7 +272,7 @@ public class Loader
 
 	}
 
-	private static class Wsf1<Z, A> extends WulfeniteScriptFunction
+	private static class Wsf1<Z, A> extends WulfeniteScriptFunction<Z>
 	{
 
 		private I<Z, A> i;
@@ -288,7 +287,7 @@ public class Loader
 		@Override
 		public Function<Object[], Object> createValueProvider()
 		{
-			Z slot = (Z) type.supplier.get();
+			Z slot = type.create();
 			return args -> {
 				i.getValue(slot, (A) args[0]);
 				return slot;
@@ -304,7 +303,7 @@ public class Loader
 
 	}
 
-	private static class Wsf2<Z, A, B> extends WulfeniteScriptFunction
+	private static class Wsf2<Z, A, B> extends WulfeniteScriptFunction<Z>
 	{
 
 		private I<Z, A, B> i;
@@ -319,7 +318,7 @@ public class Loader
 		@Override
 		public Function<Object[], Object> createValueProvider()
 		{
-			Z slot = (Z) type.supplier.get();
+			Z slot = type.create();
 			return args -> {
 				i.getValue(slot, (A) args[0], (B) args[1]);
 				return slot;
@@ -335,14 +334,14 @@ public class Loader
 
 	}
 
-	private static class Wsf3<Z, A, B, C> extends WulfeniteScriptFunction
+	private static class Wsf3<Z, A, B, C> extends WulfeniteScriptFunction<Z>
 	{
 
 		private I<Z, A, B, C> i;
 
 		public Wsf3(Type<Z> z, Type<A> a, Type<B> b, Type<C> c, I<Z, A, B, C> i)
 		{
-			super(z, a, b);
+			super(z, a, b, c);
 			this.i = i;
 		}
 
@@ -350,7 +349,7 @@ public class Loader
 		@Override
 		public Function<Object[], Object> createValueProvider()
 		{
-			Z slot = (Z) type.supplier.get();
+			Z slot = type.create();
 			return args -> {
 				i.getValue(slot, (A) args[0], (B) args[1], (C) args[2]);
 				return slot;

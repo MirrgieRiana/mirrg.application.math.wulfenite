@@ -22,7 +22,7 @@ public class Type<T>
 	public static final Type<SlotColor> Co = COLOR;
 
 	public final Class<T> type;
-	public final Supplier<T> supplier;
+	private final Supplier<T> supplier;
 	public final String name;
 
 	public Type(Class<T> type, Supplier<T> supplier, String name)
@@ -35,6 +35,11 @@ public class Type<T>
 	public String getName()
 	{
 		return name;
+	}
+
+	public T create()
+	{
+		return supplier.get();
 	}
 
 }

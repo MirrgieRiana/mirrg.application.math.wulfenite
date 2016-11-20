@@ -24,7 +24,7 @@ public class TypeHelper
 		colors.put(Type.STRING, Color.decode("#ff00ff"));
 	}
 
-	private static ArrayList<Entry<?, ?>> casters = new ArrayList<>();
+	private static ArrayList<CastEntry<?, ?>> casters = new ArrayList<>();
 	static {
 		r(S, C, 1, (z, a) -> z.value = a.re + "+" + a.im + "i");
 		r(S, D, 2, (z, a) -> z.value = a.toString());
@@ -43,7 +43,7 @@ public class TypeHelper
 		return Color.black;
 	}
 
-	public static Tuple<Integer, IWulfeniteScript> cast(IWulfeniteScript from, Type<?> to)
+	public static Tuple<Integer, IWulfeniteFormula> cast(IWulfeniteFormula from, Type<?> to)
 	{
 		if (from.getType() == to) return new Tuple<>(0, from);
 		return casters.stream()
@@ -55,10 +55,10 @@ public class TypeHelper
 
 	private static <O, I> void r(Type<O> to, Type<I> from, int distance, BiConsumer<O, I> consumer)
 	{
-		casters.add(new Entry<>(to, from, distance, consumer));
+		casters.add(new CastEntry<>(to, from, distance, consumer));
 	}
 
-	private static class Entry<O, I>
+	private static class CastEntry<O, I>
 	{
 
 		private Type<O> to;
@@ -66,7 +66,7 @@ public class TypeHelper
 		private int distance;
 		private BiConsumer<O, I> consumer;
 
-		private Entry(Type<O> to, Type<I> from, int distance, BiConsumer<O, I> consumer)
+		private CastEntry(Type<O> to, Type<I> from, int distance, BiConsumer<O, I> consumer)
 		{
 			this.to = to;
 			this.from = from;
@@ -74,14 +74,14 @@ public class TypeHelper
 			this.consumer = consumer;
 		}
 
-		public boolean match(IWulfeniteScript from, Type<?> to)
+		public boolean match(IWulfeniteFormula from, Type<?> to)
 		{
 			return from.getType() == this.from && to == this.to;
 		}
 
-		public IWulfeniteScript apply(IWulfeniteScript from)
+		public IWulfeniteFormula apply(IWulfeniteFormula from)
 		{
-			O slot = to.supplier.get();
+			O slot = to.create();
 			return new OperationCast(from, to) {
 
 				@SuppressWarnings("unchecked")

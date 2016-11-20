@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import mirrg.application.math.wulfenite.script.nodes.ExpressionRoot;
 import mirrg.application.math.wulfenite.script.nodes.LiteralColor;
 import mirrg.application.math.wulfenite.script.nodes.LiteralComplex;
 import mirrg.application.math.wulfenite.script.nodes.LiteralDouble;
@@ -27,7 +28,7 @@ import mirrg.helium.standard.hydrogen.struct.Struct3;
 public class WulfeniteScript
 {
 
-	public static Syntax<IWulfeniteScript> getSyntax()
+	public static Syntax<IWulfeniteFormula> getSyntax()
 	{
 		return new WulfeniteScript().root;
 	}
@@ -51,27 +52,27 @@ public class WulfeniteScript
 		.and(string("\"")),
 		t -> String.join("", t)), "String");
 
-	public SyntaxSlot<IWulfeniteScript> expression = slot();
+	public SyntaxSlot<IWulfeniteFormula> expression = slot();
 
 	// factor
 
-	public Syntax<IWulfeniteScript> literalImaginary = packNode(extract((String) null)
+	public Syntax<IWulfeniteFormula> literalImaginary = packNode(extract((String) null)
 		.extract(or((String) null)
 			.or(tokenDouble)
 			.or(tokenInteger))
 		.and(string("i")),
 		n -> new LiteralComplex(n, n.value));
-	public Syntax<IWulfeniteScript> literalDouble = packNode(tokenDouble,
+	public Syntax<IWulfeniteFormula> literalDouble = packNode(tokenDouble,
 		n -> new LiteralDouble(n, n.value));
-	public Syntax<IWulfeniteScript> literalInteger = packNode(tokenInteger,
+	public Syntax<IWulfeniteFormula> literalInteger = packNode(tokenInteger,
 		n -> new LiteralInteger(n, n.value));
-	public Syntax<IWulfeniteScript> literalColor = packNode(named(extract((String) null)
+	public Syntax<IWulfeniteFormula> literalColor = packNode(named(extract((String) null)
 		.and(string("#"))
 		.extract(regex("[0-9a-fA-F]+")), "Color"),
 		n -> new LiteralColor(n, n.value));
-	public Syntax<IWulfeniteScript> literalString = packNode(tokenString,
+	public Syntax<IWulfeniteFormula> literalString = packNode(tokenString,
 		n -> new LiteralString(n, n.value));
-	public Syntax<IWulfeniteScript> function = packNode(serial(Struct3<TokenIdentifier, ArrayList<IWulfeniteScript>, Node<?>>::new)
+	public Syntax<IWulfeniteFormula> function = packNode(serial(Struct3<TokenIdentifier, ArrayList<IWulfeniteFormula>, Node<?>>::new)
 		.and(pack(identifier, t -> new TokenIdentifier(t)), Struct3::setX)
 		.and(comment)
 		.and(string("("))
@@ -79,22 +80,22 @@ public class WulfeniteScript
 		.and(packNode(string(")"),
 			n -> n), Struct3::setZ),
 		n -> {
-			IWulfeniteScript[] args = new IWulfeniteScript[n.value.y.size()];
+			IWulfeniteFormula[] args = new IWulfeniteFormula[n.value.y.size()];
 			for (int i = 0; i < n.value.y.size(); i++) {
 				args[i] = n.value.y.get(i);
 			}
 			return new OperationFunction(n.begin, n.end, n.value.x, args);
 		});
-	public Syntax<IWulfeniteScript> variable = packNode(identifier,
+	public Syntax<IWulfeniteFormula> variable = packNode(identifier,
 		n -> new OperationVariable(n, n.value));
-	public Syntax<IWulfeniteScript> bracket = extract((IWulfeniteScript) null)
+	public Syntax<IWulfeniteFormula> bracket = extract((IWulfeniteFormula) null)
 		.and(string("("))
 		.and(comment)
 		.extract(expression)
 		.and(comment)
 		.and(string(")"));
 
-	public Syntax<IWulfeniteScript> factor = or((IWulfeniteScript) null)
+	public Syntax<IWulfeniteFormula> factor = or((IWulfeniteFormula) null)
 		.or(literalImaginary)
 		.or(literalDouble)
 		.or(literalInteger)
@@ -106,9 +107,9 @@ public class WulfeniteScript
 
 	// operator
 
-	public Syntax<IWulfeniteScript> operatorMethod = packNode(serial(Struct2<IWulfeniteScript, ArrayList<Struct3<TokenIdentifier, ArrayList<IWulfeniteScript>, Node<?>>>>::new)
+	public Syntax<IWulfeniteFormula> operatorMethod = packNode(serial(Struct2<IWulfeniteFormula, ArrayList<Struct3<TokenIdentifier, ArrayList<IWulfeniteFormula>, Node<?>>>>::new)
 		.and(factor, Struct2::setX)
-		.and(repeat(serial(Struct3<TokenIdentifier, ArrayList<IWulfeniteScript>, Node<?>>::new)
+		.and(repeat(serial(Struct3<TokenIdentifier, ArrayList<IWulfeniteFormula>, Node<?>>::new)
 			.and(comment)
 			.and(string("."))
 			.and(comment)
@@ -119,10 +120,10 @@ public class WulfeniteScript
 			.and(packNode(string(")"),
 				n -> n), Struct3::setZ)), Struct2::setY),
 		n -> {
-			IWulfeniteScript left = n.value.x;
+			IWulfeniteFormula left = n.value.x;
 
-			for (Struct3<TokenIdentifier, ArrayList<IWulfeniteScript>, Node<?>> right : n.value.y) {
-				IWulfeniteScript[] args = new IWulfeniteScript[right.y.size() + 1];
+			for (Struct3<TokenIdentifier, ArrayList<IWulfeniteFormula>, Node<?>> right : n.value.y) {
+				IWulfeniteFormula[] args = new IWulfeniteFormula[right.y.size() + 1];
 				args[0] = left;
 				for (int i = 0; i < right.y.size(); i++) {
 					args[i + 1] = right.y.get(i);
@@ -133,29 +134,29 @@ public class WulfeniteScript
 			return left;
 		});
 
-	public Syntax<IWulfeniteScript> operatorLeft = createLeft(operatorMethod, c -> {
+	public Syntax<IWulfeniteFormula> operatorLeft = createLeft(operatorMethod, c -> {
 		c.accept("-", "_leftMinus");
 		c.accept("+", "_leftPlus");
 		c.accept("!", "_leftExclamation");
 		c.accept("~", "_leftTilde");
 	});
 
-	public Syntax<IWulfeniteScript> operatorPow = createOperatorRight(operatorLeft, c -> {
+	public Syntax<IWulfeniteFormula> operatorPow = createOperatorRight(operatorLeft, c -> {
 		c.accept("^", "_operatorHat");
 	});
 
-	public Syntax<IWulfeniteScript> operatorMul = createOperatorLeft(operatorPow, c -> {
+	public Syntax<IWulfeniteFormula> operatorMul = createOperatorLeft(operatorPow, c -> {
 		c.accept("*", "_operatorAsterisk");
 		c.accept("/", "_operatorSlash");
 		c.accept("%", "_operatorPercent");
 	});
 
-	public Syntax<IWulfeniteScript> operatorAdd = createOperatorLeft(operatorMul, c -> {
+	public Syntax<IWulfeniteFormula> operatorAdd = createOperatorLeft(operatorMul, c -> {
 		c.accept("+", "_operatorPlus");
 		c.accept("-", "_operatorMinus");
 	});
 
-	public Syntax<IWulfeniteScript> operatorCompare = createOperatorCompare(operatorAdd, c -> {
+	public Syntax<IWulfeniteFormula> operatorCompare = createOperatorCompare(operatorAdd, c -> {
 		c.accept("<=", "_operatorLessEqual");
 		c.accept(">=", "_operatorGreaterEqual");
 		c.accept("<", "_operatorLess");
@@ -164,19 +165,18 @@ public class WulfeniteScript
 		c.accept("!=", "_operatorExclamationEqual");
 	});
 
-	public Syntax<IWulfeniteScript> operatorAnd = createOperatorLeft(operatorCompare, c -> {
+	public Syntax<IWulfeniteFormula> operatorAnd = createOperatorLeft(operatorCompare, c -> {
 		c.accept("&&", "_operatorAmpersandAmpersand");
 	});
 
-	public Syntax<IWulfeniteScript> operatorOr = createOperatorLeft(operatorAnd, c -> {
+	public Syntax<IWulfeniteFormula> operatorOr = createOperatorLeft(operatorAnd, c -> {
 		c.accept("||", "_operatorPipePipe");
 	});
 
-	public SyntaxSlot<IWulfeniteScript> operatorIif = slot();
+	public SyntaxSlot<IWulfeniteFormula> operatorIif = slot();
 	{
-		operatorIif.syntax = or((IWulfeniteScript) null)
-			.or(operatorOr)
-			.or(pack(serial(Struct3<IWulfeniteScript, IWulfeniteScript, IWulfeniteScript>::new)
+		operatorIif.syntax = or((IWulfeniteFormula) null)
+			.or(pack(serial(Struct3<IWulfeniteFormula, IWulfeniteFormula, IWulfeniteFormula>::new)
 				.and(operatorOr, Struct3::setX)
 				.and(comment)
 				.and(string("?"))
@@ -186,36 +186,55 @@ public class WulfeniteScript
 				.and(string(":"))
 				.and(comment)
 				.and(operatorIif, Struct3::setZ),
-				t -> new OperationFunction(t.getX().getBegin(), t.getZ().getEnd(), "_ternaryQuestionColon", t.getX(), t.getY(), t.getZ())));
+				t -> new OperationFunction(t.getX().getBegin(), t.getZ().getEnd(), "_ternaryQuestionColon", t.getX(), t.getY(), t.getZ())))
+			.or(operatorOr);
 	}
+
+	public Syntax<IWulfeniteFormula> formula = operatorIif;
+
+	public Syntax<Struct2<String, IWulfeniteFormula>> lineAssignment = serial(Struct2<String, IWulfeniteFormula>::new)
+		.and(identifier, Struct2::setX)
+		.and(comment)
+		.and(string("="))
+		.and(comment)
+		.and(formula, Struct2::setY);
+
+	public Syntax<IWulfeniteFormula> lines = packNode(serial(Struct2<ArrayList<Struct2<String, IWulfeniteFormula>>, IWulfeniteFormula>::new)
+		.and(repeat(extract((Struct2<String, IWulfeniteFormula>) null)
+			.extract(lineAssignment)
+			.and(comment)
+			.and(string(";"))
+			.and(comment)), Struct2::setX)
+		.and(formula, Struct2::setY),
+		n -> new ExpressionRoot(n, n.value.x, n.value.y));
 
 	// root
 
 	{
-		expression.syntax = operatorIif;
+		expression.syntax = lines;
 	}
 
-	public Syntax<IWulfeniteScript> root = extract((IWulfeniteScript) null)
+	public Syntax<IWulfeniteFormula> root = extract((IWulfeniteFormula) null)
 		.and(comment)
 		.extract(expression)
 		.and(comment)
 		.and(named(string(""), "EOF"));
 
-	protected Syntax<IWulfeniteScript> createLeft(
-		Syntax<IWulfeniteScript> term,
+	protected Syntax<IWulfeniteFormula> createLeft(
+		Syntax<IWulfeniteFormula> term,
 		Consumer<BiConsumer<String, String>> tokenMap)
 	{
 		SyntaxOr<String> tokens = or((String) null);
 		tokenMap.accept((token, name) -> tokens.or(pack(string(token), t -> name)));
 
 		return pack(serial(
-			Struct2<ArrayList<Node<String>>, IWulfeniteScript>::new)
+			Struct2<ArrayList<Node<String>>, IWulfeniteFormula>::new)
 				.and(repeat(extract((Node<String>) null)
 					.extract(packNode(tokens, n -> n))
 					.and(comment)), Struct2::setX)
 				.and(term, Struct2::setY),
 			t -> {
-				IWulfeniteScript right = t.y;
+				IWulfeniteFormula right = t.y;
 				for (Node<String> left : t.x) {
 					right = new OperationFunction(left.begin, right.getEnd(), left.value, right);
 				}
@@ -223,65 +242,65 @@ public class WulfeniteScript
 			});
 	}
 
-	protected Syntax<IWulfeniteScript> createOperatorLeft(
-		Syntax<IWulfeniteScript> term,
+	protected Syntax<IWulfeniteFormula> createOperatorLeft(
+		Syntax<IWulfeniteFormula> term,
 		Consumer<BiConsumer<String, String>> tokenMap)
 	{
 		SyntaxOr<String> tokens = or((String) null);
 		tokenMap.accept((token, name) -> tokens.or(pack(string(token), t -> name)));
 
 		return pack(serial(
-			Struct2<IWulfeniteScript, ArrayList<Struct2<String, IWulfeniteScript>>>::new)
+			Struct2<IWulfeniteFormula, ArrayList<Struct2<String, IWulfeniteFormula>>>::new)
 				.and(term, Struct2::setX)
-				.and(repeat(serial(Struct2<String, IWulfeniteScript>::new)
+				.and(repeat(serial(Struct2<String, IWulfeniteFormula>::new)
 					.and(comment)
 					.and(tokens, Struct2::setX)
 					.and(comment)
 					.and(term, Struct2::setY)), Struct2::setY),
 			t -> {
-				IWulfeniteScript left = t.x;
-				for (Struct2<String, IWulfeniteScript> right : t.y) {
+				IWulfeniteFormula left = t.x;
+				for (Struct2<String, IWulfeniteFormula> right : t.y) {
 					left = new OperationFunction(left.getBegin(), right.y.getEnd(), right.x, left, right.y);
 				}
 				return left;
 			});
 	}
 
-	protected Syntax<IWulfeniteScript> createOperatorRight(
-		Syntax<IWulfeniteScript> term,
+	protected Syntax<IWulfeniteFormula> createOperatorRight(
+		Syntax<IWulfeniteFormula> term,
 		Consumer<BiConsumer<String, String>> tokenMap)
 	{
 		SyntaxOr<String> tokens = or((String) null);
 		tokenMap.accept((token, name) -> tokens.or(pack(string(token), t -> name)));
 
 		return pack(serial(
-			Struct2<ArrayList<Struct2<IWulfeniteScript, String>>, IWulfeniteScript>::new)
-				.and(repeat(serial(Struct2<IWulfeniteScript, String>::new)
+			Struct2<ArrayList<Struct2<IWulfeniteFormula, String>>, IWulfeniteFormula>::new)
+				.and(repeat(serial(Struct2<IWulfeniteFormula, String>::new)
 					.and(term, Struct2::setX)
 					.and(comment)
 					.and(tokens, Struct2::setY)
 					.and(comment)), Struct2::setX)
 				.and(term, Struct2::setY),
 			t -> {
-				IWulfeniteScript right = t.y;
-				for (Struct2<IWulfeniteScript, String> left : t.x) {
+				IWulfeniteFormula right = t.y;
+				for (Struct2<IWulfeniteFormula, String> left : t.x) {
 					right = new OperationFunction(left.x.getBegin(), right.getEnd(), left.y, left.x, right);
 				}
 				return right;
 			});
 	}
 
-	protected Syntax<IWulfeniteScript> createOperatorCompare(
-		Syntax<IWulfeniteScript> term,
+	protected Syntax<IWulfeniteFormula> createOperatorCompare(
+		Syntax<IWulfeniteFormula> term,
 		Consumer<BiConsumer<String, String>> tokenMap)
 	{
 		SyntaxOr<String> tokens = or((String) null);
 		tokenMap.accept((token, name) -> tokens.or(pack(string(token), t -> name)));
 
 		return pack(serial(
-			Struct2<IWulfeniteScript, ArrayList<Struct2<String, IWulfeniteScript>>>::new)
+			Struct2<IWulfeniteFormula, ArrayList<Struct2<String, IWulfeniteFormula>>>::new)
 				.and(term, Struct2::setX)
-				.and(repeat(serial(Struct2<String, IWulfeniteScript>::new)
+				.and(repeat(serial(Struct2<String, IWulfeniteFormula>::new)
 					.and(comment)
 					.and(tokens, Struct2::setX)
 					.and(comment)
@@ -289,38 +308,38 @@ public class WulfeniteScript
 			t -> {
 				if (t.y.size() == 0) return t.x;
 
-				ArrayList<IWulfeniteScript> wulfeniteScripts = new ArrayList<>();
+				ArrayList<IWulfeniteFormula> formulas = new ArrayList<>();
 				{
-					IWulfeniteScript left = t.x;
-					for (Struct2<String, IWulfeniteScript> right : t.y) {
-						wulfeniteScripts.add(new OperationFunction(left.getBegin(), right.y.getEnd(), right.x, left, right.y));
+					IWulfeniteFormula left = t.x;
+					for (Struct2<String, IWulfeniteFormula> right : t.y) {
+						formulas.add(new OperationFunction(left.getBegin(), right.y.getEnd(), right.x, left, right.y));
 						left = right.y;
 					}
 				}
-				IWulfeniteScript left = wulfeniteScripts.get(0);
-				for (int i = 1; i < wulfeniteScripts.size(); i++) {
-					IWulfeniteScript right = wulfeniteScripts.get(i);
+				IWulfeniteFormula left = formulas.get(0);
+				for (int i = 1; i < formulas.size(); i++) {
+					IWulfeniteFormula right = formulas.get(i);
 					left = new OperationFunction(left.getBegin(), right.getEnd(), "_operatorAmpersandAmpersand", left, right);
 				}
 				return left;
 			});
 	}
 
-	protected Syntax<ArrayList<IWulfeniteScript>> createArgument()
+	protected Syntax<ArrayList<IWulfeniteFormula>> createArgument()
 	{
-		return extract((ArrayList<IWulfeniteScript>) null)
-			.extract(or((ArrayList<IWulfeniteScript>) null)
-				.or(pack(serial(Struct2<IWulfeniteScript, ArrayList<IWulfeniteScript>>::new)
+		return extract((ArrayList<IWulfeniteFormula>) null)
+			.extract(or((ArrayList<IWulfeniteFormula>) null)
+				.or(pack(serial(Struct2<IWulfeniteFormula, ArrayList<IWulfeniteFormula>>::new)
 					.and(comment)
 					.and(expression, Struct2::setX)
-					.and(repeat(extract((IWulfeniteScript) null)
+					.and(repeat(extract((IWulfeniteFormula) null)
 						.and(comment)
 						.and(string(","))
 						.and(comment)
 						.extract(expression)), Struct2::setY),
 					t -> Stream.concat(Stream.of(t.x), t.y.stream())
 						.collect(Collectors.toCollection(ArrayList::new))))
-				.or(pack(extract((IWulfeniteScript) null)
+				.or(pack(extract((IWulfeniteFormula) null)
 					.and(comment)
 					.extract(expression),
 					t -> new ArrayList<>(Arrays.asList(t))))

@@ -43,7 +43,7 @@ public class LiteralColor extends ScriptNodeBase
 	@Override
 	public Type<?> getType()
 	{
-		return Type.STRING;
+		return Type.COLOR;
 	}
 
 	@Override

@@ -2,7 +2,7 @@ package mirrg.application.math.wulfenite.script;
 
 import mirrg.application.math.wulfenite.core.types.Type;
 
-public interface IWulfeniteScript
+public interface IWulfeniteFormula
 {
 
 	public boolean validate(Environment environment);

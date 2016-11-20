@@ -35,17 +35,17 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 		{
 
 			@SuppressWarnings("unused")
-			private ResultOxygen<IWulfeniteScript> result;
+			private ResultOxygen<IWulfeniteFormula> result;
 
 			private Environment environment;
 			private StructureComplex input;
 			private boolean isValid;
 
-			private IWulfeniteScript consumer;
+			private IWulfeniteFormula formula;
 
 		}
 
-		private ResultValidate validate(ResultOxygen<IWulfeniteScript> result)
+		private ResultValidate validate(ResultOxygen<IWulfeniteFormula> result)
 		{
 			ResultValidate resultValidate = new ResultValidate();
 			resultValidate.result = result;
@@ -67,7 +67,7 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 				// 意味解析
 				resultValidate.isValid = result.node.value.validate(resultValidate.environment);
 				if (resultValidate.isValid) {
-					resultValidate.consumer = result.node.value;
+					resultValidate.formula = result.node.value;
 				}
 
 			}
@@ -77,7 +77,7 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 
 		private ResultValidate resultValidate;
 		private StructureComplex input;
-		private IWulfeniteScript wulfeniteScript;
+		private IWulfeniteFormula formula;
 
 		public void setSCompiler(ResultValidate resultValidate)
 		{
@@ -85,10 +85,10 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 				this.resultValidate = resultValidate;
 				if (resultValidate.isValid) {
 					input = resultValidate.input;
-					wulfeniteScript = resultValidate.consumer;
+					formula = resultValidate.formula;
 				} else {
 					input = null;
-					wulfeniteScript = null;
+					formula = null;
 				}
 			});
 		}
@@ -99,9 +99,9 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 			if (resultValidate == null) {
 				setSCompiler(validate(WulfeniteScript.getSyntax().matches(source)));
 			}
-			if (wulfeniteScript != null) {
+			if (formula != null) {
 				input.set(coordinate);
-				return wulfeniteScript.getValue();
+				return formula.getValue();
 			}
 			return null;
 		}
@@ -123,7 +123,7 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 					source = dialog.textPaneOxygen.getText();
 				});
 				dialog.textPaneOxygen.event().register(EventTextPaneOxygen.Syntax.Success.class, e -> {
-					ResultValidate resultValidate = validate((ResultOxygen<IWulfeniteScript>) e.result);
+					ResultValidate resultValidate = validate((ResultOxygen<IWulfeniteFormula>) e.result);
 
 					if (e.timing == EventTextPaneOxygen.Syntax.TIMING_MAIN) {
 						sResultValidate.x = resultValidate;

@@ -42,9 +42,9 @@ public class Environment
 		functions.add(new Tuple<>(name, wulfeniteScriptFunction));
 	}
 
-	public Stream<Tuple3<String, IWulfeniteScriptFunction, ArrayList<IWulfeniteScript>>> getFunctions(String name, IWulfeniteScript... args)
+	public Stream<Tuple3<String, IWulfeniteScriptFunction, ArrayList<IWulfeniteFormula>>> getFunctions(String name, IWulfeniteFormula... args)
 	{
-		ArrayList<Tuple3<Tuple<String, IWulfeniteScriptFunction>, Integer, ArrayList<IWulfeniteScript>>> functions2 = getFunctions2(functions.stream()
+		ArrayList<Tuple3<Tuple<String, IWulfeniteScriptFunction>, Integer, ArrayList<IWulfeniteFormula>>> functions2 = getFunctions2(functions.stream()
 			// 名前が異なるものは除外
 			.filter(f -> f.getX().equals(name)), args);
 
@@ -56,9 +56,9 @@ public class Environment
 			.map(t -> new Tuple3<>(t.getX().getX(), t.getX().getY(), t.getZ()));
 	}
 
-	public Stream<Tuple3<String, IWulfeniteScriptFunction, Boolean>> getFunctionsToProposal(String name, IWulfeniteScript... args)
+	public Stream<Tuple3<String, IWulfeniteScriptFunction, Boolean>> getFunctionsToProposal(String name, IWulfeniteFormula... args)
 	{
-		ArrayList<Tuple3<Tuple<String, IWulfeniteScriptFunction>, Integer, ArrayList<IWulfeniteScript>>> functions2 = getFunctions2(functions.stream(), args);
+		ArrayList<Tuple3<Tuple<String, IWulfeniteScriptFunction>, Integer, ArrayList<IWulfeniteFormula>>> functions2 = getFunctions2(functions.stream(), args);
 		return Stream.concat(
 			functions2.stream()
 				.sorted((a, b) -> a.getX().getX().compareTo(b.getX().getX()))
@@ -73,9 +73,9 @@ public class Environment
 	/**
 	 * 登録済み関数を距離順に並び替え
 	 */
-	private ArrayList<Tuple3<Tuple<String, IWulfeniteScriptFunction>, Integer, ArrayList<IWulfeniteScript>>> getFunctions2(
+	private ArrayList<Tuple3<Tuple<String, IWulfeniteScriptFunction>, Integer, ArrayList<IWulfeniteFormula>>> getFunctions2(
 		Stream<Tuple<String, IWulfeniteScriptFunction>> functions,
-		IWulfeniteScript... args)
+		IWulfeniteFormula... args)
 	{
 		return functions
 
@@ -86,9 +86,9 @@ public class Environment
 			.map(f -> {
 				ArrayList<Type<?>> argumentsType = f.getY().getArgumentsType();
 				int distance = 0;
-				ArrayList<IWulfeniteScript> argumentsNew = new ArrayList<>();
+				ArrayList<IWulfeniteFormula> argumentsNew = new ArrayList<>();
 				for (int i = 0; i < argumentsType.size(); i++) {
-					Tuple<Integer, IWulfeniteScript> casted = TypeHelper.cast(args[i], argumentsType.get(i));
+					Tuple<Integer, IWulfeniteFormula> casted = TypeHelper.cast(args[i], argumentsType.get(i));
 					if (casted == null) return null;
 					distance += casted.getX();
 					argumentsNew.add(casted.getY());
@@ -107,14 +107,14 @@ public class Environment
 
 	//
 
-	private ArrayList<Tuple<String, IWulfeniteScript>> errors = new ArrayList<>();
+	private ArrayList<Tuple<String, IWulfeniteFormula>> errors = new ArrayList<>();
 
-	public void reportError(String message, IWulfeniteScript wulfeniteScript)
+	public void reportError(String message, IWulfeniteFormula formula)
 	{
-		errors.add(new Tuple<String, IWulfeniteScript>(message, wulfeniteScript));
+		errors.add(new Tuple<String, IWulfeniteFormula>(message, formula));
 	}
 
-	public Stream<Tuple<String, IWulfeniteScript>> getErrors()
+	public Stream<Tuple<String, IWulfeniteFormula>> getErrors()
 	{
 		return errors.stream();
 	}
