@@ -1,8 +1,11 @@
 package mirrg.application.math.wulfenite.script;
 
+import java.awt.Color;
+
+import mirrg.helium.compile.oxygen.editor.IProviderColor;
 import mirrg.helium.compile.oxygen.parser.core.Node;
 
-public abstract class ScriptNodeBase implements IWulfeniteScript
+public abstract class ScriptNodeBase implements IWulfeniteScript, IProviderColor
 {
 
 	public final int begin;
@@ -30,6 +33,27 @@ public abstract class ScriptNodeBase implements IWulfeniteScript
 	public int getEnd()
 	{
 		return end;
+	}
+
+	public boolean isValid;
+
+	@Override
+	public boolean validate(Environment environment)
+	{
+		isValid = validateImpl(environment);
+		return isValid;
+	}
+
+	protected abstract boolean validateImpl(Environment environment);
+
+	@Override
+	public Color getColor()
+	{
+		if (isValid) {
+			return Type.getTokenColor(getType());
+		} else {
+			return Color.red;
+		}
 	}
 
 }

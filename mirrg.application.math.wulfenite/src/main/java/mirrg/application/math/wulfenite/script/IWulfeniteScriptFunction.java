@@ -8,8 +8,6 @@ public interface IWulfeniteScriptFunction
 
 	public Class<?> getType();
 
-	public String getName();
-
 	public ArrayList<Class<?>> getArgumentsType();
 
 	public Function<Object[], Object> createValueProvider();

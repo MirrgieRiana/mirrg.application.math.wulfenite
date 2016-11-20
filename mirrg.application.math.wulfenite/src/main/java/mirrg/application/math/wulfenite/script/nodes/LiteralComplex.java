@@ -19,7 +19,7 @@ public class LiteralComplex extends ScriptNodeBase
 	private StructureComplex slot;
 
 	@Override
-	public boolean validate(Environment environment)
+	protected boolean validateImpl(Environment environment)
 	{
 		slot = new StructureComplex(0, Double.parseDouble(string));
 		return true;

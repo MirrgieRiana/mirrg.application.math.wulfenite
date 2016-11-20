@@ -1,4 +1,4 @@
-package mirrg.application.math.wulfenite.core;
+package mirrg.application.math.wulfenite.core.types;
 
 public class SlotDouble
 {

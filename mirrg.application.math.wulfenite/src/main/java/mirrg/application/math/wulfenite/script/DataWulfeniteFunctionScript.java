@@ -1,7 +1,6 @@
 package mirrg.application.math.wulfenite.script;
 
 import java.awt.Color;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import mirrg.application.math.wulfenite.core.DataWulfeniteFunctionBase;
@@ -9,6 +8,7 @@ import mirrg.application.math.wulfenite.core.Wulfenite;
 import mirrg.helium.compile.oxygen.editor.EventTextPaneOxygen;
 import mirrg.helium.compile.oxygen.parser.core.ResultOxygen;
 import mirrg.helium.math.hydrogen.complex.StructureComplex;
+import mirrg.helium.standard.hydrogen.struct.Struct1;
 import mirrg.helium.swing.phosphorus.canvas.game.existence.Entity;
 
 public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
@@ -30,74 +30,116 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 			super(game);
 		}
 
-		private Optional<IWulfeniteScript> consumer;
-
-		private Environment environment;
-		private StructureComplex input;
-
-		private void onChangeSource()
+		private class ResultValidate
 		{
-			ResultOxygen<IWulfeniteScript> result = WulfeniteScript.getSyntax().matches(source);
+
+			@SuppressWarnings("unused")
+			private ResultOxygen<IWulfeniteScript> result;
+
+			private Environment environment;
+			private StructureComplex input;
+			private boolean isValid;
+
+			private IWulfeniteScript consumer;
+
+		}
+
+		private ResultValidate validate(ResultOxygen<IWulfeniteScript> result)
+		{
+			ResultValidate resultValidate = new ResultValidate();
+			resultValidate.result = result;
+
 			if (result.isValid) {
 
 				// VM初期化
 				{
-					environment = new Environment();
+					resultValidate.environment = new Environment();
 
-					Variable variable = environment.addVariable("_", StructureComplex.class);
-					input = new StructureComplex();
-					variable.value = input;
+					Variable<StructureComplex> variable = resultValidate.environment.addVariable("_", StructureComplex.class);
+					resultValidate.input = new StructureComplex();
+					variable.value = resultValidate.input;
 
-					Loader.loadFunction(environment);
+					Loader.loadEnvironment(resultValidate.environment);
 
 				}
 
 				// 意味解析
-				if (result.node.value.validate(environment)) {
-					game.fireChangeFunction(() -> {
-						consumer = Optional.of(result.node.value);
-					});
-				} else {
-					consumer = Optional.empty();
-					dialog.textPaneOut.setText(environment.getErrors()
-						.map(t -> "[" + DialogWulfeniteScript.toPosition(source, t.getY().getBegin()) + "] " + t.getX())
-						.collect(Collectors.joining("\n")));
-					dialog.textPaneOut.setBackground(Color.decode("#ffddbb"));
+				resultValidate.isValid = result.node.value.validate(resultValidate.environment);
+				if (resultValidate.isValid) {
+					resultValidate.consumer = result.node.value;
 				}
 
-			} else {
-				environment = null;
-				consumer = Optional.empty();
 			}
+
+			return resultValidate;
+		}
+
+		private ResultValidate resultValidate;
+		private StructureComplex input;
+		private IWulfeniteScript wulfeniteScript;
+
+		public void setSCompiler(ResultValidate resultValidate)
+		{
+			game.fireChangeFunction(() -> {
+				this.resultValidate = resultValidate;
+				if (resultValidate.isValid) {
+					input = resultValidate.input;
+					wulfeniteScript = resultValidate.consumer;
+				} else {
+					input = null;
+					wulfeniteScript = null;
+				}
+			});
 		}
 
 		@Override
 		public Object getValue(StructureComplex coordinate)
 		{
-			if (consumer == null) onChangeSource();
-			if (consumer.isPresent()) {
+			if (resultValidate == null) {
+				setSCompiler(validate(WulfeniteScript.getSyntax().matches(source)));
+			}
+			if (wulfeniteScript != null) {
 				input.set(coordinate);
-				return consumer.get().getValue();
+				return wulfeniteScript.getValue();
 			}
 			return null;
 		}
 
 		private DialogWulfeniteScript dialog;
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public void toggleDialog()
 		{
 			if (dialog == null) {
+				Struct1<ResultValidate> sResultValidate = new Struct1<>();
+
 				dialog = new DialogWulfeniteScript(game.frame, source);
+
+				dialog.textPaneOxygen.addProposalString("a()");
+
 				dialog.textPaneOxygen.event().register(EventTextPaneOxygen.ChangeSource.class, e -> {
 					source = dialog.textPaneOxygen.getText();
 				});
 				dialog.textPaneOxygen.event().register(EventTextPaneOxygen.Syntax.Success.class, e -> {
-					onChangeSource();
+					ResultValidate resultValidate = validate((ResultOxygen<IWulfeniteScript>) e.result);
+
+					if (e.timing == EventTextPaneOxygen.Syntax.TIMING_MAIN) {
+						sResultValidate.x = resultValidate;
+
+						if (!resultValidate.isValid) {
+							dialog.textPaneOut.setText(resultValidate.environment.getErrors()
+								.map(t -> "[" + DialogWulfeniteScript.toPosition(source, t.getY().getBegin()) + "] " + t.getX())
+								.collect(Collectors.joining("\n")));
+							dialog.textPaneOut.setBackground(Color.decode("#ffddbb"));
+						}
+						setSCompiler(resultValidate);
+
+					}
 				});
 				dialog.textPaneOxygen.event().register(EventTextPaneOxygen.Highlight.Post.class, e -> {
-					if (environment != null) {
-						environment.getErrors()
+					if (!sResultValidate.x.isValid) {
+						sResultValidate.x.environment.getErrors()
 							.forEach(t -> {
 								dialog.textPaneOxygen.setUnderline(
 									t.getY().getBegin(),
@@ -107,6 +149,8 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 				});
 			}
 			dialog.setVisible(!dialog.isVisible());
+
+			if (dialog.isVisible()) dialog.textPaneOxygen.update();
 		}
 
 		@Override

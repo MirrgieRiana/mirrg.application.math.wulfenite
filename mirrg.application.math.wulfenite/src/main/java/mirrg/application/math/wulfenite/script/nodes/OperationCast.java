@@ -18,7 +18,7 @@ public abstract class OperationCast extends ScriptNodeBase
 	}
 
 	@Override
-	public boolean validate(Environment environment)
+	protected boolean validateImpl(Environment environment)
 	{
 		if (!from.validate(environment)) return false;
 		return true;

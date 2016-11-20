@@ -1,13 +1,19 @@
 package mirrg.application.math.wulfenite.script.nodes;
 
 import java.util.Optional;
+import java.util.stream.Stream;
+
+import javax.swing.JLabel;
 
 import mirrg.application.math.wulfenite.script.Environment;
 import mirrg.application.math.wulfenite.script.ScriptNodeBase;
+import mirrg.application.math.wulfenite.script.Type;
 import mirrg.application.math.wulfenite.script.Variable;
+import mirrg.helium.compile.oxygen.editor.IProviderProposal;
+import mirrg.helium.compile.oxygen.editor.Proposal;
 import mirrg.helium.compile.oxygen.parser.core.Node;
 
-public class OperationVariable extends ScriptNodeBase
+public class OperationVariable extends ScriptNodeBase implements IProviderProposal
 {
 
 	private String name;
@@ -18,15 +24,26 @@ public class OperationVariable extends ScriptNodeBase
 		this.name = name;
 	}
 
-	private Variable variable;
+	private Variable<?> variable;
 
 	@Override
-	public boolean validate(Environment environment)
+	protected boolean validateImpl(Environment environment)
 	{
 		boolean flag = true;
 
 		{
-			Optional<Variable> oVariable = environment.getVariable(name);
+			Optional<Variable<?>> oVariable = environment.getVariable(name);
+
+			providerProposal = () -> environment.getVariables()
+				.sorted((a, b) -> a.getX().compareTo(b.getX()))
+				.map(t -> new Proposal(t.getX()) {
+					@Override
+					public void decorateListCellRendererComponent(JLabel label)
+					{
+						label.setText(t.getX() + " : " + t.getY().type.getSimpleName());
+						label.setForeground(Type.getTokenColor(t.getY().type));
+					}
+				});
 
 			if (oVariable.isPresent()) {
 				variable = oVariable.get();
@@ -50,6 +67,18 @@ public class OperationVariable extends ScriptNodeBase
 	public Object getValue()
 	{
 		return variable.value;
+	}
+
+	//
+
+	public IProviderProposal providerProposal;
+	private Stream<Proposal> cache;
+
+	@Override
+	public Stream<Proposal> getProposals()
+	{
+		if (cache == null) cache = providerProposal.getProposals();
+		return cache;
 	}
 
 }

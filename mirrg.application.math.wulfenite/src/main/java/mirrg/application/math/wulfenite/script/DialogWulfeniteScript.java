@@ -32,10 +32,12 @@ public class DialogWulfeniteScript extends JDialog
 				textPaneOxygen = new TextPaneOxygenWulfeniteScript(WulfeniteScript.getSyntax());
 				textPaneOxygen.setText(source);
 				textPaneOxygen.setPreferredSize(new Dimension(500, 100));
-				textPaneOxygen.event().register(EventTextPaneOxygen.Syntax.Success.Main.class, e -> {
-					if (textPaneOut == null) return;
-					textPaneOut.setText("Compiled Successfully");
-					textPaneOut.setBackground(Color.decode("#bbffbb"));
+				textPaneOxygen.event().register(EventTextPaneOxygen.Syntax.Success.class, e -> {
+					if (e.timing == EventTextPaneOxygen.Syntax.TIMING_MAIN) {
+						if (textPaneOut == null) return;
+						textPaneOut.setText("Compiled Successfully");
+						textPaneOut.setBackground(Color.decode("#bbffbb"));
+					}
 				});
 				textPaneOxygen.event().register(EventTextPaneOxygen.Syntax.Failure.class, e -> {
 					if (textPaneOut == null) return;
@@ -64,8 +66,6 @@ public class DialogWulfeniteScript extends JDialog
 				textPaneOut.setFont(new Font(Font.MONOSPACED, textPaneOut.getFont().getStyle(), textPaneOut.getFont().getSize()));
 				return textPaneOut;
 			}))));
-
-		textPaneOxygen.update();
 
 		pack();
 		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);

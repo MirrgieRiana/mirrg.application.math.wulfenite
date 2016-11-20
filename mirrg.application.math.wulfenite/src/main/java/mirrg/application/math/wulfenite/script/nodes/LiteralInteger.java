@@ -1,6 +1,6 @@
 package mirrg.application.math.wulfenite.script.nodes;
 
-import mirrg.application.math.wulfenite.core.SlotInteger;
+import mirrg.application.math.wulfenite.core.types.SlotInteger;
 import mirrg.application.math.wulfenite.script.Environment;
 import mirrg.application.math.wulfenite.script.ScriptNodeBase;
 import mirrg.helium.compile.oxygen.parser.core.Node;
@@ -19,7 +19,7 @@ public class LiteralInteger extends ScriptNodeBase
 	private SlotInteger slot;
 
 	@Override
-	public boolean validate(Environment environment)
+	protected boolean validateImpl(Environment environment)
 	{
 		try {
 			slot = new SlotInteger(Integer.parseInt(string, 10));

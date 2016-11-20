@@ -6,58 +6,88 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import mirrg.application.math.wulfenite.core.SlotDouble;
-import mirrg.application.math.wulfenite.core.SlotInteger;
-import mirrg.application.math.wulfenite.script.nodes.OperationCast;
-import mirrg.helium.math.hydrogen.complex.StructureComplex;
 import mirrg.helium.standard.hydrogen.struct.Tuple;
 import mirrg.helium.standard.hydrogen.struct.Tuple3;
 
 public class Environment
 {
 
-	private Hashtable<String, Variable> variables = new Hashtable<>();
+	private Hashtable<String, Variable<?>> variables = new Hashtable<>();
 
-	public Variable addVariable(String name, Class<?> type)
+	public <T> Variable<T> addVariable(String name, Class<T> type)
 	{
-		Variable variable = new Variable(type);
+		Variable<T> variable = new Variable<>(type);
 		variables.put(name, variable);
 		return variable;
 	}
 
-	public Optional<Variable> getVariable(String name)
+	public Optional<Variable<?>> getVariable(String name)
 	{
 		return Optional.ofNullable(variables.get(name));
 	}
 
-	//
-
-	private ArrayList<IWulfeniteScriptFunction> functions = new ArrayList<>();
-
-	public void addFunction(IWulfeniteScriptFunction wulfeniteScriptFunction)
+	public Stream<Tuple<String, Variable<?>>> getVariables()
 	{
-		functions.add(wulfeniteScriptFunction);
+		return variables.entrySet().stream()
+			.map(s -> new Tuple<>(s.getKey(), s.getValue()));
 	}
 
-	public ArrayList<Tuple<IWulfeniteScriptFunction, ArrayList<IWulfeniteScript>>> getFunction(String name, IWulfeniteScript... args)
+	//
+
+	private ArrayList<Tuple<String, IWulfeniteScriptFunction>> functions = new ArrayList<>();
+
+	public void addFunction(String name, IWulfeniteScriptFunction wulfeniteScriptFunction)
 	{
+		functions.add(new Tuple<>(name, wulfeniteScriptFunction));
+	}
 
-		// 登録済み関数を距離順に並び替え
-		ArrayList<Tuple3<IWulfeniteScriptFunction, Integer, ArrayList<IWulfeniteScript>>> functions2 = functions.stream()
-
+	public Stream<Tuple3<String, IWulfeniteScriptFunction, ArrayList<IWulfeniteScript>>> getFunctions(String name, IWulfeniteScript... args)
+	{
+		ArrayList<Tuple3<Tuple<String, IWulfeniteScriptFunction>, Integer, ArrayList<IWulfeniteScript>>> functions2 = getFunctions2(functions.stream()
 			// 名前が異なるものは除外
-			.filter(f -> f.getName().equals(name))
+			.filter(f -> f.getX().equals(name)), args);
+
+		if (functions2.size() == 0) return Stream.empty();
+
+		// 最短距離の関数だけを抽出
+		return functions2.stream()
+			.filter(t -> t.getY() == functions2.get(0).getY())
+			.map(t -> new Tuple3<>(t.getX().getX(), t.getX().getY(), t.getZ()));
+	}
+
+	public Stream<Tuple3<String, IWulfeniteScriptFunction, Boolean>> getFunctionsToProposal(String name, IWulfeniteScript... args)
+	{
+		ArrayList<Tuple3<Tuple<String, IWulfeniteScriptFunction>, Integer, ArrayList<IWulfeniteScript>>> functions2 = getFunctions2(functions.stream(), args);
+		return Stream.concat(
+			functions2.stream()
+				.sorted((a, b) -> a.getX().getX().compareTo(b.getX().getX()))
+				.map(t -> new Tuple3<>(t.getX().getX(), t.getX().getY(), true)),
+			functions.stream()
+				.filter(f -> functions2.stream()
+					.allMatch(t -> f != t.getX()))
+				.sorted((a, b) -> a.getX().compareTo(b.getX()))
+				.map(t -> new Tuple3<>(t.getX(), t.getY(), false)));
+	}
+
+	/**
+	 * 登録済み関数を距離順に並び替え
+	 */
+	private ArrayList<Tuple3<Tuple<String, IWulfeniteScriptFunction>, Integer, ArrayList<IWulfeniteScript>>> getFunctions2(
+		Stream<Tuple<String, IWulfeniteScriptFunction>> functions,
+		IWulfeniteScript... args)
+	{
+		return functions
 
 			// 引数の数が異なるものは除外
-			.filter(f -> f.getArgumentsType().size() == args.length)
+			.filter(f -> f.getY().getArgumentsType().size() == args.length)
 
 			// 各引数のキャスト時の距離と関数を取得
 			.map(f -> {
-				ArrayList<Class<?>> argumentsType = f.getArgumentsType();
+				ArrayList<Class<?>> argumentsType = f.getY().getArgumentsType();
 				int distance = 0;
 				ArrayList<IWulfeniteScript> argumentsNew = new ArrayList<>();
 				for (int i = 0; i < argumentsType.size(); i++) {
-					Tuple<Integer, IWulfeniteScript> casted = cast(args[i], argumentsType.get(i));
+					Tuple<Integer, IWulfeniteScript> casted = Type.cast(args[i], argumentsType.get(i));
 					if (casted == null) return null;
 					distance += casted.getX();
 					argumentsNew.add(casted.getY());
@@ -68,72 +98,10 @@ public class Environment
 			// キャストできなかったものを除く
 			.filter(t -> t != null)
 
-			// 最も距離の短いもの
+			// 距離が短い順にソート
 			.sorted((a, b) -> a.getY() - b.getY())
 
 			.collect(Collectors.toCollection(ArrayList::new));
-
-		if (functions2.size() == 0) return new ArrayList<>();
-
-		// 最短距離の関数だけを抽出
-		return functions2.stream()
-			.filter(t -> t.getY() == functions2.get(0).getY())
-			.map(t -> new Tuple<>(t.getX(), t.getZ()))
-			.collect(Collectors.toCollection(ArrayList::new));
-	}
-
-	public static Tuple<Integer, IWulfeniteScript> cast(IWulfeniteScript from, Class<?> to)
-	{
-		if (from.getType() == SlotInteger.class) {
-			if (to == SlotDouble.class) {
-				return new Tuple<>(1, new OperationCast(from, to) {
-
-					private SlotDouble slot = new SlotDouble();
-
-					@Override
-					public Object getValue()
-					{
-						slot.value = ((SlotInteger) from.getValue()).value;
-						return slot;
-					}
-
-				});
-			}
-			if (to == StructureComplex.class) {
-				return new Tuple<>(2, new OperationCast(from, to) {
-
-					private StructureComplex slot = new StructureComplex();
-
-					@Override
-					public Object getValue()
-					{
-						slot.re = ((SlotInteger) from.getValue()).value;
-						return slot;
-					}
-
-				});
-			}
-		}
-		if (from.getType() == SlotDouble.class) {
-			if (to == StructureComplex.class) {
-				return new Tuple<>(1, new OperationCast(from, to) {
-
-					private StructureComplex slot = new StructureComplex();
-
-					@Override
-					public Object getValue()
-					{
-						slot.re = ((SlotDouble) from.getValue()).value;
-						return slot;
-					}
-
-				});
-			}
-		}
-		if (from.getType() == to) {
-			return new Tuple<>(0, from);
-		}
-		return null;
 	}
 
 	//

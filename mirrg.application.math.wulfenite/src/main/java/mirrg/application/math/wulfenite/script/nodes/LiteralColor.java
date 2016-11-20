@@ -1,6 +1,6 @@
 package mirrg.application.math.wulfenite.script.nodes;
 
-import mirrg.application.math.wulfenite.core.SlotColor;
+import mirrg.application.math.wulfenite.core.types.SlotColor;
 import mirrg.application.math.wulfenite.script.Environment;
 import mirrg.application.math.wulfenite.script.ScriptNodeBase;
 import mirrg.helium.compile.oxygen.parser.core.Node;
@@ -19,7 +19,7 @@ public class LiteralColor extends ScriptNodeBase
 	private SlotColor slot;
 
 	@Override
-	public boolean validate(Environment environment)
+	protected boolean validateImpl(Environment environment)
 	{
 
 		if (string.length() == 3) {

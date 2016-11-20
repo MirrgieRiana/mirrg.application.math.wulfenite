@@ -6,13 +6,11 @@ import java.util.Arrays;
 public abstract class WulfeniteScriptFunction implements IWulfeniteScriptFunction
 {
 
-	public String name;
 	public Class<?> type;
 	public ArrayList<Class<?>> args;
 
-	public WulfeniteScriptFunction(String name, Class<?> type, Class<?>... args)
+	public WulfeniteScriptFunction(Class<?> type, Class<?>... args)
 	{
-		this.name = name;
 		this.type = type;
 		this.args = new ArrayList<>(Arrays.asList(args));
 	}
@@ -21,12 +19,6 @@ public abstract class WulfeniteScriptFunction implements IWulfeniteScriptFunctio
 	public Class<?> getType()
 	{
 		return type;
-	}
-
-	@Override
-	public String getName()
-	{
-		return name;
 	}
 
 	@Override

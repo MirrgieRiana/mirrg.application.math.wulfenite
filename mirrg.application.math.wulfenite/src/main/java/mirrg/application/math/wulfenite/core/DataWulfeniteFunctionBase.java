@@ -1,7 +1,10 @@
 package mirrg.application.math.wulfenite.core;
 
-import java.awt.Color;
-
+import mirrg.application.math.wulfenite.core.types.SlotBoolean;
+import mirrg.application.math.wulfenite.core.types.SlotColor;
+import mirrg.application.math.wulfenite.core.types.SlotDouble;
+import mirrg.application.math.wulfenite.core.types.SlotInteger;
+import mirrg.application.math.wulfenite.core.types.SlotString;
 import mirrg.helium.math.hydrogen.complex.StructureComplex;
 import mirrg.helium.swing.nitrogen.util.HColor;
 import mirrg.helium.swing.phosphorus.canvas.game.existence.DataEntity;
@@ -26,17 +29,15 @@ public abstract class DataWulfeniteFunctionBase extends DataEntity<Wulfenite>
 			if (value instanceof StructureComplex) {
 				return getColorIntFromComplex((StructureComplex) value);
 			} else if (value instanceof SlotColor) {
-				return ((SlotColor) value).rgb;
+				return ((SlotColor) value).value;
 			} else if (value instanceof SlotInteger) {
 				return HColor.createColor(128 - 128 * Math.cos(((SlotInteger) value).value * 3.1415 / 90), 0, 0).getRGB();
 			} else if (value instanceof SlotDouble) {
 				return HColor.createColor(128 - 128 * Math.cos(((SlotDouble) value).value * 3.1415 / 90), 0, 0).getRGB();
-			} else if (value instanceof Color) {
-				return ((Color) value).getRGB();
-			} else if (value instanceof Integer) {
-				return HColor.createColor(128 - 128 * Math.cos(((Integer) value) * 3.1415 / 90), 0, 0).getRGB();
-			} else if (value instanceof Double) {
-				return HColor.createColor(128 - 128 * Math.cos(((Double) value) * 3.1415 / 90), 0, 0).getRGB();
+			} else if (value instanceof SlotBoolean) {
+				return ((SlotBoolean) value).value ? 0xffffff : 0x404040;
+			} else if (value instanceof SlotString) {
+				return ((SlotString) value).value.hashCode();
 			} else if (value == null) {
 				return 0x000000;
 			} else {
