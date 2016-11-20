@@ -1,5 +1,6 @@
 package mirrg.application.math.wulfenite.core;
 
+import mirrg.application.math.wulfenite.core.types.SlotInteger;
 import mirrg.helium.math.hydrogen.complex.StructureComplex;
 import mirrg.helium.swing.phosphorus.canvas.game.existence.Entity;
 
@@ -20,6 +21,8 @@ public class DataWulfeniteFunctionMandelbrot extends DataWulfeniteFunctionBase
 			super(wulfenite);
 		}
 
+		private SlotInteger slot = new SlotInteger();
+
 		@Override
 		public Object getValue(StructureComplex coordinate)
 		{
@@ -38,7 +41,8 @@ public class DataWulfeniteFunctionMandelbrot extends DataWulfeniteFunctionBase
 				t++;
 			}
 
-			return t;
+			slot.value = t;
+			return slot;
 		}
 
 	}

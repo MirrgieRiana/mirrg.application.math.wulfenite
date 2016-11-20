@@ -227,6 +227,33 @@ public class Loader
 
 		}
 
+		// その他
+		{
+
+			a("mand", new WSF1<>(I, C, (z, a) -> z.value = mand(0, 0, a.re, a.im, 360 * 4)));
+			a("mand", new WSF3<>(I, C, C, I, (z, a, b, lim) -> z.value = mand(a.re, a.im, b.re, b.im, lim.value)));
+
+		}
+
+	}
+
+	private int mand(double a, double b, double c, double d, int lim)
+	{
+		int t = 0;
+		double x2 = a;
+		double y2 = b;
+		while (t < lim) {
+			x2 += c;
+			y2 += d;
+			double e = x2 * x2;
+			double f = y2 * y2;
+			if (e + f > 4) break;
+			double tmp = e - f;
+			y2 = 2 * x2 * y2;
+			x2 = tmp;
+			t++;
+		}
+		return t;
 	}
 
 	private String name;
