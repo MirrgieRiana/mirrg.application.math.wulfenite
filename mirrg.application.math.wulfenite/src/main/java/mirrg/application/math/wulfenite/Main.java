@@ -20,9 +20,11 @@ public class Main
 		FrameCanvas frame = new FrameCanvas(600, 600);
 
 		frame.setTitle("Wulfenite");
-		{
+		try {
 			ImageIcon imageIcon = new ImageIcon(Main.class.getResource("icon.png"));
 			frame.setIconImage(imageIcon.getImage());
+		} catch (RuntimeException e) {
+			e.printStackTrace();
 		}
 
 		JMenuBar menuBar = new JMenuBar();
