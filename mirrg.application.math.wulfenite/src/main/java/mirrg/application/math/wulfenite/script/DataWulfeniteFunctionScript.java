@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import mirrg.application.math.wulfenite.core.DataWulfeniteFunctionBase;
 import mirrg.application.math.wulfenite.core.Wulfenite;
 import mirrg.application.math.wulfenite.core.types.Type;
+import mirrg.application.math.wulfenite.script.node.IWSFormula;
 import mirrg.helium.compile.oxygen.editor.EventTextPaneOxygen;
 import mirrg.helium.compile.oxygen.parser.core.ResultOxygen;
 import mirrg.helium.math.hydrogen.complex.StructureComplex;
@@ -35,17 +36,17 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 		{
 
 			@SuppressWarnings("unused")
-			private ResultOxygen<IWulfeniteFormula> result;
+			private ResultOxygen<IWSFormula> result;
 
 			private Environment environment;
 			private StructureComplex input;
 			private boolean isValid;
 
-			private IWulfeniteFormula formula;
+			private IWSFormula formula;
 
 		}
 
-		private ResultValidate validate(ResultOxygen<IWulfeniteFormula> result)
+		private ResultValidate validate(ResultOxygen<IWSFormula> result)
 		{
 			ResultValidate resultValidate = new ResultValidate();
 			resultValidate.result = result;
@@ -77,7 +78,7 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 
 		private ResultValidate resultValidate;
 		private StructureComplex input;
-		private IWulfeniteFormula formula;
+		private IWSFormula formula;
 
 		public void setSCompiler(ResultValidate resultValidate)
 		{
@@ -123,7 +124,7 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 					source = dialog.textPaneOxygen.getText();
 				});
 				dialog.textPaneOxygen.event().register(EventTextPaneOxygen.Syntax.Success.class, e -> {
-					ResultValidate resultValidate = validate((ResultOxygen<IWulfeniteFormula>) e.result);
+					ResultValidate resultValidate = validate((ResultOxygen<IWSFormula>) e.result);
 
 					if (e.timing == EventTextPaneOxygen.Syntax.TIMING_MAIN) {
 						sResultValidate.x = resultValidate;

@@ -12,23 +12,23 @@ import javax.swing.JLabel;
 
 import mirrg.application.math.wulfenite.core.types.Type;
 import mirrg.application.math.wulfenite.script.Environment;
-import mirrg.application.math.wulfenite.script.IWulfeniteFormula;
-import mirrg.application.math.wulfenite.script.IWulfeniteScriptFunction;
-import mirrg.application.math.wulfenite.script.ScriptNodeBase;
 import mirrg.application.math.wulfenite.script.TypeHelper;
+import mirrg.application.math.wulfenite.script.function.IWSFunction;
+import mirrg.application.math.wulfenite.script.node.IWSFormula;
+import mirrg.application.math.wulfenite.script.node.WSFormulaBase;
 import mirrg.helium.compile.oxygen.editor.IProviderChildren;
 import mirrg.helium.compile.oxygen.editor.Proposal;
 import mirrg.helium.compile.oxygen.parser.core.Node;
 import mirrg.helium.standard.hydrogen.struct.Tuple3;
 
-public class OperationFunction extends ScriptNodeBase implements IProviderChildren
+public class OperationFunction extends WSFormulaBase implements IProviderChildren
 {
 
 	private String name;
 	private Optional<TokenIdentifier> oTokenIdentifier;
-	private IWulfeniteFormula[] args;
+	private IWSFormula[] args;
 
-	public OperationFunction(int begin, int end, String name, IWulfeniteFormula... args)
+	public OperationFunction(int begin, int end, String name, IWSFormula... args)
 	{
 		super(begin, end);
 		this.name = name;
@@ -37,7 +37,7 @@ public class OperationFunction extends ScriptNodeBase implements IProviderChildr
 		args2 = new Object[args.length];
 	}
 
-	public OperationFunction(int begin, int end, TokenIdentifier tokenIdentifier, IWulfeniteFormula... args)
+	public OperationFunction(int begin, int end, TokenIdentifier tokenIdentifier, IWSFormula... args)
 	{
 		super(begin, end);
 		this.name = tokenIdentifier.string;
@@ -46,8 +46,8 @@ public class OperationFunction extends ScriptNodeBase implements IProviderChildr
 		args2 = new Object[args.length];
 	}
 
-	private IWulfeniteScriptFunction function;
-	private IWulfeniteFormula[] args3;
+	private IWSFunction function;
+	private IWSFormula[] args3;
 	private Function<Object[], Object> function2;
 
 	@Override
@@ -57,8 +57,8 @@ public class OperationFunction extends ScriptNodeBase implements IProviderChildr
 
 		// validate args
 		{
-			for (IWulfeniteFormula wulfeniteScript : args) {
-				if (!wulfeniteScript.validate(environment)) flag = false;
+			for (IWSFormula arg : args) {
+				if (!arg.validate(environment)) flag = false;
 			}
 		}
 		if (!flag) return false;
@@ -84,22 +84,22 @@ public class OperationFunction extends ScriptNodeBase implements IProviderChildr
 					});
 			}
 
-			ArrayList<Tuple3<String, IWulfeniteScriptFunction, ArrayList<IWulfeniteFormula>>> functions = environment.getFunctions(name, args)
+			ArrayList<Tuple3<String, IWSFunction, ArrayList<IWSFormula>>> functions = environment.getFunctions(name, args)
 				.collect(Collectors.toCollection(ArrayList::new));
 
 			if (functions.size() == 1) {
 				function = functions.get(0).getY();
-				args3 = functions.get(0).getZ().toArray(new IWulfeniteFormula[0]);
+				args3 = functions.get(0).getZ().toArray(new IWSFormula[0]);
 				function2 = function.createValueProvider();
 			} else if (functions.size() == 0) {
 				environment.reportError("No such function: " + name + "(" + Stream.of(args)
-					.map(IWulfeniteFormula::getType)
+					.map(IWSFormula::getType)
 					.map(Type::getName)
 					.collect(Collectors.joining(", ")) + ")", this);
 				flag = false;
 			} else {
 				environment.reportError("Ambiguous function call: " + name + "(" + Stream.of(args)
-					.map(IWulfeniteFormula::getType)
+					.map(IWSFormula::getType)
 					.map(Type::getName)
 					.collect(Collectors.joining(", ")) + ")", this);
 				flag = true;
@@ -134,11 +134,11 @@ public class OperationFunction extends ScriptNodeBase implements IProviderChildr
 			return Stream.concat(
 				Stream.of(oTokenIdentifier.get().node),
 				Stream.of(args)
-					.map(a -> new Node<Object>(null, null, a.getBegin(), a.getEnd(), a)))
+					.map(IWSFormula::createNode))
 				.collect(Collectors.toCollection(ArrayList::new));
 		} else {
 			return Stream.of(args)
-				.map(a -> new Node<Object>(null, null, a.getBegin(), a.getEnd(), a))
+				.map(IWSFormula::createNode)
 				.collect(Collectors.toCollection(ArrayList::new));
 		}
 	}

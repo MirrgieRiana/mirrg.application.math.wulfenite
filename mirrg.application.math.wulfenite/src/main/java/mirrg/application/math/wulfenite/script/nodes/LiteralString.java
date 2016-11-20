@@ -3,10 +3,10 @@ package mirrg.application.math.wulfenite.script.nodes;
 import mirrg.application.math.wulfenite.core.types.SlotString;
 import mirrg.application.math.wulfenite.core.types.Type;
 import mirrg.application.math.wulfenite.script.Environment;
-import mirrg.application.math.wulfenite.script.ScriptNodeBase;
+import mirrg.application.math.wulfenite.script.node.WSFormulaBase;
 import mirrg.helium.compile.oxygen.parser.core.Node;
 
-public class LiteralString extends ScriptNodeBase
+public class LiteralString extends WSFormulaBase
 {
 
 	private String string;

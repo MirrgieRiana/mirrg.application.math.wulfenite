@@ -1,17 +1,17 @@
-package mirrg.application.math.wulfenite.script;
+package mirrg.application.math.wulfenite.script.function;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import mirrg.application.math.wulfenite.core.types.Type;
 
-public abstract class WulfeniteScriptFunction<T> implements IWulfeniteScriptFunction
+public abstract class WSFunction<T> implements IWSFunction
 {
 
 	public Type<T> type;
 	public ArrayList<Type<?>> args;
 
-	public WulfeniteScriptFunction(Type<T> type, Type<?>... args)
+	public WSFunction(Type<T> type, Type<?>... args)
 	{
 		this.type = type;
 		this.args = new ArrayList<>(Arrays.asList(args));

@@ -2,11 +2,11 @@ package mirrg.application.math.wulfenite.script.nodes;
 
 import mirrg.application.math.wulfenite.core.types.Type;
 import mirrg.application.math.wulfenite.script.Environment;
-import mirrg.application.math.wulfenite.script.ScriptNodeBase;
+import mirrg.application.math.wulfenite.script.node.WSFormulaBase;
 import mirrg.helium.compile.oxygen.parser.core.Node;
 import mirrg.helium.math.hydrogen.complex.StructureComplex;
 
-public class LiteralComplex extends ScriptNodeBase
+public class LiteralComplex extends WSFormulaBase
 {
 
 	private String string;

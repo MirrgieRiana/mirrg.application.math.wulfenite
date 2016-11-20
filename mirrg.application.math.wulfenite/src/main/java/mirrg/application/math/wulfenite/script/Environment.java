@@ -7,6 +7,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import mirrg.application.math.wulfenite.core.types.Type;
+import mirrg.application.math.wulfenite.script.function.IWSFunction;
+import mirrg.application.math.wulfenite.script.node.IWSFormula;
+import mirrg.application.math.wulfenite.script.node.IWSNode;
 import mirrg.helium.standard.hydrogen.struct.Tuple;
 import mirrg.helium.standard.hydrogen.struct.Tuple3;
 
@@ -35,16 +38,16 @@ public class Environment
 
 	//
 
-	private ArrayList<Tuple<String, IWulfeniteScriptFunction>> functions = new ArrayList<>();
+	private ArrayList<Tuple<String, IWSFunction>> functions = new ArrayList<>();
 
-	public void addFunction(String name, IWulfeniteScriptFunction wulfeniteScriptFunction)
+	public void addFunction(String name, IWSFunction wsFunction)
 	{
-		functions.add(new Tuple<>(name, wulfeniteScriptFunction));
+		functions.add(new Tuple<>(name, wsFunction));
 	}
 
-	public Stream<Tuple3<String, IWulfeniteScriptFunction, ArrayList<IWulfeniteFormula>>> getFunctions(String name, IWulfeniteFormula... args)
+	public Stream<Tuple3<String, IWSFunction, ArrayList<IWSFormula>>> getFunctions(String name, IWSFormula... args)
 	{
-		ArrayList<Tuple3<Tuple<String, IWulfeniteScriptFunction>, Integer, ArrayList<IWulfeniteFormula>>> functions2 = getFunctions2(functions.stream()
+		ArrayList<Tuple3<Tuple<String, IWSFunction>, Integer, ArrayList<IWSFormula>>> functions2 = getFunctions2(functions.stream()
 			// 名前が異なるものは除外
 			.filter(f -> f.getX().equals(name)), args);
 
@@ -56,9 +59,9 @@ public class Environment
 			.map(t -> new Tuple3<>(t.getX().getX(), t.getX().getY(), t.getZ()));
 	}
 
-	public Stream<Tuple3<String, IWulfeniteScriptFunction, Boolean>> getFunctionsToProposal(String name, IWulfeniteFormula... args)
+	public Stream<Tuple3<String, IWSFunction, Boolean>> getFunctionsToProposal(String name, IWSFormula... args)
 	{
-		ArrayList<Tuple3<Tuple<String, IWulfeniteScriptFunction>, Integer, ArrayList<IWulfeniteFormula>>> functions2 = getFunctions2(functions.stream(), args);
+		ArrayList<Tuple3<Tuple<String, IWSFunction>, Integer, ArrayList<IWSFormula>>> functions2 = getFunctions2(functions.stream(), args);
 		return Stream.concat(
 			functions2.stream()
 				.sorted((a, b) -> a.getX().getX().compareTo(b.getX().getX()))
@@ -73,9 +76,9 @@ public class Environment
 	/**
 	 * 登録済み関数を距離順に並び替え
 	 */
-	private ArrayList<Tuple3<Tuple<String, IWulfeniteScriptFunction>, Integer, ArrayList<IWulfeniteFormula>>> getFunctions2(
-		Stream<Tuple<String, IWulfeniteScriptFunction>> functions,
-		IWulfeniteFormula... args)
+	private ArrayList<Tuple3<Tuple<String, IWSFunction>, Integer, ArrayList<IWSFormula>>> getFunctions2(
+		Stream<Tuple<String, IWSFunction>> functions,
+		IWSFormula... args)
 	{
 		return functions
 
@@ -86,9 +89,9 @@ public class Environment
 			.map(f -> {
 				ArrayList<Type<?>> argumentsType = f.getY().getArgumentsType();
 				int distance = 0;
-				ArrayList<IWulfeniteFormula> argumentsNew = new ArrayList<>();
+				ArrayList<IWSFormula> argumentsNew = new ArrayList<>();
 				for (int i = 0; i < argumentsType.size(); i++) {
-					Tuple<Integer, IWulfeniteFormula> casted = TypeHelper.cast(args[i], argumentsType.get(i));
+					Tuple<Integer, IWSFormula> casted = TypeHelper.cast(args[i], argumentsType.get(i));
 					if (casted == null) return null;
 					distance += casted.getX();
 					argumentsNew.add(casted.getY());
@@ -107,14 +110,14 @@ public class Environment
 
 	//
 
-	private ArrayList<Tuple<String, IWulfeniteFormula>> errors = new ArrayList<>();
+	private ArrayList<Tuple<String, IWSNode>> errors = new ArrayList<>();
 
-	public void reportError(String message, IWulfeniteFormula formula)
+	public void reportError(String message, IWSNode formula)
 	{
-		errors.add(new Tuple<String, IWulfeniteFormula>(message, formula));
+		errors.add(new Tuple<String, IWSNode>(message, formula));
 	}
 
-	public Stream<Tuple<String, IWulfeniteFormula>> getErrors()
+	public Stream<Tuple<String, IWSNode>> getErrors()
 	{
 		return errors.stream();
 	}

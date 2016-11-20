@@ -7,14 +7,14 @@ import javax.swing.JLabel;
 
 import mirrg.application.math.wulfenite.core.types.Type;
 import mirrg.application.math.wulfenite.script.Environment;
-import mirrg.application.math.wulfenite.script.ScriptNodeBase;
 import mirrg.application.math.wulfenite.script.TypeHelper;
 import mirrg.application.math.wulfenite.script.Variable;
+import mirrg.application.math.wulfenite.script.node.WSFormulaBase;
 import mirrg.helium.compile.oxygen.editor.IProviderProposal;
 import mirrg.helium.compile.oxygen.editor.Proposal;
 import mirrg.helium.compile.oxygen.parser.core.Node;
 
-public class OperationVariable extends ScriptNodeBase implements IProviderProposal
+public class OperationVariable extends WSFormulaBase implements IProviderProposal
 {
 
 	private String name;

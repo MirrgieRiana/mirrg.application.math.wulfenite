@@ -1,23 +1,25 @@
-package mirrg.application.math.wulfenite.script;
+package mirrg.application.math.wulfenite.script.node;
 
 import java.awt.Color;
 
+import mirrg.application.math.wulfenite.script.Environment;
+import mirrg.application.math.wulfenite.script.TypeHelper;
 import mirrg.helium.compile.oxygen.editor.IProviderColor;
 import mirrg.helium.compile.oxygen.parser.core.Node;
 
-public abstract class ScriptNodeBase implements IWulfeniteFormula, IProviderColor
+public abstract class WSFormulaBase implements IWSFormula, IProviderColor
 {
 
 	public final int begin;
 	public final int end;
 
-	public ScriptNodeBase(Node<?> node)
+	public WSFormulaBase(Node<?> node)
 	{
 		begin = node.begin;
 		end = node.end;
 	}
 
-	public ScriptNodeBase(int begin, int end)
+	public WSFormulaBase(int begin, int end)
 	{
 		this.begin = begin;
 		this.end = end;

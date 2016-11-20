@@ -8,6 +8,7 @@ import java.util.Hashtable;
 import java.util.function.BiConsumer;
 
 import mirrg.application.math.wulfenite.core.types.Type;
+import mirrg.application.math.wulfenite.script.node.IWSFormula;
 import mirrg.application.math.wulfenite.script.nodes.OperationCast;
 import mirrg.helium.standard.hydrogen.struct.Tuple;
 
@@ -43,7 +44,7 @@ public class TypeHelper
 		return Color.black;
 	}
 
-	public static Tuple<Integer, IWulfeniteFormula> cast(IWulfeniteFormula from, Type<?> to)
+	public static Tuple<Integer, IWSFormula> cast(IWSFormula from, Type<?> to)
 	{
 		if (from.getType() == to) return new Tuple<>(0, from);
 		return casters.stream()
@@ -74,12 +75,12 @@ public class TypeHelper
 			this.consumer = consumer;
 		}
 
-		public boolean match(IWulfeniteFormula from, Type<?> to)
+		public boolean match(IWSFormula from, Type<?> to)
 		{
 			return from.getType() == this.from && to == this.to;
 		}
 
-		public IWulfeniteFormula apply(IWulfeniteFormula from)
+		public IWSFormula apply(IWSFormula from)
 		{
 			O slot = to.create();
 			return new OperationCast(from, to) {
