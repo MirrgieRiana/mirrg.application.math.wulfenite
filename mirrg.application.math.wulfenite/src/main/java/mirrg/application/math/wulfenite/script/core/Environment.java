@@ -1,7 +1,6 @@
-package mirrg.application.math.wulfenite.script;
+package mirrg.application.math.wulfenite.script.core;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -16,24 +15,33 @@ import mirrg.helium.standard.hydrogen.struct.Tuple3;
 public class Environment
 {
 
-	private Hashtable<String, Variable<?>> variables = new Hashtable<>();
+	private Frame frame = new Frame();
+
+	public void doInFrame(Runnable runnable)
+	{
+		Frame frame2 = new Frame(frame);
+		frame = frame2;
+
+		runnable.run();
+
+		frame = frame2.parent;
+	}
 
 	public <T> Variable<T> addVariable(String name, Type<T> type)
 	{
-		Variable<T> variable = new Variable<>(type);
-		variables.put(name, variable);
-		return variable;
+		return frame.addVariable(name, type);
 	}
 
 	public Optional<Variable<?>> getVariable(String name)
 	{
-		return Optional.ofNullable(variables.get(name));
+		return frame.getVariable(name);
 	}
 
 	public Stream<Tuple<String, Variable<?>>> getVariables()
 	{
-		return variables.entrySet().stream()
-			.map(s -> new Tuple<>(s.getKey(), s.getValue()));
+		ArrayList<Tuple<String, Variable<?>>> dest = new ArrayList<>();
+		frame.getVariables(dest);
+		return dest.stream();
 	}
 
 	//

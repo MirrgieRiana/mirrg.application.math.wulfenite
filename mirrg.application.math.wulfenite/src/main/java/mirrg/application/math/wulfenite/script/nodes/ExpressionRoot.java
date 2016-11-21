@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import mirrg.application.math.wulfenite.core.types.Type;
-import mirrg.application.math.wulfenite.script.Environment;
+import mirrg.application.math.wulfenite.script.core.Environment;
 import mirrg.application.math.wulfenite.script.node.IWSFormula;
 import mirrg.application.math.wulfenite.script.node.IWSLine;
 import mirrg.application.math.wulfenite.script.node.IWSNode;
@@ -49,7 +49,7 @@ public class ExpressionRoot extends WSNodeBase implements IWSFormula, IProviderC
 	@Override
 	public Object getValue()
 	{
-		lines.forEach(l -> l.invoke());
+		lines.forEach(IWSLine::invoke);
 		return formula.getValue();
 	}
 

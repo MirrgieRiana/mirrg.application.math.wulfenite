@@ -1,6 +1,6 @@
 package mirrg.application.math.wulfenite.script.node;
 
-import mirrg.application.math.wulfenite.script.Environment;
+import mirrg.application.math.wulfenite.script.core.Environment;
 import mirrg.helium.compile.oxygen.parser.core.Node;
 
 public interface IWSNode

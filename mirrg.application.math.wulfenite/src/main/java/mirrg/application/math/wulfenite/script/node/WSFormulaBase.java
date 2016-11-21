@@ -2,7 +2,7 @@ package mirrg.application.math.wulfenite.script.node;
 
 import java.awt.Color;
 
-import mirrg.application.math.wulfenite.script.TypeHelper;
+import mirrg.application.math.wulfenite.script.core.TypeHelper;
 import mirrg.helium.compile.oxygen.editor.IProviderColor;
 import mirrg.helium.compile.oxygen.parser.core.Node;
 

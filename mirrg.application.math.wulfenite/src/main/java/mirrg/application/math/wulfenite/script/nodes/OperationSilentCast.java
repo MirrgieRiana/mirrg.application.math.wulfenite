@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import mirrg.application.math.wulfenite.core.types.Type;
-import mirrg.application.math.wulfenite.script.Environment;
+import mirrg.application.math.wulfenite.script.core.Environment;
 import mirrg.application.math.wulfenite.script.node.IWSFormula;
 import mirrg.application.math.wulfenite.script.node.WSFormulaBase;
 import mirrg.helium.compile.oxygen.editor.IProviderChildren;

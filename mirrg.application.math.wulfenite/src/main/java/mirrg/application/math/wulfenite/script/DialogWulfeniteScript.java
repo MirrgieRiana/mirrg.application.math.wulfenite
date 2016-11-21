@@ -9,10 +9,12 @@ import java.awt.Frame;
 import java.util.stream.Collectors;
 
 import javax.swing.JDialog;
+import javax.swing.JSplitPane;
 import javax.swing.JTextPane;
 import javax.swing.WindowConstants;
 
 import mirrg.application.math.wulfenite.Mirrg;
+import mirrg.application.math.wulfenite.script.core.WulfeniteScript;
 import mirrg.helium.compile.oxygen.editor.EventTextPaneOxygen;
 import mirrg.helium.standard.hydrogen.util.HString;
 import mirrg.helium.standard.hydrogen.util.HString.LineProvider;
@@ -27,7 +29,7 @@ public class DialogWulfeniteScript extends JDialog
 	{
 		super(parent, "Wulfenite Script");
 
-		add(createSplitPaneVertical(
+		add(process(createSplitPaneVertical(
 			createScrollPane(get(() -> {
 				textPaneOxygen = new TextPaneOxygenWulfeniteScript(WulfeniteScript.getSyntax());
 				textPaneOxygen.setText(source);
@@ -65,7 +67,11 @@ public class DialogWulfeniteScript extends JDialog
 				textPaneOut.setEditable(false);
 				textPaneOut.setFont(new Font(Font.MONOSPACED, textPaneOut.getFont().getStyle(), textPaneOut.getFont().getSize()));
 				return textPaneOut;
-			}))));
+			}))),
+			c -> {
+				// TODO mirrg
+				((JSplitPane) c).setResizeWeight(1);
+			}));
 
 		pack();
 		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);

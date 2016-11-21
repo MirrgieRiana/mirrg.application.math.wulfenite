@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.util.function.Consumer;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -28,17 +29,17 @@ import com.thoughtworks.xstream.XStream;
 import mirrg.application.math.wulfenite.script.DataWulfeniteFunctionScript;
 import mirrg.helium.standard.hydrogen.struct.Struct1;
 import mirrg.helium.swing.phosphorus.canvas.PhosphorusCanvas;
-import mirrg.helium.swing.phosphorus.canvas.game.Data;
 import mirrg.helium.swing.phosphorus.canvas.game.EventPhosphorusGame;
 import mirrg.helium.swing.phosphorus.canvas.game.PhosphorusGame;
+import mirrg.helium.swing.phosphorus.canvas.game.existence.Existence;
 import mirrg.helium.swing.phosphorus.canvas.game.render.Layer;
 import mirrg.helium.swing.phosphorus.canvas.game.tools.ToolScroll;
 import mirrg.helium.swing.phosphorus.canvas.game.tools.ToolZoom;
 import mirrg.helium.swing.phosphorus.canvas.game.view.DataViewSkewed;
 import mirrg.helium.swing.phosphorus.canvas.game.view.ViewSkewed;
 
-// TODO 点の追加の実装
-public class Wulfenite extends PhosphorusGame<Wulfenite>
+// TODO 点の追加の実装 スクリプトが無限ループしたときの処理
+public class Wulfenite extends PhosphorusGame<Wulfenite, DataWulfenite>
 {
 
 	public static enum ActionKey
@@ -343,15 +344,9 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 	}
 
 	@Override
-	public DataWulfenite getData()
+	public synchronized void setData(DataWulfenite data)
 	{
-		return (DataWulfenite) super.getData();
-	}
-
-	@Override
-	public synchronized void setData(Data<Wulfenite> data)
-	{
-		DataWulfenite data2 = (DataWulfenite) data;
+		DataWulfenite data2 = data;
 		fireChangeFunction(() -> {
 			super.setData(data2);
 		});
@@ -380,6 +375,13 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 		});
 	}
 
+	@Override
+	public void getExistences(Consumer<Existence<? super Wulfenite>> consumer)
+	{
+		super.getExistences(consumer);
+		consumer.accept(getData().wulfeniteFunction.getEntity());
+	}
+
 	public static DataWulfenite createData()
 	{
 		DataWulfenite data = new DataWulfenite();
@@ -391,7 +393,7 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 		}
 		{
 			DataWulfeniteFunctionScript dataWulfeniteFunctionScript = new DataWulfeniteFunctionScript();
-			dataWulfeniteFunctionScript.source = "(_ + 1 + 1i) * (_ - 1 - 1i) / (_ - 1 + 1i) / (_ + 1 - 1i)";
+			dataWulfeniteFunctionScript.source = "(x + 1 + 1i) * (x - 1 - 1i) / (x - 1 + 1i) / (x + 1 - 1i)";
 			data.wulfeniteFunction = dataWulfeniteFunctionScript;
 		}
 		return data;
@@ -426,10 +428,9 @@ public class Wulfenite extends PhosphorusGame<Wulfenite>
 		return getXStream().toXML(getData());
 	}
 
-	@SuppressWarnings("unchecked")
 	public void setXML(String xml)
 	{
-		setData((Data<Wulfenite>) getXStream().fromXML(xml));
+		setData((DataWulfenite) getXStream().fromXML(xml));
 	}
 
 	public void fireChangeFunction(Runnable inner)

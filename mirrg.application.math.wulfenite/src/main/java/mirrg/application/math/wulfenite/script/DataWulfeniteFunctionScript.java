@@ -1,22 +1,37 @@
 package mirrg.application.math.wulfenite.script;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Line2D;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import mirrg.application.math.wulfenite.core.DataWulfeniteFunctionBase;
 import mirrg.application.math.wulfenite.core.Wulfenite;
 import mirrg.application.math.wulfenite.core.types.Type;
+import mirrg.application.math.wulfenite.script.core.Environment;
+import mirrg.application.math.wulfenite.script.core.Loader;
+import mirrg.application.math.wulfenite.script.core.Variable;
+import mirrg.application.math.wulfenite.script.core.WulfeniteScript;
 import mirrg.application.math.wulfenite.script.node.IWSFormula;
 import mirrg.helium.compile.oxygen.editor.EventTextPaneOxygen;
 import mirrg.helium.compile.oxygen.parser.core.ResultOxygen;
 import mirrg.helium.math.hydrogen.complex.StructureComplex;
 import mirrg.helium.standard.hydrogen.struct.Struct1;
+import mirrg.helium.swing.phosphorus.canvas.EventPhosphorusCanvas;
 import mirrg.helium.swing.phosphorus.canvas.game.existence.Entity;
+import mirrg.helium.swing.phosphorus.canvas.game.render.Layer;
+import mirrg.helium.swing.phosphorus.canvas.game.render.PointCoordinate;
+import mirrg.helium.swing.phosphorus.canvas.game.render.PointScreen;
+import mirrg.helium.swing.phosphorus.canvas.game.render.RectangleCoordinate;
 
 public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 {
 
 	public String source = "";
+	public StructureComplex point1 = new StructureComplex();
+	public StructureComplex point2 = new StructureComplex();
 
 	@Override
 	protected Entity<Wulfenite> createEntity(Wulfenite game)
@@ -27,9 +42,83 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 	public class EntityWulfeniteFunctionScript extends EntityWulfeniteFunctionBase
 	{
 
+		private boolean pressingLeft;
+		private boolean pressingRight;
+
 		public EntityWulfeniteFunctionScript(Wulfenite game)
 		{
 			super(game);
+
+			registerEvent(EventPhosphorusCanvas.EventMouse.Pressed.class, e -> {
+				PointCoordinate point = game.getView().convert(new PointScreen(e.event.getPoint()));
+				if (e.event.getButton() == MouseEvent.BUTTON1) {
+					pressingLeft = true;
+
+					game.fireChangeFunction(() -> point1.set(point.x, point.y));
+					dirty(game.layerOverlay);
+				} else if (e.event.getButton() == MouseEvent.BUTTON3) {
+					pressingRight = true;
+
+					game.fireChangeFunction(() -> point2.set(point.x, point.y));
+					dirty(game.layerOverlay);
+				}
+			});
+			registerEvent(EventPhosphorusCanvas.EventMouse.Released.class, e -> {
+				PointCoordinate point = game.getView().convert(new PointScreen(e.event.getPoint()));
+				if (e.event.getButton() == MouseEvent.BUTTON1) {
+					pressingLeft = false;
+
+					game.fireChangeFunction(() -> point1.set(point.x, point.y));
+					dirty(game.layerOverlay);
+				} else if (e.event.getButton() == MouseEvent.BUTTON3) {
+					pressingRight = false;
+
+					game.fireChangeFunction(() -> point2.set(point.x, point.y));
+					dirty(game.layerOverlay);
+				}
+			});
+			registerEvent(EventPhosphorusCanvas.EventMouseMotion.Dragged.class, e -> {
+				PointCoordinate point = game.getView().convert(new PointScreen(e.event.getPoint()));
+				if (pressingLeft) {
+					game.fireChangeFunction(() -> point1.set(point.x, point.y));
+					dirty(game.layerOverlay);
+				}
+				if (pressingRight) {
+					game.fireChangeFunction(() -> point2.set(point.x, point.y));
+					dirty(game.layerOverlay);
+				}
+			});
+		}
+
+		@Override
+		public Optional<RectangleCoordinate> getOpticalBounds(Layer layer)
+		{
+			if (layer == game.layerOverlay) return Optional.of(game.getView().getCoordinateRectangle());
+			return super.getOpticalBounds(layer);
+		}
+
+		@Override
+		public void render(Layer layer)
+		{
+			if (layer == game.layerOverlay) {
+				Graphics2D g = layer.getImageLayer().getGraphics();
+
+				{
+					PointScreen point = game.getView().convert(new PointCoordinate(point1.re, point1.im));
+					g.setColor(Color.red);
+					g.draw(new Line2D.Double(point.x - 5, point.y - 5, point.x + 5, point.y + 5));
+					g.draw(new Line2D.Double(point.x - 5, point.y + 5, point.x + 5, point.y - 5));
+				}
+
+				{
+					PointScreen point = game.getView().convert(new PointCoordinate(point2.re, point2.im));
+					g.setColor(Color.yellow);
+					g.draw(new Line2D.Double(point.x - 5, point.y - 5, point.x + 5, point.y + 5));
+					g.draw(new Line2D.Double(point.x - 5, point.y + 5, point.x + 5, point.y - 5));
+				}
+
+			}
+			super.render(layer);
 		}
 
 		private class ResultValidate
@@ -39,10 +128,23 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 			private ResultOxygen<IWSFormula> result;
 
 			private Environment environment;
-			private StructureComplex input;
+			private Variable<StructureComplex> variable1;
+			private Variable<StructureComplex> variable2;
+			private Variable<StructureComplex> variable3;
 			private boolean isValid;
 
 			private IWSFormula formula;
+
+			public Object getValue(StructureComplex coordinate)
+			{
+				if (formula != null) {
+					variable1.value = coordinate;
+					variable2.value = point1;
+					variable3.value = point2;
+					return formula.getValue();
+				}
+				return null;
+			}
 
 		}
 
@@ -57,10 +159,9 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 				{
 					resultValidate.environment = new Environment();
 
-					Variable<StructureComplex> variable = resultValidate.environment.addVariable("_", Type.COMPLEX);
-					resultValidate.input = new StructureComplex();
-					variable.value = resultValidate.input;
-
+					resultValidate.variable1 = resultValidate.environment.addVariable("x", Type.COMPLEX);
+					resultValidate.variable2 = resultValidate.environment.addVariable("a", Type.COMPLEX);
+					resultValidate.variable3 = resultValidate.environment.addVariable("b", Type.COMPLEX);
 					Loader.loadEnvironment(resultValidate.environment);
 
 				}
@@ -77,24 +178,10 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 		}
 
 		private ResultValidate resultValidate;
-		private Environment environment;
-		private StructureComplex input;
-		private IWSFormula formula;
 
 		public void setSCompiler(ResultValidate resultValidate)
 		{
-			game.fireChangeFunction(() -> {
-				this.resultValidate = resultValidate;
-				if (resultValidate.isValid) {
-					environment = resultValidate.environment;
-					input = resultValidate.input;
-					formula = resultValidate.formula;
-				} else {
-					environment = null;
-					input = null;
-					formula = null;
-				}
-			});
+			game.fireChangeFunction(() -> this.resultValidate = resultValidate);
 		}
 
 		@Override
@@ -103,11 +190,7 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 			if (resultValidate == null) {
 				setSCompiler(validate(WulfeniteScript.getSyntax().matches(source)));
 			}
-			if (formula != null) {
-				input.set(coordinate);
-				return formula.getValue();
-			}
-			return null;
+			return resultValidate.getValue(coordinate);
 		}
 
 		private DialogWulfeniteScript dialog;

@@ -6,9 +6,9 @@ import java.util.stream.Stream;
 import javax.swing.JLabel;
 
 import mirrg.application.math.wulfenite.core.types.Type;
-import mirrg.application.math.wulfenite.script.Environment;
-import mirrg.application.math.wulfenite.script.TypeHelper;
-import mirrg.application.math.wulfenite.script.Variable;
+import mirrg.application.math.wulfenite.script.core.Environment;
+import mirrg.application.math.wulfenite.script.core.TypeHelper;
+import mirrg.application.math.wulfenite.script.core.Variable;
 import mirrg.application.math.wulfenite.script.node.WSFormulaBase;
 import mirrg.helium.compile.oxygen.editor.IProviderProposal;
 import mirrg.helium.compile.oxygen.editor.Proposal;

@@ -1,5 +1,7 @@
 package mirrg.application.math.wulfenite.core.types;
 
+import java.util.ArrayList;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import mirrg.helium.math.hydrogen.complex.StructureComplex;
@@ -20,6 +22,23 @@ public class Type<T>
 	public static final Type<SlotBoolean> B = BOOLEAN;
 	public static final Type<SlotString> S = STRING;
 	public static final Type<SlotColor> Co = COLOR;
+
+	private static ArrayList<Type<?>> types = new ArrayList<>();
+	static {
+		types.add(INTEGER);
+		types.add(DOUBLE);
+		types.add(COMPLEX);
+		types.add(BOOLEAN);
+		types.add(STRING);
+		types.add(COLOR);
+	}
+
+	public static Optional<Type<?>> getType(String name)
+	{
+		return types.stream()
+			.filter(t -> t.name.toLowerCase().equals(name))
+			.findFirst();
+	}
 
 	public final Class<T> type;
 	private final Supplier<T> supplier;

@@ -1,4 +1,4 @@
-package mirrg.application.math.wulfenite.script;
+package mirrg.application.math.wulfenite.script.core;
 
 import static mirrg.application.math.wulfenite.core.types.Type.*;
 

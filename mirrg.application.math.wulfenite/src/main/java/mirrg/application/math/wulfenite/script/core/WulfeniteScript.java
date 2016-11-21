@@ -1,11 +1,13 @@
-package mirrg.application.math.wulfenite.script;
+package mirrg.application.math.wulfenite.script.core;
 
 import static mirrg.helium.compile.oxygen.parser.HSyntaxOxygen.*;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -13,14 +15,22 @@ import mirrg.application.math.wulfenite.script.node.IWSFormula;
 import mirrg.application.math.wulfenite.script.node.IWSLine;
 import mirrg.application.math.wulfenite.script.nodes.ExpressionRoot;
 import mirrg.application.math.wulfenite.script.nodes.LineAssignment;
+import mirrg.application.math.wulfenite.script.nodes.LineBrackets;
+import mirrg.application.math.wulfenite.script.nodes.LineDefineVariable;
+import mirrg.application.math.wulfenite.script.nodes.LineDefineVariableAssignment;
+import mirrg.application.math.wulfenite.script.nodes.LineIf;
+import mirrg.application.math.wulfenite.script.nodes.LineStatic;
+import mirrg.application.math.wulfenite.script.nodes.LineVoid;
 import mirrg.application.math.wulfenite.script.nodes.LiteralColor;
 import mirrg.application.math.wulfenite.script.nodes.LiteralComplex;
 import mirrg.application.math.wulfenite.script.nodes.LiteralDouble;
 import mirrg.application.math.wulfenite.script.nodes.LiteralInteger;
 import mirrg.application.math.wulfenite.script.nodes.LiteralString;
+import mirrg.application.math.wulfenite.script.nodes.OperationCast;
 import mirrg.application.math.wulfenite.script.nodes.OperationFunction;
 import mirrg.application.math.wulfenite.script.nodes.OperationVariable;
 import mirrg.application.math.wulfenite.script.nodes.TokenIdentifier;
+import mirrg.helium.compile.oxygen.editor.WithColor;
 import mirrg.helium.compile.oxygen.parser.core.Node;
 import mirrg.helium.compile.oxygen.parser.core.Syntax;
 import mirrg.helium.compile.oxygen.parser.syntaxes.SyntaxOr;
@@ -36,14 +46,18 @@ public class WulfeniteScript
 		return new WulfeniteScript().root;
 	}
 
-	public SyntaxSlot<IWSFormula> expression = slot();
 	public SyntaxSlot<IWSFormula> formula = slot();
 
 	//
 
-	public Syntax<String> comment = named(regex("[ \t\r\n]*"), "Comment");
+	public Syntax<String> comment = named(WithColor.withColor(pack(repeat(or((String) null)
+		.or(regex("[ \t\r\n]+"))
+		.or(regex("//[^\\r\\n]*"))
+		.or(regex("/\\*((?!\\*/).)*\\*/"))),
+		t -> String.join("", t)),
+		t -> Color.decode("#008800")), "Comment");
 
-	public Syntax<String> identifier = named(regex("[a-zA-Z_][a-zA-Z0-9_]*"), "Identifier");
+	public Syntax<String> identifier = named(regex("[a-zA-Z_][a-zA-Z0-9_]*\\b"), "Identifier");
 
 	public Syntax<String> tokenInteger = named(regex("[0-9]+"), "Integer");
 
@@ -74,7 +88,7 @@ public class WulfeniteScript
 		n -> new LiteralInteger(n, n.value));
 	public Syntax<IWSFormula> literalColor = packNode(named(extract((String) null)
 		.and(string("#"))
-		.extract(regex("[0-9a-fA-F]+")), "Color"),
+		.extract(regex("[0-9a-fA-F]+\\b")), "Color"),
 		n -> new LiteralColor(n, n.value));
 	public Syntax<IWSFormula> literalString = packNode(tokenString,
 		n -> new LiteralString(n, n.value));
@@ -82,7 +96,8 @@ public class WulfeniteScript
 		.and(pack(identifier, t -> new TokenIdentifier(t)), Struct3::setX)
 		.and(comment)
 		.and(string("("))
-		.and(createArgument(), Struct3::setY)
+		.and(createArray(formula, string(",")), Struct3::setY)
+		.and(comment)
 		.and(packNode(string(")"),
 			n -> n), Struct3::setZ),
 		n -> {
@@ -94,7 +109,7 @@ public class WulfeniteScript
 		});
 	public Syntax<IWSFormula> variable = packNode(identifier,
 		n -> new OperationVariable(n, n.value));
-	public Syntax<IWSFormula> bracket = extract((IWSFormula) null)
+	public Syntax<IWSFormula> brackets = extract((IWSFormula) null)
 		.and(string("("))
 		.and(comment)
 		.extract(formula)
@@ -109,7 +124,7 @@ public class WulfeniteScript
 		.or(literalString)
 		.or(function)
 		.or(variable)
-		.or(bracket);
+		.or(brackets);
 
 	// operator
 
@@ -122,7 +137,8 @@ public class WulfeniteScript
 			.and(pack(identifier, t -> new TokenIdentifier(t)), Struct3::setX)
 			.and(comment)
 			.and(string("("))
-			.and(createArgument(), Struct3::setY)
+			.and(createArray(formula, string(",")), Struct3::setY)
+			.and(comment)
 			.and(packNode(string(")"),
 				n -> n), Struct3::setZ)), Struct2::setY),
 		n -> {
@@ -141,10 +157,16 @@ public class WulfeniteScript
 		});
 
 	public Syntax<IWSFormula> operatorLeft = createLeft(operatorMethod, c -> {
-		c.accept("-", "_leftMinus");
-		c.accept("+", "_leftPlus");
-		c.accept("!", "_leftExclamation");
-		c.accept("~", "_leftTilde");
+		c.accept(packNode(string("-"), n -> f -> new OperationFunction(n.begin, f.getEnd(), "_leftMinus", f)));
+		c.accept(packNode(string("+"), n -> f -> new OperationFunction(n.begin, f.getEnd(), "_leftPlus", f)));
+		c.accept(packNode(string("!"), n -> f -> new OperationFunction(n.begin, f.getEnd(), "_leftExclamation", f)));
+		c.accept(packNode(string("~"), n -> f -> new OperationFunction(n.begin, f.getEnd(), "_leftTilde", f)));
+		c.accept(packNode(serial(Struct2<Node<?>, String>::new)
+			.and(packNode(string("("), n -> n), Struct2::setX)
+			.and(comment)
+			.and(identifier, Struct2::setY)
+			.and(comment)
+			.and(string(")")), n -> f -> new OperationCast(n.begin, f.getEnd(), n.value.y, f)));
 	});
 
 	public Syntax<IWSFormula> operatorPow = createOperatorRight(operatorLeft, c -> {
@@ -202,6 +224,54 @@ public class WulfeniteScript
 		formula.syntax = operatorIif;
 	}
 
+	public SyntaxSlot<IWSLine> line = slot();
+
+	public Syntax<IWSLine> lineIf = or((IWSLine) null)
+		.or(packNode(serial(Struct3<IWSFormula, IWSLine, IWSLine>::new)
+			.and(WithColor.withColor(regex("if\\b"), t -> Color.gray))
+			.and(comment)
+			.and(string("("))
+			.and(comment)
+			.and(formula, Struct3::setX)
+			.and(comment)
+			.and(string(")"))
+			.and(comment)
+			.and(line, Struct3::setY)
+			.and(comment)
+			.and(WithColor.withColor(regex("else\\b"), t -> Color.gray))
+			.and(comment)
+			.and(line, Struct3::setZ),
+			t -> new LineIf(t, t.value.getX(), t.value.getY(), t.value.getZ())))
+		.or(packNode(serial(Struct3<IWSFormula, IWSLine, IWSLine>::new)
+			.and(WithColor.withColor(regex("if\\b"), t -> Color.gray))
+			.and(comment)
+			.and(string("("))
+			.and(comment)
+			.and(formula, Struct3::setX)
+			.and(comment)
+			.and(string(")"))
+			.and(comment)
+			.and(line, Struct3::setY),
+			t -> new LineIf(t, t.value.getX(), t.value.getY())));
+	public Syntax<IWSLine> lineStatic = packNode(extract((IWSLine) null)
+		.and(WithColor.withColor(regex("static\\b"), t -> Color.gray))
+		.and(comment)
+		.extract(line),
+		t -> new LineStatic(t, t.value));
+	public Syntax<IWSLine> lineDefineVariableAssignment = packNode(serial(Struct3<String, String, IWSFormula>::new)
+		.and(WithColor.withColor(identifier, t -> Color.gray), Struct3::setX)
+		.and(comment)
+		.and(identifier, Struct3::setY)
+		.and(comment)
+		.and(string("="))
+		.and(comment)
+		.and(formula, Struct3::setZ),
+		n -> new LineDefineVariableAssignment(n, n.value.x, n.value.y, n.value.z));
+	public Syntax<IWSLine> lineDefineVariable = packNode(serial(Struct2<String, String>::new)
+		.and(WithColor.withColor(identifier, t -> Color.gray), Struct2::setX)
+		.and(comment)
+		.and(identifier, Struct2::setY),
+		n -> new LineDefineVariable(n, n.value.x, n.value.y));
 	public Syntax<IWSLine> lineAssignment = packNode(serial(Struct2<String, IWSFormula>::new)
 		.and(identifier, Struct2::setX)
 		.and(comment)
@@ -209,21 +279,52 @@ public class WulfeniteScript
 		.and(comment)
 		.and(formula, Struct2::setY),
 		n -> new LineAssignment(n, n.value.x, n.value.y));
+	public Syntax<IWSLine> lineVoid = packNode(string(";"),
+		n -> new LineVoid(n));
+	public Syntax<IWSLine> lineBrackets = extract((IWSLine) null)
+		.and(string("{"))
+		.extract(packNode(or((ArrayList<IWSLine>) null)
+			.or(pack(serial(Struct2<IWSLine, ArrayList<IWSLine>>::new)
+				.and(comment)
+				.and(line, Struct2::setX)
+				.and(repeat(extract((IWSLine) null)
+					.and(comment)
+					.extract(line)), Struct2::setY),
+				t -> Stream.concat(
+					Stream.of(t.getX()),
+					t.getY().stream())
+					.collect(Collectors.toCollection(ArrayList::new))))
+			.or(pack(string(""),
+				t -> new ArrayList<>())),
+			n -> new LineBrackets(n, n.value)))
+		.and(comment)
+		.and(string("}"));
 
-	public Syntax<IWSFormula> lines = packNode(serial(Struct2<ArrayList<IWSLine>, IWSFormula>::new)
+	{
+		line.syntax = or((IWSLine) null)
+			.or(lineIf)
+			.or(lineStatic)
+			.or(extract((IWSLine) null)
+				.extract(or((IWSLine) null)
+					.or(lineDefineVariableAssignment)
+					.or(lineDefineVariable)
+					.or(lineAssignment))
+				.and(comment)
+				.and(string(";")))
+			.or(lineVoid)
+			.or(lineBrackets);
+	}
+
+	public Syntax<IWSFormula> linesFormula = packNode(serial(Struct2<ArrayList<IWSLine>, IWSFormula>::new)
 		.and(repeat(extract((IWSLine) null)
-			.extract(lineAssignment)
-			.and(comment)
-			.and(string(";"))
+			.extract(line)
 			.and(comment)), Struct2::setX)
 		.and(formula, Struct2::setY),
 		n -> new ExpressionRoot(n, n.value.x, n.value.y));
 
 	// root
 
-	{
-		expression.syntax = lines;
-	}
+	public Syntax<IWSFormula> expression = linesFormula;
 
 	public Syntax<IWSFormula> root = extract((IWSFormula) null)
 		.and(comment)
@@ -233,21 +334,21 @@ public class WulfeniteScript
 
 	protected Syntax<IWSFormula> createLeft(
 		Syntax<IWSFormula> term,
-		Consumer<BiConsumer<String, String>> tokenMap)
+		Consumer<Consumer<Syntax<UnaryOperator<IWSFormula>>>> tokenMap)
 	{
-		SyntaxOr<String> tokens = or((String) null);
-		tokenMap.accept((token, name) -> tokens.or(pack(string(token), t -> name)));
+		SyntaxOr<UnaryOperator<IWSFormula>> tokens = or((UnaryOperator<IWSFormula>) null);
+		tokenMap.accept((fomula) -> tokens.or(fomula));
 
 		return pack(serial(
-			Struct2<ArrayList<Node<String>>, IWSFormula>::new)
-				.and(repeat(extract((Node<String>) null)
-					.extract(packNode(tokens, n -> n))
+			Struct2<ArrayList<UnaryOperator<IWSFormula>>, IWSFormula>::new)
+				.and(repeat(extract((UnaryOperator<IWSFormula>) null)
+					.extract(tokens)
 					.and(comment)), Struct2::setX)
 				.and(term, Struct2::setY),
 			t -> {
 				IWSFormula right = t.y;
-				for (Node<String> left : t.x) {
-					right = new OperationFunction(left.begin, right.getEnd(), left.value, right);
+				for (UnaryOperator<IWSFormula> left : t.x) {
+					right = left.apply(right);
 				}
 				return right;
 			});
@@ -336,27 +437,25 @@ public class WulfeniteScript
 			});
 	}
 
-	protected Syntax<ArrayList<IWSFormula>> createArgument()
+	protected <T> Syntax<ArrayList<T>> createArray(Syntax<T> formula, Syntax<?> separator)
 	{
-		return extract((ArrayList<IWSFormula>) null)
-			.extract(or((ArrayList<IWSFormula>) null)
-				.or(pack(serial(Struct2<IWSFormula, ArrayList<IWSFormula>>::new)
+		return or((ArrayList<T>) null)
+			.or(pack(serial(Struct2<T, ArrayList<T>>::new)
+				.and(comment)
+				.and(formula, Struct2::setX)
+				.and(repeat(extract((T) null)
 					.and(comment)
-					.and(formula, Struct2::setX)
-					.and(repeat(extract((IWSFormula) null)
-						.and(comment)
-						.and(string(","))
-						.and(comment)
-						.extract(formula)), Struct2::setY),
-					t -> Stream.concat(Stream.of(t.x), t.y.stream())
-						.collect(Collectors.toCollection(ArrayList::new))))
-				.or(pack(extract((IWSFormula) null)
+					.and(separator)
 					.and(comment)
-					.extract(formula),
-					t -> new ArrayList<>(Arrays.asList(t))))
-				.or(pack(string(""),
-					t -> new ArrayList<>())))
-			.and(comment);
+					.extract(formula)), Struct2::setY),
+				t -> Stream.concat(Stream.of(t.x), t.y.stream())
+					.collect(Collectors.toCollection(ArrayList::new))))
+			.or(pack(extract((T) null)
+				.and(comment)
+				.extract(formula),
+				t -> new ArrayList<>(Arrays.asList(t))))
+			.or(pack(string(""),
+				t -> new ArrayList<>()));
 	}
 
 }

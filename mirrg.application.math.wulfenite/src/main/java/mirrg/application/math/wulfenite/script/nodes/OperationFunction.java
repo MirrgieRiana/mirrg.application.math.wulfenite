@@ -11,8 +11,8 @@ import java.util.stream.Stream;
 import javax.swing.JLabel;
 
 import mirrg.application.math.wulfenite.core.types.Type;
-import mirrg.application.math.wulfenite.script.Environment;
-import mirrg.application.math.wulfenite.script.TypeHelper;
+import mirrg.application.math.wulfenite.script.core.Environment;
+import mirrg.application.math.wulfenite.script.core.TypeHelper;
 import mirrg.application.math.wulfenite.script.function.IWSFunction;
 import mirrg.application.math.wulfenite.script.node.IWSFormula;
 import mirrg.application.math.wulfenite.script.node.IWSNode;
