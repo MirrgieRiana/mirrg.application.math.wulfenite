@@ -1,5 +1,7 @@
 package mirrg.application.math.wulfenite.script.node;
 
+import java.util.ArrayList;
+
 import mirrg.application.math.wulfenite.script.core.Environment;
 import mirrg.helium.compile.oxygen.parser.core.IListenerNode;
 import mirrg.helium.compile.oxygen.parser.core.Node;
@@ -13,7 +15,7 @@ public abstract class WSNodeBase implements IWSNode, IListenerNode
 
 	public WSNodeBase(int begin, int end)
 	{
-		this.node = new Node<>(null, null, begin, end, this);
+		this.node = new Node<>(null, new ArrayList<>(), begin, end, this);
 		this.begin = begin;
 		this.end = end;
 	}

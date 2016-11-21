@@ -38,7 +38,7 @@ import mirrg.helium.swing.phosphorus.canvas.game.tools.ToolZoom;
 import mirrg.helium.swing.phosphorus.canvas.game.view.DataViewSkewed;
 import mirrg.helium.swing.phosphorus.canvas.game.view.ViewSkewed;
 
-// TODO 点の追加の実装 スクリプトが無限ループしたときの処理
+// TODO クリプトが無限ループしたときの処理
 public class Wulfenite extends PhosphorusGame<Wulfenite, DataWulfenite>
 {
 

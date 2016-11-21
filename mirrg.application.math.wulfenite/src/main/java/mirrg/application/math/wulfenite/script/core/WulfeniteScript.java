@@ -53,7 +53,7 @@ public class WulfeniteScript
 	public Syntax<String> comment = named(WithColor.withColor(pack(repeat(or((String) null)
 		.or(regex("[ \t\r\n]+"))
 		.or(regex("//[^\\r\\n]*"))
-		.or(regex("/\\*((?!\\*/).)*\\*/"))),
+		.or(regex("/\\*((?!\\*/)(?s:.))*\\*/"))),
 		t -> String.join("", t)),
 		t -> Color.decode("#008800")), "Comment");
 
