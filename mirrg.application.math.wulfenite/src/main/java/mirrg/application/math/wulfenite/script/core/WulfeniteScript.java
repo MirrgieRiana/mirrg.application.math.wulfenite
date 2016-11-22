@@ -228,7 +228,7 @@ public class WulfeniteScript
 
 	public Syntax<IWSLine> lineIf = or((IWSLine) null)
 		.or(packNode(serial(Struct3<IWSFormula, IWSLine, IWSLine>::new)
-			.and(WithColor.withColor(regex("if\\b"), t -> Color.gray))
+			.and(WithColor.withColor(named(regex("if\\b"), "if"), t -> Color.gray))
 			.and(comment)
 			.and(string("("))
 			.and(comment)
@@ -238,12 +238,12 @@ public class WulfeniteScript
 			.and(comment)
 			.and(line, Struct3::setY)
 			.and(comment)
-			.and(WithColor.withColor(regex("else\\b"), t -> Color.gray))
+			.and(WithColor.withColor(named(regex("else\\b"), "else"), t -> Color.gray))
 			.and(comment)
 			.and(line, Struct3::setZ),
 			t -> new LineIf(t, t.value.getX(), t.value.getY(), t.value.getZ())))
 		.or(packNode(serial(Struct3<IWSFormula, IWSLine, IWSLine>::new)
-			.and(WithColor.withColor(regex("if\\b"), t -> Color.gray))
+			.and(WithColor.withColor(named(regex("if\\b"), "if"), t -> Color.gray))
 			.and(comment)
 			.and(string("("))
 			.and(comment)
@@ -254,7 +254,7 @@ public class WulfeniteScript
 			.and(line, Struct3::setY),
 			t -> new LineIf(t, t.value.getX(), t.value.getY())));
 	public Syntax<IWSLine> lineStatic = packNode(extract((IWSLine) null)
-		.and(WithColor.withColor(regex("static\\b"), t -> Color.gray))
+		.and(WithColor.withColor(named(regex("static\\b"), "static"), t -> Color.gray))
 		.and(comment)
 		.extract(line),
 		t -> new LineStatic(t, t.value));

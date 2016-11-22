@@ -22,7 +22,6 @@ public class LineDefineVariable extends WSLineBase
 	}
 
 	private Type<?> type2;
-	private Variable<?> variable;
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -49,7 +48,6 @@ public class LineDefineVariable extends WSLineBase
 			variable2 = environment.addVariable(name, type2);
 			((Variable<Object>) variable2).value = type2.create();
 		}
-		variable = variable2;
 
 		return true;
 	}
