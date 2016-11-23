@@ -176,27 +176,27 @@ public class ToolGrid extends Tool<Wulfenite>
 				{
 					double mgridx = game.getView().getCoordinateX(point.x);
 
-					String str = "X: " + HString.getEffectiveExpression(
+					String str = "Re: " + HString.getEffectiveExpression(
 						mgridx, effectiveDigitW + 4);
 
 					g.setFont(font);
 					drawBoldString(g, str,
 						(int) (point.x + 2),
 						(int) (point.y - 2 - g.getFont().getSize()),
-						Color.white, Color.black);
+						Color.yellow, Color.black);
 				}
 
 				{
 					double mgridy = game.getView().getCoordinateY(point.y);
 
-					String str = "Y: " + HString.getEffectiveExpression(
+					String str = "Im: " + HString.getEffectiveExpression(
 						mgridy, effectiveDigitH + 4);
 
 					g.setFont(font);
 					drawBoldString(g, str,
 						(int) (point.x + 2),
 						(int) (point.y - 2),
-						Color.white, Color.black);
+						Color.yellow, Color.black);
 				}
 
 			}

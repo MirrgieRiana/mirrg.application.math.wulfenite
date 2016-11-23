@@ -31,9 +31,9 @@ public abstract class DataWulfeniteFunctionBase extends DataEntity<Wulfenite>
 			} else if (value instanceof SlotColor) {
 				return ((SlotColor) value).value;
 			} else if (value instanceof SlotInteger) {
-				return HColor.createColor(128 - 128 * Math.cos(((SlotInteger) value).value * 3.1415 / 90), 0, 0).getRGB();
+				return HColor.createColor(getBrightness(((SlotInteger) value).value) * 255, 0, 0).getRGB();
 			} else if (value instanceof SlotDouble) {
-				return HColor.createColor(128 - 128 * Math.cos(((SlotDouble) value).value * 3.1415 / 90), 0, 0).getRGB();
+				return HColor.createColor(getBrightness(((SlotDouble) value).value) * 255, 0, 0).getRGB();
 			} else if (value instanceof SlotBoolean) {
 				return ((SlotBoolean) value).value ? 0xffffff : 0x404040;
 			} else if (value instanceof SlotString) {
@@ -43,6 +43,14 @@ public abstract class DataWulfeniteFunctionBase extends DataEntity<Wulfenite>
 			} else {
 				return value.hashCode();
 			}
+		}
+
+		private double getBrightness(double value)
+		{
+			value = value - Math.floor(value / 10) * 10;
+			if (value > 5) value = 10 - value;
+			value *= 0.2;
+			return value;
 		}
 
 		@Override
