@@ -7,7 +7,7 @@ import java.awt.geom.Line2D;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import mirrg.application.math.wulfenite.core.DataWulfeniteFunctionBase;
+import mirrg.application.math.wulfenite.core.ModelMapperBase;
 import mirrg.application.math.wulfenite.core.Wulfenite;
 import mirrg.application.math.wulfenite.core.types.Type;
 import mirrg.application.math.wulfenite.script.core.Environment;
@@ -17,16 +17,16 @@ import mirrg.application.math.wulfenite.script.core.WulfeniteScript;
 import mirrg.application.math.wulfenite.script.node.IWSFormula;
 import mirrg.helium.compile.oxygen.editor.EventTextPaneOxygen;
 import mirrg.helium.compile.oxygen.parser.core.ResultOxygen;
+import mirrg.helium.game.carbon.base.ControllerCarbon;
 import mirrg.helium.math.hydrogen.complex.StructureComplex;
 import mirrg.helium.standard.hydrogen.struct.Struct1;
 import mirrg.helium.swing.phosphorus.canvas.EventPhosphorusCanvas;
-import mirrg.helium.swing.phosphorus.canvas.game.existence.Entity;
 import mirrg.helium.swing.phosphorus.canvas.game.render.Layer;
 import mirrg.helium.swing.phosphorus.canvas.game.render.PointCoordinate;
 import mirrg.helium.swing.phosphorus.canvas.game.render.PointScreen;
 import mirrg.helium.swing.phosphorus.canvas.game.render.RectangleCoordinate;
 
-public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
+public class ModelMapperScript extends ModelMapperBase
 {
 
 	public String source = "";
@@ -34,23 +34,23 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 	public StructureComplex point2 = new StructureComplex();
 
 	@Override
-	protected Entity<Wulfenite> createEntity(Wulfenite game)
+	protected ControllerCarbon<Wulfenite> createController(Wulfenite game)
 	{
-		return new EntityWulfeniteFunctionScript(game);
+		return new MapperScript(game);
 	}
 
-	public class EntityWulfeniteFunctionScript extends EntityWulfeniteFunctionBase
+	public class MapperScript extends MapperBase
 	{
 
 		private boolean pressingLeft;
 		private boolean pressingRight;
 
-		public EntityWulfeniteFunctionScript(Wulfenite game)
+		public MapperScript(Wulfenite game)
 		{
 			super(game);
 
 			registerEvent(EventPhosphorusCanvas.EventMouse.Pressed.class, e -> {
-				PointCoordinate point = game.getView().convert(new PointScreen(e.event.getPoint()));
+				PointCoordinate point = game.getView().getController().convert(new PointScreen(e.event.getPoint()));
 				if (e.event.getButton() == MouseEvent.BUTTON1) {
 					pressingLeft = true;
 
@@ -64,7 +64,7 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 				}
 			});
 			registerEvent(EventPhosphorusCanvas.EventMouse.Released.class, e -> {
-				PointCoordinate point = game.getView().convert(new PointScreen(e.event.getPoint()));
+				PointCoordinate point = game.getView().getController().convert(new PointScreen(e.event.getPoint()));
 				if (e.event.getButton() == MouseEvent.BUTTON1) {
 					pressingLeft = false;
 
@@ -78,7 +78,7 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 				}
 			});
 			registerEvent(EventPhosphorusCanvas.EventMouseMotion.Dragged.class, e -> {
-				PointCoordinate point = game.getView().convert(new PointScreen(e.event.getPoint()));
+				PointCoordinate point = game.getView().getController().convert(new PointScreen(e.event.getPoint()));
 				if (pressingLeft) {
 					game.fireChangeFunction(() -> point1.set(point.x, point.y));
 					dirty(game.layerOverlay);
@@ -93,7 +93,7 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 		@Override
 		public Optional<RectangleCoordinate> getOpticalBounds(Layer layer)
 		{
-			if (layer == game.layerOverlay) return Optional.of(game.getView().getCoordinateRectangle());
+			if (layer == game.layerOverlay) return Optional.of(game.getView().getController().getCoordinateRectangle());
 			return super.getOpticalBounds(layer);
 		}
 
@@ -104,14 +104,14 @@ public class DataWulfeniteFunctionScript extends DataWulfeniteFunctionBase
 				Graphics2D g = layer.getImageLayer().getGraphics();
 
 				{
-					PointScreen point = game.getView().convert(new PointCoordinate(point1.re, point1.im));
+					PointScreen point = game.getView().getController().convert(new PointCoordinate(point1.re, point1.im));
 					g.setColor(Color.red);
 					g.draw(new Line2D.Double(point.x - 5, point.y - 5, point.x + 5, point.y + 5));
 					g.draw(new Line2D.Double(point.x - 5, point.y + 5, point.x + 5, point.y - 5));
 				}
 
 				{
-					PointScreen point = game.getView().convert(new PointCoordinate(point2.re, point2.im));
+					PointScreen point = game.getView().getController().convert(new PointCoordinate(point2.re, point2.im));
 					g.setColor(Color.yellow);
 					g.draw(new Line2D.Double(point.x - 5, point.y - 5, point.x + 5, point.y + 5));
 					g.draw(new Line2D.Double(point.x - 5, point.y + 5, point.x + 5, point.y - 5));

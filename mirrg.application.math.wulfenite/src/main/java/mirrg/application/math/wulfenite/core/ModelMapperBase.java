@@ -5,18 +5,18 @@ import mirrg.application.math.wulfenite.core.types.SlotColor;
 import mirrg.application.math.wulfenite.core.types.SlotDouble;
 import mirrg.application.math.wulfenite.core.types.SlotInteger;
 import mirrg.application.math.wulfenite.core.types.SlotString;
+import mirrg.helium.game.carbon.base.ModelCarbon;
 import mirrg.helium.math.hydrogen.complex.StructureComplex;
 import mirrg.helium.swing.nitrogen.util.HColor;
-import mirrg.helium.swing.phosphorus.canvas.game.existence.DataEntity;
-import mirrg.helium.swing.phosphorus.canvas.game.existence.Entity;
+import mirrg.helium.swing.phosphorus.canvas.game.entity.ModelEntity.Entity;
 
-public abstract class DataWulfeniteFunctionBase extends DataEntity<Wulfenite>
+public abstract class ModelMapperBase extends ModelCarbon<Wulfenite>
 {
 
-	public abstract class EntityWulfeniteFunctionBase extends Entity<Wulfenite> implements IEntityWulfeniteFunction
+	public abstract class MapperBase extends Entity<Wulfenite> implements IMapper
 	{
 
-		public EntityWulfeniteFunctionBase(Wulfenite game)
+		public MapperBase(Wulfenite game)
 		{
 			super(game);
 		}

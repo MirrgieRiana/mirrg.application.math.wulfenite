@@ -7,7 +7,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.util.function.Consumer;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -26,20 +25,18 @@ import javax.swing.WindowConstants;
 
 import com.thoughtworks.xstream.XStream;
 
-import mirrg.application.math.wulfenite.script.DataWulfeniteFunctionScript;
+import mirrg.application.math.wulfenite.script.ModelMapperScript;
 import mirrg.helium.standard.hydrogen.struct.Struct1;
 import mirrg.helium.swing.phosphorus.canvas.PhosphorusCanvas;
-import mirrg.helium.swing.phosphorus.canvas.game.EventPhosphorusGame;
-import mirrg.helium.swing.phosphorus.canvas.game.PhosphorusGame;
-import mirrg.helium.swing.phosphorus.canvas.game.existence.Existence;
+import mirrg.helium.swing.phosphorus.canvas.game.EventGamePhosphorus;
+import mirrg.helium.swing.phosphorus.canvas.game.GamePhosphorus;
+import mirrg.helium.swing.phosphorus.canvas.game.entity.ToolScroll;
+import mirrg.helium.swing.phosphorus.canvas.game.entity.ToolZoom;
 import mirrg.helium.swing.phosphorus.canvas.game.render.Layer;
-import mirrg.helium.swing.phosphorus.canvas.game.tools.ToolScroll;
-import mirrg.helium.swing.phosphorus.canvas.game.tools.ToolZoom;
-import mirrg.helium.swing.phosphorus.canvas.game.view.DataViewSkewed;
-import mirrg.helium.swing.phosphorus.canvas.game.view.ViewSkewed;
+import mirrg.helium.swing.phosphorus.canvas.game.view.ModelViewSkewed;
 
 // TODO クリプトが無限ループしたときの処理
-public class Wulfenite extends PhosphorusGame<Wulfenite, DataWulfenite>
+public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelViewSkewed>
 {
 
 	public static enum ActionKey
@@ -77,7 +74,7 @@ public class Wulfenite extends PhosphorusGame<Wulfenite, DataWulfenite>
 
 	public Wulfenite(JFrame frame, PhosphorusCanvas canvas, JMenuBar menuBar)
 	{
-		super(canvas, createData());
+		super(canvas);
 		this.frame = frame;
 
 		actionMap = frame.getRootPane().getActionMap();
@@ -93,8 +90,8 @@ public class Wulfenite extends PhosphorusGame<Wulfenite, DataWulfenite>
 				'R',
 				KeyStroke.getKeyStroke(KeyEvent.VK_R, Event.CTRL_MASK | Event.SHIFT_MASK),
 				e -> {
-					event().registerRemovable(EventPhosphorusGame.Move.Post.class, e2 -> {
-						setData(createData());
+					event().registerRemovable(EventGamePhosphorus.Move.Post.class, e2 -> {
+						setModel(createDefaultData());
 						return false;
 					});
 				})));
@@ -179,28 +176,28 @@ public class Wulfenite extends PhosphorusGame<Wulfenite, DataWulfenite>
 				"上方向に50ピクセル分スクロールします。",
 				'E',
 				KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),
-				e -> getView().setY(getView().getY() - 50 * getView().getZoomY()))));
+				e -> getView().getController().setY(getView().getController().getY() - 50 * getView().getController().getZoomY()))));
 			menu.add(new JMenuItem(createAction(
 				ActionKey.MOVE_DOWN,
 				"↓(S)",
 				"下方向に50ピクセル分スクロールします。",
 				'Q',
 				KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
-				e -> getView().setY(getView().getY() + 50 * getView().getZoomY()))));
+				e -> getView().getController().setY(getView().getController().getY() + 50 * getView().getController().getZoomY()))));
 			menu.add(new JMenuItem(createAction(
 				ActionKey.MOVE_LEFT,
 				"←(A)",
 				"左方向に50ピクセル分スクロールします。",
 				'E',
 				KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0),
-				e -> getView().setX(getView().getX() - 50 * getView().getZoomX()))));
+				e -> getView().getController().setX(getView().getController().getX() - 50 * getView().getController().getZoomX()))));
 			menu.add(new JMenuItem(createAction(
 				ActionKey.MOVE_RIGHT,
 				"→(D)",
 				"右方向に50ピクセル分スクロールします。",
 				'Q',
 				KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0),
-				e -> getView().setX(getView().getX() + 50 * getView().getZoomX()))));
+				e -> getView().getController().setX(getView().getController().getX() + 50 * getView().getController().getZoomX()))));
 
 			menuBar.add(menu);
 		}
@@ -278,21 +275,21 @@ public class Wulfenite extends PhosphorusGame<Wulfenite, DataWulfenite>
 				"関数を設定します。",
 				'1',
 				KeyStroke.getKeyStroke(KeyEvent.VK_1, 0),
-				e -> setFunction(new DataWulfeniteFunctionScript()))));
+				e -> setFunction(new ModelMapperScript()))));
 			menu.add(new JMenuItem(createAction(
 				null,
 				"Complex(2)...",
 				"関数を設定します。",
 				'2',
 				KeyStroke.getKeyStroke(KeyEvent.VK_2, 0),
-				e -> setFunction(new DataWulfeniteFunctionComplex()))));
+				e -> setFunction(new ModelMapperComplex()))));
 			menu.add(new JMenuItem(createAction(
 				null,
 				"Mandelbrot(3)...",
 				"関数を設定します。",
 				'3',
 				KeyStroke.getKeyStroke(KeyEvent.VK_3, 0),
-				e -> setFunction(new DataWulfeniteFunctionMandelbrot()))));
+				e -> setFunction(new ModelMapperMandelbrot()))));
 			menuBar.add(menu);
 		}
 
@@ -300,13 +297,15 @@ public class Wulfenite extends PhosphorusGame<Wulfenite, DataWulfenite>
 		layerMath.setAutoClear(false);
 		addLayer(layerMath);
 		addLayer(layerOverlay = createLayer());
+	}
 
+	public void init()
+	{
 		addTool(new ToolScroll(this, MouseEvent.BUTTON2));
 		addTool(toolZoom = new ToolZoom(this));
 		addTool(new ToolWulfenitePainter(this, 45));
 		addTool(toolGrid = new ToolGrid(this));
 		addTool(new ToolWulfeniteScrollSaver(this));
-
 	}
 
 	public Action createAction(
@@ -336,6 +335,7 @@ public class Wulfenite extends PhosphorusGame<Wulfenite, DataWulfenite>
 		return action;
 	}
 
+	@Override
 	public XStream getXStream()
 	{
 		XStream xStream = new XStream();
@@ -344,93 +344,74 @@ public class Wulfenite extends PhosphorusGame<Wulfenite, DataWulfenite>
 	}
 
 	@Override
-	public synchronized void setData(DataWulfenite data)
+	public synchronized void setModel(ModelWulfenite data)
 	{
-		DataWulfenite data2 = data;
-		fireChangeFunction(() -> {
-			super.setData(data2);
-		});
+		fireChangeFunction(() -> super.setModel(data));
 	}
 
-	public IEntityWulfeniteFunction getFunction()
+	public IMapper getFunction()
 	{
-		return (IEntityWulfeniteFunction) getData().wulfeniteFunction.getEntity();
+		return (IMapper) getModel().mapper.getController();
 	}
 
-	public void setFunction(DataWulfeniteFunctionBase wulfeniteFunction)
+	public void setFunction(ModelMapperBase wulfeniteFunction)
 	{
 		fireChangeFunction(() -> {
-			DataWulfeniteFunctionBase tmp = getData().wulfeniteFunction;
+			ModelMapperBase tmp = getModel().mapper;
 			wulfeniteFunction.initialize(this);
-			getData().wulfeniteFunction = wulfeniteFunction;
+			getModel().mapper = wulfeniteFunction;
 			tmp.dispose();
 		});
 	}
 
 	public void invokeLater(Runnable runnable)
 	{
-		event().registerRemovable(EventPhosphorusGame.Move.Post.class, e2 -> {
+		event().registerRemovable(EventGamePhosphorus.Move.Post.class, e2 -> {
 			runnable.run();
 			return false;
 		});
 	}
 
-	@Override
-	public void getExistences(Consumer<Existence<? super Wulfenite>> consumer)
+	public static ModelWulfenite createDefaultData()
 	{
-		super.getExistences(consumer);
-		consumer.accept(getData().wulfeniteFunction.getEntity());
-	}
+		ModelViewSkewed view = new ModelViewSkewed();
+		view.zoomX = 0.01;
+		view.zoomY = -0.01;
 
-	public static DataWulfenite createData()
-	{
-		DataWulfenite data = new DataWulfenite();
-		{
-			DataViewSkewed dataViewSkewed = new DataViewSkewed();
-			dataViewSkewed.zoomX = 0.01;
-			dataViewSkewed.zoomY = -0.01;
-			data.view = dataViewSkewed;
-		}
-		{
-			DataWulfeniteFunctionScript dataWulfeniteFunctionScript = new DataWulfeniteFunctionScript();
-			dataWulfeniteFunctionScript.source = "(x + 1 + 1i) * (x - 1 - 1i) / (x - 1 + 1i) / (x + 1 - 1i)";
-			data.wulfeniteFunction = dataWulfeniteFunctionScript;
-		}
-		return data;
-	}
+		ModelMapperScript mapper = new ModelMapperScript();
+		mapper.source = "(x + 1 + 1i) * (x - 1 - 1i) / (x - 1 + 1i) / (x + 1 - 1i)";
 
-	@Override
-	public ViewSkewed getView()
-	{
-		return (ViewSkewed) super.getView();
+		ModelWulfenite model = new ModelWulfenite(view, mapper);
+
+		return model;
 	}
 
 	public void turnVertical()
 	{
-		getView().setZoomY(-getView().getZoomY());
+		getView().getController().setZoomY(-getView().getController().getZoomY());
 	}
 
 	public void turnHorizontal()
 	{
-		getView().setZoomX(-getView().getZoomX());
+		getView().getController().setZoomX(-getView().getController().getZoomX());
 	}
 
 	public void resetPosition()
 	{
-		getView().setX(0);
-		getView().setY(0);
-		getView().setZoomX(0.01);
-		getView().setZoomY(-0.01);
+		getView().getController().setX(0);
+		getView().getController().setY(0);
+		getView().getController().setZoomX(0.01);
+		getView().getController().setZoomY(-0.01);
 	}
 
 	public String getXML()
 	{
-		return getXStream().toXML(getData());
+		return getXStream().toXML(getModel());
 	}
 
 	public void setXML(String xml)
 	{
-		setData((DataWulfenite) getXStream().fromXML(xml));
+		setModel((ModelWulfenite) getXStream().fromXML(xml));
 	}
 
 	public void fireChangeFunction(Runnable inner)

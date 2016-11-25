@@ -2,7 +2,7 @@ package mirrg.application.math.wulfenite.core;
 
 import mirrg.helium.math.hydrogen.complex.StructureComplex;
 
-interface IEntityWulfeniteFunction
+interface IMapper
 {
 
 	/**

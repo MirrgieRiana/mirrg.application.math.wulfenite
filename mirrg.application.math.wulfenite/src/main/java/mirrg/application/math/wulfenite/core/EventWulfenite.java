@@ -1,8 +1,8 @@
 package mirrg.application.math.wulfenite.core;
 
-import mirrg.helium.swing.phosphorus.canvas.game.EventPhosphorusGame;
+import mirrg.helium.game.carbon.base.EventGameCarbon;
 
-public class EventWulfenite extends EventPhosphorusGame
+public class EventWulfenite extends EventGameCarbon
 {
 
 	public static class ChangeFunction extends EventWulfenite

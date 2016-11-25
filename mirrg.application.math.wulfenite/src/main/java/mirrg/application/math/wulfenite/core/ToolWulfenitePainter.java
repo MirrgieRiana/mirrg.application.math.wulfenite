@@ -2,11 +2,11 @@ package mirrg.application.math.wulfenite.core;
 
 import mirrg.helium.math.hydrogen.complex.StructureComplex;
 import mirrg.helium.swing.phosphorus.canvas.EventPhosphorusCanvas;
-import mirrg.helium.swing.phosphorus.canvas.game.EventPhosphorusGame;
-import mirrg.helium.swing.phosphorus.canvas.game.existence.Tool;
+import mirrg.helium.swing.phosphorus.canvas.game.EventGamePhosphorus;
+import mirrg.helium.swing.phosphorus.canvas.game.entity.ModelEntity.Entity;
 import mirrg.helium.swing.phosphorus.canvas.game.render.PointCoordinate;
 
-public class ToolWulfenitePainter extends Tool<Wulfenite>
+public class ToolWulfenitePainter extends Entity<Wulfenite>
 {
 
 	public int limitMs;
@@ -28,16 +28,18 @@ public class ToolWulfenitePainter extends Tool<Wulfenite>
 			dirty();
 			updateCoordinate();
 		});
-		registerGameEvent(EventPhosphorusGame.ViewChange.Post.class, e -> {
+		registerGameEvent(EventGamePhosphorus.ChangeViewStatus.Post.class, e -> {
 			dirty();
 			updateCoordinate();
 		});
 		registerGameEvent(EventWulfenite.ChangeFunction.Post.class, e -> {
 			dirty();
+			updateCoordinate();
 		});
 
 	}
 
+	@Override
 	public synchronized void dirty()
 	{
 		updatedBeginX = x;
@@ -53,7 +55,7 @@ public class ToolWulfenitePainter extends Tool<Wulfenite>
 			StructureComplex buffer = new StructureComplex();
 
 			while (true) {
-				IEntityWulfeniteFunction function = game.getFunction();
+				IMapper function = game.getFunction();
 				buffer.set(getCoordinateX(), getCoordinateY());
 				int color;
 				try {
@@ -109,14 +111,17 @@ public class ToolWulfenitePainter extends Tool<Wulfenite>
 	private double dx;
 	private double dy;
 
+	/**
+	 * ペイントの終了座標を現在の座標に設定する。
+	 */
 	private synchronized void updateCoordinate()
 	{
-		PointCoordinate p = game.getView().getCoordinateTopLeft();
+		PointCoordinate p = game.getView().getController().getCoordinateTopLeft();
 		x0 = p.x;
 		y0 = p.y;
 
-		dx = game.getView().getZoomX();
-		dy = game.getView().getZoomY();
+		dx = game.getView().getController().getZoomX();
+		dy = game.getView().getController().getZoomY();
 	}
 
 	public double getCoordinateX()

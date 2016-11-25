@@ -4,12 +4,12 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import mirrg.helium.swing.phosphorus.canvas.EventImageLayer;
-import mirrg.helium.swing.phosphorus.canvas.game.EventPhosphorusGame;
-import mirrg.helium.swing.phosphorus.canvas.game.existence.Tool;
+import mirrg.helium.swing.phosphorus.canvas.game.EventGamePhosphorus;
+import mirrg.helium.swing.phosphorus.canvas.game.entity.ModelEntity.Entity;
 import mirrg.helium.swing.phosphorus.canvas.game.render.RectangleCoordinate;
 import mirrg.helium.swing.phosphorus.canvas.game.render.RectangleScreen;
 
-public class ToolWulfeniteScrollSaver extends Tool<Wulfenite>
+public class ToolWulfeniteScrollSaver extends Entity<Wulfenite>
 {
 
 	private RectangleCoordinate rectangle;
@@ -24,16 +24,16 @@ public class ToolWulfeniteScrollSaver extends Tool<Wulfenite>
 			rebuffer();
 		});
 
-		registerGameEvent(EventPhosphorusGame.ViewChange.Pre.class, e -> {
-			rectangle = game.getView().getCoordinateRectangle();
+		registerGameEvent(EventGamePhosphorus.ChangeViewStatus.Pre.class, e -> {
+			rectangle = game.getView().getController().getCoordinateRectangle();
 
 			image.createGraphics().drawImage(game.layerMath.getImageLayer().getImage(), 0, 0, null);
 		});
-		registerGameEvent(EventPhosphorusGame.ViewChange.Post.class, e -> {
+		registerGameEvent(EventGamePhosphorus.ChangeViewStatus.Post.class, e -> {
 			if (rectangle == null) return;
 			Graphics2D g = game.layerMath.getImageLayer().getGraphics();
 
-			RectangleScreen rectangle2 = game.getView().convert(rectangle);
+			RectangleScreen rectangle2 = game.getView().getController().convert(rectangle);
 
 			g.drawImage(
 				image,

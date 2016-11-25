@@ -1,22 +1,22 @@
 package mirrg.application.math.wulfenite.core;
 
 import mirrg.application.math.wulfenite.core.types.SlotInteger;
+import mirrg.helium.game.carbon.base.ControllerCarbon;
 import mirrg.helium.math.hydrogen.complex.StructureComplex;
-import mirrg.helium.swing.phosphorus.canvas.game.existence.Entity;
 
-public class DataWulfeniteFunctionMandelbrot extends DataWulfeniteFunctionBase
+public class ModelMapperMandelbrot extends ModelMapperBase
 {
 
 	@Override
-	protected Entity<Wulfenite> createEntity(Wulfenite game)
+	protected ControllerCarbon<Wulfenite> createController(Wulfenite game)
 	{
-		return new EntityWulfeniteFunctionMandelbrot(game);
+		return new MapperMandelbrot(game);
 	}
 
-	public class EntityWulfeniteFunctionMandelbrot extends EntityWulfeniteFunctionBase
+	public class MapperMandelbrot extends MapperBase
 	{
 
-		public EntityWulfeniteFunctionMandelbrot(Wulfenite wulfenite)
+		public MapperMandelbrot(Wulfenite wulfenite)
 		{
 			super(wulfenite);
 		}

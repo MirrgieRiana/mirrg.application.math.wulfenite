@@ -6,7 +6,6 @@ import javax.swing.WindowConstants;
 
 import mirrg.application.math.wulfenite.core.Wulfenite;
 import mirrg.helium.swing.nitrogen.util.HSwing;
-import mirrg.helium.swing.phosphorus.canvas.game.IGame;
 import mirrg.helium.swing.phosphorus.canvas.util.FrameCanvas;
 import mirrg.helium.swing.phosphorus.canvas.util.IntervalThread;
 
@@ -30,7 +29,9 @@ public class Main
 		JMenuBar menuBar = new JMenuBar();
 		frame.setJMenuBar(menuBar);
 
-		IGame game = new Wulfenite(frame, frame.canvas, menuBar);
+		Wulfenite game = new Wulfenite(frame, frame.canvas, menuBar);
+		game.setModel(Wulfenite.createDefaultData());
+		game.init();
 
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		frame.setLocationByPlatform(true);

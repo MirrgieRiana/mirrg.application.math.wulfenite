@@ -9,12 +9,12 @@ import mirrg.helium.math.hydrogen.complex.StructureComplex;
 import mirrg.helium.standard.hydrogen.util.HMath;
 import mirrg.helium.standard.hydrogen.util.HString;
 import mirrg.helium.swing.phosphorus.canvas.EventPhosphorusCanvas;
-import mirrg.helium.swing.phosphorus.canvas.game.existence.Tool;
+import mirrg.helium.swing.phosphorus.canvas.game.entity.ModelEntity.Entity;
 import mirrg.helium.swing.phosphorus.canvas.game.render.Layer;
 import mirrg.helium.swing.phosphorus.canvas.game.render.PointScreen;
 import mirrg.helium.swing.phosphorus.canvas.game.render.RectangleCoordinate;
 
-public class ToolGrid extends Tool<Wulfenite>
+public class ToolGrid extends Entity<Wulfenite>
 {
 
 	private static final Font font = new Font("MS Gothic", Font.BOLD, 14);
@@ -52,10 +52,10 @@ public class ToolGrid extends Tool<Wulfenite>
 			if (!(enabledGrid || enabledCursor)) return;
 
 			// 画面の頂点における数学的座標の取得
-			double mx1 = game.getView().getCoordinateX(0);
-			double my1 = game.getView().getCoordinateY(0);
-			double mx2 = game.getView().getCoordinateX(game.canvas.getWidth());
-			double my2 = game.getView().getCoordinateY(game.canvas.getHeight());
+			double mx1 = game.getView().getController().getCoordinateX(0);
+			double my1 = game.getView().getController().getCoordinateY(0);
+			double mx2 = game.getView().getController().getCoordinateX(game.canvas.getWidth());
+			double my2 = game.getView().getController().getCoordinateY(game.canvas.getHeight());
 
 			// 数学的座標の反転のチェック
 			{
@@ -89,7 +89,7 @@ public class ToolGrid extends Tool<Wulfenite>
 			double mgridstarty = Math.ceil(my1 / gridSpaceH) * gridSpaceH;
 
 			// グリッド間隔の描画距離
-			final double gridSpaceDispW = game.getView().getScreenX(mx1 + gridSpaceW);
+			final double gridSpaceDispW = game.getView().getController().getScreenX(mx1 + gridSpaceW);
 			//final double gridSpaceDispH = cc.getScreenYFromCoordY(my1 + gridSpaceH);
 
 			// グリッドの終了数学的座標
@@ -100,12 +100,12 @@ public class ToolGrid extends Tool<Wulfenite>
 			if (enabledGrid) {
 				g.setColor(Color.black);
 				for (double mgridx = mgridstartx; mgridx < mgridendx; mgridx += gridSpaceW) {
-					int dx = (int) game.getView().getScreenX(mgridx);
+					int dx = (int) game.getView().getController().getScreenX(mgridx);
 					g.drawLine(dx, 0, dx, game.canvas.getHeight());
 				}
 				for (double mgridy = mgridstarty; mgridy < mgridendy; mgridy += gridSpaceH) {
 					// TODO アンダーフロー
-					int dy = (int) game.getView().getScreenY(mgridy);
+					int dy = (int) game.getView().getController().getScreenY(mgridy);
 					g.drawLine(0, dy, game.canvas.getWidth(), dy);
 				}
 			}
@@ -115,14 +115,14 @@ public class ToolGrid extends Tool<Wulfenite>
 				g.setColor(Color.blue);
 
 				{
-					double mgridx = game.getView().getCoordinateX(point.x);
-					int dx = (int) game.getView().getScreenX(mgridx);
+					double mgridx = game.getView().getController().getCoordinateX(point.x);
+					int dx = (int) game.getView().getController().getScreenX(mgridx);
 					g.drawLine(dx, 0, dx, game.canvas.getHeight());
 				}
 
 				{
-					double mgridy = game.getView().getCoordinateY(point.y);
-					int dy = (int) game.getView().getScreenY(mgridy);
+					double mgridy = game.getView().getController().getCoordinateY(point.y);
+					int dy = (int) game.getView().getController().getScreenY(mgridy);
 					g.drawLine(0, dy, game.canvas.getWidth(), dy);
 				}
 
@@ -134,7 +134,7 @@ public class ToolGrid extends Tool<Wulfenite>
 				int drawY = 0;
 
 				for (double mgridx = mgridstartx; mgridx < mgridendx; mgridx += gridSpaceW) {
-					int dx = (int) game.getView().getScreenX(mgridx);
+					int dx = (int) game.getView().getController().getScreenX(mgridx);
 					String str = HString.getEffectiveExpression(mgridx, effectiveDigitW);
 
 					g.setFont(font);
@@ -145,7 +145,7 @@ public class ToolGrid extends Tool<Wulfenite>
 				}
 
 				for (double mgridy = mgridstarty; mgridy < mgridendy; mgridy += gridSpaceH) {
-					int dy = (int) game.getView().getScreenY(mgridy);
+					int dy = (int) game.getView().getController().getScreenY(mgridy);
 					String str = HString.getEffectiveExpression(mgridy, effectiveDigitH);
 
 					g.setFont(font);
@@ -158,8 +158,8 @@ public class ToolGrid extends Tool<Wulfenite>
 
 				{
 					StructureComplex buffer = new StructureComplex(
-						game.getView().getCoordinateX(point.x),
-						game.getView().getCoordinateY(point.y));
+						game.getView().getController().getCoordinateX(point.x),
+						game.getView().getController().getCoordinateY(point.y));
 					String[] valueInformation = game.getFunction().getValueInformation(buffer);
 
 					for (int i = 0; i < valueInformation.length; i++) {
@@ -174,7 +174,7 @@ public class ToolGrid extends Tool<Wulfenite>
 				}
 
 				{
-					double mgridx = game.getView().getCoordinateX(point.x);
+					double mgridx = game.getView().getController().getCoordinateX(point.x);
 
 					String str = "Re: " + HString.getEffectiveExpression(
 						mgridx, effectiveDigitW + 4);
@@ -187,7 +187,7 @@ public class ToolGrid extends Tool<Wulfenite>
 				}
 
 				{
-					double mgridy = game.getView().getCoordinateY(point.y);
+					double mgridy = game.getView().getController().getCoordinateY(point.y);
 
 					String str = "Im: " + HString.getEffectiveExpression(
 						mgridy, effectiveDigitH + 4);
@@ -207,7 +207,7 @@ public class ToolGrid extends Tool<Wulfenite>
 	@Override
 	public Optional<RectangleCoordinate> getOpticalBounds(Layer layer)
 	{
-		if (layer == game.layerOverlay) return Optional.of(game.getView().getCoordinateRectangle());
+		if (layer == game.layerOverlay) return Optional.of(game.getView().getController().getCoordinateRectangle());
 		return super.getOpticalBounds(layer);
 	}
 
