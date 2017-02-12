@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
@@ -31,7 +32,6 @@ import mirrg.helium.swing.phosphorus.canvas.PhosphorusCanvas;
 import mirrg.helium.swing.phosphorus.canvas.game.EventGamePhosphorus;
 import mirrg.helium.swing.phosphorus.canvas.game.GamePhosphorus;
 import mirrg.helium.swing.phosphorus.canvas.game.entity.ToolScroll;
-import mirrg.helium.swing.phosphorus.canvas.game.entity.ToolZoom;
 import mirrg.helium.swing.phosphorus.canvas.game.render.Layer;
 import mirrg.helium.swing.phosphorus.canvas.game.view.ModelViewXYZoomXY;
 
@@ -43,6 +43,7 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 	{
 		RESET,
 		RESET_COORDINATE,
+		RESET_ASPECT,
 		TEMPORARY_SAVE,
 		TEMPORARY_LOAD,
 		OPEN_CONFIG_DIALOG,
@@ -50,7 +51,11 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 		MIRROR_VERTICAL,
 		MIRROR_HORIZONTAL,
 		ZOOM_IN,
+		ZOOM_IN_X,
+		ZOOM_IN_Y,
 		ZOOM_OUT,
+		ZOOM_OUT_X,
+		ZOOM_OUT_Y,
 		MOVE_UP,
 		MOVE_DOWN,
 		MOVE_LEFT,
@@ -150,26 +155,66 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 			menu.add(new JMenuItem(createAction(
 				ActionKey.RESET_COORDINATE,
 				"位置と倍率の初期化(R)",
-				"表示位置を初期化します。",
+				"表示位置と表示倍率を初期化します。",
 				'R',
 				KeyStroke.getKeyStroke(KeyEvent.VK_R, 0),
 				e -> resetPosition())));
+			menu.add(new JMenuItem(createAction(
+				ActionKey.RESET_ASPECT,
+				"縦横比の初期化(T)",
+				"表示倍率の縦横比を初期化します。",
+				'T',
+				KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK),
+				e -> resetAspect())));
 			menu.addSeparator();
-			menu.add(new JMenuItem(createAction(
-				ActionKey.ZOOM_IN,
-				"拡大(E)",
-				"ホイール1段階分ズームインします。",
-				'E',
-				KeyStroke.getKeyStroke(KeyEvent.VK_X, 0),
-				e -> toolZoom.doZoom(-1))));
-			menu.add(new JMenuItem(createAction(
-				ActionKey.ZOOM_OUT,
-				"縮小(Q)",
-				"ホイール1段階分ズームアウトします。",
-				'Q',
-				KeyStroke.getKeyStroke(KeyEvent.VK_Z, 0),
-				e -> toolZoom.doZoom(1))));
+			{
+				menu.add(new JMenuItem(createAction(
+					ActionKey.ZOOM_IN,
+					"拡大(E)",
+					"ホイール1段階分ズームインします。",
+					'E',
+					KeyStroke.getKeyStroke(KeyEvent.VK_X, 0),
+					e -> toolZoom.doZoom(-1))));
+				menu.add(new JMenuItem(createAction(
+					ActionKey.ZOOM_IN_X,
+					"実軸のみ拡大(Z)",
+					"実軸のみホイール1段階分ズームインします。",
+					'Z',
+					KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_DOWN_MASK),
+					e -> toolZoom.doZoom(-1, true, false))));
+				menu.add(new JMenuItem(createAction(
+					ActionKey.ZOOM_IN_Y,
+					"虚軸のみ拡大(X)",
+					"虚軸のみホイール1段階分ズームインします。",
+					'X',
+					KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.SHIFT_DOWN_MASK),
+					e -> toolZoom.doZoom(-1, false, true))));
+			}
+			{
+				menu.add(new JMenuItem(createAction(
+					ActionKey.ZOOM_OUT,
+					"縮小(Q)",
+					"ホイール1段階分ズームアウトします。",
+					'Q',
+					KeyStroke.getKeyStroke(KeyEvent.VK_Z, 0),
+					e -> toolZoom.doZoom(1))));
+				menu.add(new JMenuItem(createAction(
+					ActionKey.ZOOM_OUT_X,
+					"実軸のみ縮小(C)",
+					"実軸のみホイール1段階分ズームアウトします。",
+					'C',
+					KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK),
+					e -> toolZoom.doZoom(1, true, false))));
+				menu.add(new JMenuItem(createAction(
+					ActionKey.ZOOM_OUT_Y,
+					"虚軸のみ縮小(V)",
+					"虚軸のみホイール1段階分ズームアウトします。",
+					'V',
+					KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.SHIFT_DOWN_MASK),
+					e -> toolZoom.doZoom(1, false, true))));
+			}
 
+			menu.addSeparator();
 			menu.add(new JMenuItem(createAction(
 				ActionKey.MOVE_UP,
 				"↑(W)",
@@ -402,6 +447,16 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 		getView().getController().setY(0);
 		getView().getController().setZoomX(0.01);
 		getView().getController().setZoomY(-0.01);
+	}
+
+	public void resetAspect()
+	{
+		double x = Math.signum(getView().getController().getZoomX());
+		double y = Math.signum(getView().getController().getZoomY());
+		double zoom = (Math.abs(getView().getController().getZoomX())
+			+ Math.abs(getView().getController().getZoomY())) / 2;
+		getView().getController().setZoomX(x * zoom);
+		getView().getController().setZoomY(y * zoom);
 	}
 
 	public String getXML()
