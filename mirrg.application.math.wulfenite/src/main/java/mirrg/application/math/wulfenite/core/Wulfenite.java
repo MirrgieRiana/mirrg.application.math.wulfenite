@@ -62,6 +62,7 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 		MOVE_RIGHT,
 		SHOW_GRID,
 		SHOW_CURSOR_INFO,
+		SHOW_EXTRA_INFO,
 		CHANGE_COLOR_GRID,
 		CHANGE_COLOR_CURSOR,
 	}
@@ -71,7 +72,6 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 	public final Layer layerMath;
 	public final Layer layerOverlay;
 
-	public ToolGrid toolGrid;
 	public ToolZoomXY toolZoom;
 
 	public final ActionMap actionMap;
@@ -289,7 +289,7 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 						if (!(e.getSource() instanceof JCheckBoxMenuItem)) {
 							menuItem.x.setSelected(!menuItem.x.isSelected());
 						}
-						toolGrid.enabledGrid = menuItem.x.isSelected();
+						getModel().grid.enabledGrid = menuItem.x.isSelected();
 						getLayers().forEach(Layer::dirty);
 					}));
 				menuItem.x.setSelected(true);
@@ -307,7 +307,25 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 						if (!(e.getSource() instanceof JCheckBoxMenuItem)) {
 							menuItem.x.setSelected(!menuItem.x.isSelected());
 						}
-						toolGrid.enabledCursor = menuItem.x.isSelected();
+						getModel().grid.enabledCursor = menuItem.x.isSelected();
+						getLayers().forEach(Layer::dirty);
+					}));
+				menuItem.x.setSelected(true);
+				menu.add(menuItem.x);
+			}
+			{
+				Struct1<JMenuItem> menuItem = new Struct1<>();
+				menuItem.x = new JCheckBoxMenuItem(createAction(
+					ActionKey.SHOW_EXTRA_INFO,
+					"追加情報の表示(E)",
+					"関数プラグインによって追加される表示を切り替えます。",
+					'E',
+					KeyStroke.getKeyStroke(KeyEvent.VK_G, Event.SHIFT_MASK),
+					e -> {
+						if (!(e.getSource() instanceof JCheckBoxMenuItem)) {
+							menuItem.x.setSelected(!menuItem.x.isSelected());
+						}
+						getModel().grid.enabledExtra = menuItem.x.isSelected();
 						getLayers().forEach(Layer::dirty);
 					}));
 				menuItem.x.setSelected(true);
@@ -376,7 +394,6 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 		addTool(new ToolScroll(this, MouseEvent.BUTTON2));
 		addTool(toolZoom = new ToolZoomXY(this));
 		addTool(new ToolWulfenitePainter(this, 45));
-		addTool(toolGrid = new ToolGrid(this));
 		addTool(new ToolWulfeniteScrollSaver(this));
 	}
 
@@ -446,16 +463,7 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 
 	public static ModelWulfenite createDefaultData()
 	{
-		ModelViewXYZoomXY view = new ModelViewXYZoomXY();
-		view.zoomX = 0.01;
-		view.zoomY = -0.01;
-
-		ModelMapperScript mapper = new ModelMapperScript();
-		mapper.source = "(z + 1 + i) * (z - 1 - i) / (z - 1 + i) / (z + 1 - i)";
-
-		ModelWulfenite model = new ModelWulfenite(view, mapper);
-
-		return model;
+		return ModelWulfenite.create();
 	}
 
 	public void turnVertical()

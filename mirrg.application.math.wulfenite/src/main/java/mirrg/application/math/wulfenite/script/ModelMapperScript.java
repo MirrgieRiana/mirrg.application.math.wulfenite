@@ -104,18 +104,20 @@ public class ModelMapperScript extends ModelMapperBase
 			if (layer == game.layerOverlay) {
 				Graphics2D g = layer.getImageLayer().getGraphics();
 
-				{
-					PointScreen point = game.getView().getController().convert(new PointCoordinate(point1.re, point1.im));
-					g.setColor(Color.red);
-					g.draw(new Line2D.Double(point.x - 5, point.y - 5, point.x + 5, point.y + 5));
-					g.draw(new Line2D.Double(point.x - 5, point.y + 5, point.x + 5, point.y - 5));
-				}
+				if (game.getModel().grid.enabledExtra) {
+					{
+						PointScreen point = game.getView().getController().convert(new PointCoordinate(point1.re, point1.im));
+						g.setColor(Color.red);
+						g.draw(new Line2D.Double(point.x - 5, point.y - 5, point.x + 5, point.y + 5));
+						g.draw(new Line2D.Double(point.x - 5, point.y + 5, point.x + 5, point.y - 5));
+					}
 
-				{
-					PointScreen point = game.getView().getController().convert(new PointCoordinate(point2.re, point2.im));
-					g.setColor(Color.yellow);
-					g.draw(new Line2D.Double(point.x - 5, point.y - 5, point.x + 5, point.y + 5));
-					g.draw(new Line2D.Double(point.x - 5, point.y + 5, point.x + 5, point.y - 5));
+					{
+						PointScreen point = game.getView().getController().convert(new PointCoordinate(point2.re, point2.im));
+						g.setColor(Color.yellow);
+						g.draw(new Line2D.Double(point.x - 5, point.y - 5, point.x + 5, point.y + 5));
+						g.draw(new Line2D.Double(point.x - 5, point.y + 5, point.x + 5, point.y - 5));
+					}
 				}
 
 			}
