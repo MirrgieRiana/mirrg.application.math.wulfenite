@@ -20,6 +20,11 @@ import mirrg.helium.swing.phosphorus.canvas.game.render.RectangleCoordinate;
 public class ModelGrid extends ModelEntity<Wulfenite>
 {
 
+	public double unitX = Math.PI;
+	public double unitY = 1;
+	public String unitNameX = "π";
+	public String unitNameY = "";
+
 	public boolean enabledGrid = true;
 	public boolean enabledCursor = true;
 	public boolean enabledExtra = true;
@@ -75,10 +80,10 @@ public class ModelGrid extends ModelEntity<Wulfenite>
 				if (!(enabledGrid || enabledCursor)) return;
 
 				// 画面の頂点における数学的座標の取得
-				double mx1 = game.getView().getController().getCoordinateX(0);
-				double my1 = game.getView().getController().getCoordinateY(0);
-				double mx2 = game.getView().getController().getCoordinateX(game.canvas.getWidth());
-				double my2 = game.getView().getController().getCoordinateY(game.canvas.getHeight());
+				double mx1 = game.getView().getController().getCoordinateX(0) / unitX;
+				double my1 = game.getView().getController().getCoordinateY(0) / unitY;
+				double mx2 = game.getView().getController().getCoordinateX(game.canvas.getWidth()) / unitX;
+				double my2 = game.getView().getController().getCoordinateY(game.canvas.getHeight()) / unitY;
 
 				// 数学的座標の反転のチェック
 				{
@@ -96,8 +101,8 @@ public class ModelGrid extends ModelEntity<Wulfenite>
 				}
 
 				// 画面の縦横の数学的大きさ
-				final double mwidth = mx2 - mx1;
-				final double mheight = my2 - my1;
+				double mwidth = mx2 - mx1;
+				double mheight = my2 - my1;
 
 				// グリッド間隔の数学的距離
 				final double gridSpaceW = HMath.nice(mwidth * 0.3);
@@ -112,7 +117,7 @@ public class ModelGrid extends ModelEntity<Wulfenite>
 				double mgridstarty = Math.ceil(my1 / gridSpaceH) * gridSpaceH;
 
 				// グリッド間隔の描画距離
-				final double gridSpaceDispW = game.getView().getController().getScreenX(mx1 + gridSpaceW);
+				final double gridSpaceDispW = game.getView().getController().getScreenX((mx1 + gridSpaceW) * unitX);
 				//final double gridSpaceDispH = cc.getScreenYFromCoordY(my1 + gridSpaceH);
 
 				// グリッドの終了数学的座標
@@ -130,9 +135,9 @@ public class ModelGrid extends ModelEntity<Wulfenite>
 				}
 
 				// カーソルの数学的座標
-				double mgridx = game.getView().getController().getCoordinateX(point.x);
-				double mgridy = game.getView().getController().getCoordinateY(point.y);
-				if (isControl) {
+				double mgridx = game.getView().getController().getCoordinateX(point.x) / unitX;
+				double mgridy = game.getView().getController().getCoordinateY(point.y) / unitY;
+				if (enabledCatch) {
 					// カーソル情報の座標をグリッドのある座標に固定
 
 					double mgridx2 = mgridx;
@@ -156,11 +161,11 @@ public class ModelGrid extends ModelEntity<Wulfenite>
 					// TODO アンダーフロー
 					g.setColor(colorGrid);
 					for (double x : linesX) {
-						int dx = (int) game.getView().getController().getScreenX(x);
+						int dx = (int) game.getView().getController().getScreenX(x * unitX);
 						g.drawLine(dx, 0, dx, game.canvas.getHeight());
 					}
 					for (double y : linesY) {
-						int dy = (int) game.getView().getController().getScreenY(y);
+						int dy = (int) game.getView().getController().getScreenY(y * unitY);
 						g.drawLine(0, dy, game.canvas.getWidth(), dy);
 					}
 				}
@@ -170,12 +175,12 @@ public class ModelGrid extends ModelEntity<Wulfenite>
 					g.setColor(colorCursor);
 
 					{
-						int dx = (int) game.getView().getController().getScreenX(mgridx);
+						int dx = (int) game.getView().getController().getScreenX(mgridx * unitX);
 						g.drawLine(dx, 0, dx, game.canvas.getHeight());
 					}
 
 					{
-						int dy = (int) game.getView().getController().getScreenY(mgridy);
+						int dy = (int) game.getView().getController().getScreenY(mgridy * unitY);
 						g.drawLine(0, dy, game.canvas.getWidth(), dy);
 					}
 
@@ -187,8 +192,8 @@ public class ModelGrid extends ModelEntity<Wulfenite>
 					int drawY = 0;
 
 					for (double x : linesX) {
-						int dx = (int) game.getView().getController().getScreenX(x);
-						String str = HString.getEffectiveExpression(x, effectiveDigitW);
+						int dx = (int) game.getView().getController().getScreenX(x * unitX);
+						String str = HString.getEffectiveExpression(x, effectiveDigitW) + unitNameX;
 
 						g.setFont(font);
 						drawBoldString(g, str, dx, (1 + drawY) * g.getFont().getSize(), Color.white, Color.black);
@@ -198,8 +203,8 @@ public class ModelGrid extends ModelEntity<Wulfenite>
 					}
 
 					for (double y : linesY) {
-						int dy = (int) game.getView().getController().getScreenY(y);
-						String str = HString.getEffectiveExpression(y, effectiveDigitH);
+						int dy = (int) game.getView().getController().getScreenY(y * unitY);
+						String str = HString.getEffectiveExpression(y, effectiveDigitH) + unitNameY;
 
 						g.setFont(font);
 						drawBoldString(g, str, 0, dy + g.getFont().getSize(), Color.white, Color.black);
@@ -211,8 +216,8 @@ public class ModelGrid extends ModelEntity<Wulfenite>
 
 					{
 						StructureComplex buffer = new StructureComplex(
-							mgridx,
-							mgridy);
+							mgridx * unitX,
+							mgridy * unitY);
 						String[] valueInformation = game.getFunction().getValueInformation(buffer);
 
 						for (int i = 0; i < valueInformation.length; i++) {
@@ -220,31 +225,31 @@ public class ModelGrid extends ModelEntity<Wulfenite>
 
 							g.setFont(font);
 							drawBoldString(g, str,
-								(int) (game.getView().getController().getScreenX(mgridx) + 2),
-								(int) (game.getView().getController().getScreenY(mgridy) - 2 - g.getFont().getSize() * ((1 + valueInformation.length) - i)),
+								(int) (game.getView().getController().getScreenX(mgridx * unitX) + 2),
+								(int) (game.getView().getController().getScreenY(mgridy * unitY) - 2 - g.getFont().getSize() * ((1 + valueInformation.length) - i)),
 								Color.white, Color.black);
 						}
 					}
 
 					{
 						String str = "Re: " + HString.getEffectiveExpression(
-							mgridx, effectiveDigitW + 4);
+							mgridx, effectiveDigitW + 4) + unitNameX;
 
 						g.setFont(font);
 						drawBoldString(g, str,
-							(int) (game.getView().getController().getScreenX(mgridx) + 2),
-							(int) (game.getView().getController().getScreenY(mgridy) - 2 - g.getFont().getSize()),
+							(int) (game.getView().getController().getScreenX(mgridx * unitX) + 2),
+							(int) (game.getView().getController().getScreenY(mgridy * unitY) - 2 - g.getFont().getSize()),
 							Color.yellow, Color.black);
 					}
 
 					{
 						String str = "Im: " + HString.getEffectiveExpression(
-							mgridy, effectiveDigitH + 4);
+							mgridy, effectiveDigitH + 4) + unitNameY;
 
 						g.setFont(font);
 						drawBoldString(g, str,
-							(int) (game.getView().getController().getScreenX(mgridx) + 2),
-							(int) (game.getView().getController().getScreenY(mgridy) - 2),
+							(int) (game.getView().getController().getScreenX(mgridx * unitX) + 2),
+							(int) (game.getView().getController().getScreenY(mgridy * unitY) - 2),
 							Color.yellow, Color.black);
 					}
 
