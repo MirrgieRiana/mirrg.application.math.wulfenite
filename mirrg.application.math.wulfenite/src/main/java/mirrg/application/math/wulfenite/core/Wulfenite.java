@@ -50,6 +50,7 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 		OPEN_QUERY_DIALOG,
 		MIRROR_VERTICAL,
 		MIRROR_HORIZONTAL,
+		DIALOG_COORDINATE,
 		DIALOG_UNIT,
 		ZOOM_IN,
 		ZOOM_IN_X,
@@ -248,6 +249,15 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 				KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0),
 				e -> getView().getController().setX(getView().getController().getX() + 50 * getView().getController().getZoomX()))));
 
+			menu.addSeparator();
+			menu.add(new JMenuItem(createAction(
+				ActionKey.DIALOG_COORDINATE,
+				"座標設定...(D)",
+				"座標の設定ウィンドウを開きます。",
+				'D',
+				KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0),
+				e -> openDialogCoordinate())));
+
 			menuBar.add(menu);
 		}
 		{
@@ -374,10 +384,10 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 			menu.addSeparator();
 			menu.add(new JMenuItem(createAction(
 				ActionKey.DIALOG_UNIT,
-				"単位設定...(U)",
+				"単位設定...(D)",
 				"表示単位の設定ウィンドウを開きます。",
-				'U',
-				KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0),
+				'D',
+				KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0),
 				e -> openDialogUnit())));
 
 			menuBar.add(menu);
@@ -421,6 +431,16 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 		layerMath.setAutoClear(false);
 		addLayer(layerMath);
 		addLayer(layerOverlay = createLayer());
+	}
+
+	public void openDialogCoordinate()
+	{
+		JDialog dialog = new DialogCoordinate(this, frame);
+
+		dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		dialog.pack();
+		dialog.setLocationByPlatform(true);
+		dialog.setVisible(true);
 	}
 
 	public void openDialogUnit()
