@@ -1,4 +1,5 @@
 backup/
+*/backup/
 *.lnk
 */.settings/
 */.gradle/
