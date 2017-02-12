@@ -15,6 +15,7 @@ import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JColorChooser;
 import javax.swing.JDialog;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -61,6 +62,8 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 		MOVE_RIGHT,
 		SHOW_GRID,
 		SHOW_CURSOR_INFO,
+		CHANGE_COLOR_GRID,
+		CHANGE_COLOR_CURSOR,
 	}
 
 	public final FrameWulfenite frame;
@@ -149,8 +152,8 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 			menuBar.add(menu);
 		}
 		{
-			JMenu menu = new JMenu("座標(C)");
-			menu.setMnemonic('C');
+			JMenu menu = new JMenu("座標(P)");
+			menu.setMnemonic('P');
 			menu.add(new JMenuItem(createAction(
 				ActionKey.RESET_COORDINATE,
 				"位置と倍率の初期化(R)",
@@ -242,6 +245,31 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 				'Q',
 				KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0),
 				e -> getView().getController().setX(getView().getController().getX() + 50 * getView().getController().getZoomX()))));
+
+			menuBar.add(menu);
+		}
+		{
+			JMenu menu = new JMenu("色(C)");
+			menu.setMnemonic('C');
+
+			menu.add(new JMenuItem(createAction(
+				ActionKey.CHANGE_COLOR_GRID,
+				"グリッド色の変更(G)",
+				"グリッドの色を変更します。",
+				'G',
+				null,
+				e -> {
+					toolGrid.colorGrid = JColorChooser.showDialog(new JColorChooser(), "グリッドの色の変更", toolGrid.colorGrid);
+				})));
+			menu.add(new JMenuItem(createAction(
+				ActionKey.CHANGE_COLOR_CURSOR,
+				"カーソル色の変更(C)",
+				"カーソル線の色を変更します。",
+				'C',
+				null,
+				e -> {
+					toolGrid.colorCursor = JColorChooser.showDialog(new JColorChooser(), "カーソルの色の変更", toolGrid.colorCursor);
+				})));
 
 			menuBar.add(menu);
 		}

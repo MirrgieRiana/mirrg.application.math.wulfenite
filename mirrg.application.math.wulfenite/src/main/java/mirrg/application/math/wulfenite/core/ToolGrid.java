@@ -26,6 +26,8 @@ public class ToolGrid extends Entity<Wulfenite>
 
 	public boolean enabledGrid = true;
 	public boolean enabledCursor = true;
+	public Color colorGrid = Color.white;
+	public Color colorCursor = Color.yellow;
 
 	public ToolGrid(Wulfenite wulfenite)
 	{
@@ -142,7 +144,7 @@ public class ToolGrid extends Entity<Wulfenite>
 			// lines
 			if (enabledGrid) {
 				// TODO アンダーフロー
-				g.setColor(Color.black);
+				g.setColor(colorGrid);
 				for (double x : linesX) {
 					int dx = (int) game.getView().getController().getScreenX(x);
 					g.drawLine(dx, 0, dx, game.canvas.getHeight());
@@ -155,7 +157,7 @@ public class ToolGrid extends Entity<Wulfenite>
 
 			// lines cursor
 			if (enabledCursor) {
-				g.setColor(Color.blue);
+				g.setColor(colorCursor);
 
 				{
 					int dx = (int) game.getView().getController().getScreenX(mgridx);
