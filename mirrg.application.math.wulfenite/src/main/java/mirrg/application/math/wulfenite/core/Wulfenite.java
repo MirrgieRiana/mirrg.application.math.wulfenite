@@ -379,7 +379,7 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 		view.zoomY = -0.01;
 
 		ModelMapperScript mapper = new ModelMapperScript();
-		mapper.source = "(x + 1 + 1i) * (x - 1 - 1i) / (x - 1 + 1i) / (x + 1 - 1i)";
+		mapper.source = "(z + 1 + i) * (z - 1 - i) / (z - 1 + i) / (z + 1 - i)";
 
 		ModelWulfenite model = new ModelWulfenite(view, mapper);
 

@@ -10,6 +10,7 @@ import mirrg.application.math.wulfenite.core.types.SlotBoolean;
 import mirrg.application.math.wulfenite.core.types.SlotDouble;
 import mirrg.application.math.wulfenite.core.types.Type;
 import mirrg.application.math.wulfenite.script.function.WSFunction;
+import mirrg.helium.math.hydrogen.complex.StructureComplex;
 import mirrg.helium.math.hydrogen.complex.functions.Exponential;
 import mirrg.helium.math.hydrogen.complex.functions.Trigonometry;
 
@@ -29,6 +30,7 @@ public class Loader
 		{
 			environment.addVariable("PI", Type.DOUBLE).value = new SlotDouble(Math.PI);
 			environment.addVariable("E", Type.DOUBLE).value = new SlotDouble(Math.E);
+			environment.addVariable("i", Type.COMPLEX).value = new StructureComplex(0, 1);
 			environment.addVariable("true", Type.BOOLEAN).value = new SlotBoolean(true);
 			environment.addVariable("false", Type.BOOLEAN).value = new SlotBoolean(false);
 		}
