@@ -3,9 +3,11 @@ package mirrg.application.math.wulfenite.core;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.util.ArrayList;
 import java.util.Optional;
 
 import mirrg.helium.math.hydrogen.complex.StructureComplex;
+import mirrg.helium.standard.hydrogen.struct.Tuple;
 import mirrg.helium.standard.hydrogen.util.HMath;
 import mirrg.helium.standard.hydrogen.util.HString;
 import mirrg.helium.swing.phosphorus.canvas.EventPhosphorusCanvas;
@@ -20,6 +22,7 @@ public class ToolGrid extends Entity<Wulfenite>
 	private static final Font font = new Font("MS Gothic", Font.BOLD, 14);
 
 	private PointScreen point = new PointScreen(0, 0);
+	private boolean isControl = false;
 
 	public boolean enabledGrid = true;
 	public boolean enabledCursor = true;
@@ -34,6 +37,14 @@ public class ToolGrid extends Entity<Wulfenite>
 		});
 		registerEvent(EventPhosphorusCanvas.EventMouseMotion.Dragged.class, e -> {
 			point = new PointScreen(e.event.getPoint());
+			dirty(game.layerOverlay);
+		});
+		registerEvent(EventPhosphorusCanvas.EventKey.Pressed.class, e -> {
+			isControl = true;
+			dirty(game.layerOverlay);
+		});
+		registerEvent(EventPhosphorusCanvas.EventKey.Released.class, e -> {
+			isControl = false;
 			dirty(game.layerOverlay);
 		});
 
@@ -96,16 +107,48 @@ public class ToolGrid extends Entity<Wulfenite>
 			double mgridendx = mx2;
 			double mgridendy = my2;
 
+			// グリッドの数学的座標
+			ArrayList<Double> linesX = new ArrayList<>();
+			for (double x = mgridstartx; x < mgridendx; x += gridSpaceW) {
+				linesX.add(x);
+			}
+			ArrayList<Double> linesY = new ArrayList<>();
+			for (double y = mgridstarty; y < mgridendy; y += gridSpaceH) {
+				linesY.add(y);
+			}
+
+			// カーソルの数学的座標
+			double mgridx = game.getView().getController().getCoordinateX(point.x);
+			double mgridy = game.getView().getController().getCoordinateY(point.y);
+			if (isControl) {
+				// カーソル情報の座標をグリッドのある座標に固定
+
+				double mgridx2 = mgridx;
+				double mgridy2 = mgridy;
+
+				Optional<Double> x = linesX.stream()
+					.map(a -> new Tuple<>(a, Math.abs(mgridx2 - a)))
+					.min((a, b) -> (int) Math.signum(a.getY() - b.getY()))
+					.map(a -> a.getX());
+				if (x.isPresent()) mgridx = x.get();
+
+				Optional<Double> y = linesY.stream()
+					.map(a -> new Tuple<>(a, Math.abs(mgridy2 - a)))
+					.min((a, b) -> (int) Math.signum(a.getY() - b.getY()))
+					.map(a -> a.getX());
+				if (y.isPresent()) mgridy = y.get();
+			}
+
 			// lines
 			if (enabledGrid) {
+				// TODO アンダーフロー
 				g.setColor(Color.black);
-				for (double mgridx = mgridstartx; mgridx < mgridendx; mgridx += gridSpaceW) {
-					int dx = (int) game.getView().getController().getScreenX(mgridx);
+				for (double x : linesX) {
+					int dx = (int) game.getView().getController().getScreenX(x);
 					g.drawLine(dx, 0, dx, game.canvas.getHeight());
 				}
-				for (double mgridy = mgridstarty; mgridy < mgridendy; mgridy += gridSpaceH) {
-					// TODO アンダーフロー
-					int dy = (int) game.getView().getController().getScreenY(mgridy);
+				for (double y : linesY) {
+					int dy = (int) game.getView().getController().getScreenY(y);
 					g.drawLine(0, dy, game.canvas.getWidth(), dy);
 				}
 			}
@@ -115,13 +158,11 @@ public class ToolGrid extends Entity<Wulfenite>
 				g.setColor(Color.blue);
 
 				{
-					double mgridx = game.getView().getController().getCoordinateX(point.x);
 					int dx = (int) game.getView().getController().getScreenX(mgridx);
 					g.drawLine(dx, 0, dx, game.canvas.getHeight());
 				}
 
 				{
-					double mgridy = game.getView().getController().getCoordinateY(point.y);
 					int dy = (int) game.getView().getController().getScreenY(mgridy);
 					g.drawLine(0, dy, game.canvas.getWidth(), dy);
 				}
@@ -133,9 +174,9 @@ public class ToolGrid extends Entity<Wulfenite>
 				// X座標ラベルの描画位置カウンタ
 				int drawY = 0;
 
-				for (double mgridx = mgridstartx; mgridx < mgridendx; mgridx += gridSpaceW) {
-					int dx = (int) game.getView().getController().getScreenX(mgridx);
-					String str = HString.getEffectiveExpression(mgridx, effectiveDigitW);
+				for (double x : linesX) {
+					int dx = (int) game.getView().getController().getScreenX(x);
+					String str = HString.getEffectiveExpression(x, effectiveDigitW);
 
 					g.setFont(font);
 					drawBoldString(g, str, dx, (1 + drawY) * g.getFont().getSize(), Color.white, Color.black);
@@ -144,9 +185,9 @@ public class ToolGrid extends Entity<Wulfenite>
 					drawY = (drawY + 1) % (1 + (int) (textLength / gridSpaceDispW));
 				}
 
-				for (double mgridy = mgridstarty; mgridy < mgridendy; mgridy += gridSpaceH) {
-					int dy = (int) game.getView().getController().getScreenY(mgridy);
-					String str = HString.getEffectiveExpression(mgridy, effectiveDigitH);
+				for (double y : linesY) {
+					int dy = (int) game.getView().getController().getScreenY(y);
+					String str = HString.getEffectiveExpression(y, effectiveDigitH);
 
 					g.setFont(font);
 					drawBoldString(g, str, 0, dy + g.getFont().getSize(), Color.white, Color.black);
@@ -158,8 +199,8 @@ public class ToolGrid extends Entity<Wulfenite>
 
 				{
 					StructureComplex buffer = new StructureComplex(
-						game.getView().getController().getCoordinateX(point.x),
-						game.getView().getController().getCoordinateY(point.y));
+						mgridx,
+						mgridy);
 					String[] valueInformation = game.getFunction().getValueInformation(buffer);
 
 					for (int i = 0; i < valueInformation.length; i++) {
@@ -167,35 +208,31 @@ public class ToolGrid extends Entity<Wulfenite>
 
 						g.setFont(font);
 						drawBoldString(g, str,
-							(int) (point.x + 2),
-							(int) (point.y - 2 - g.getFont().getSize() * ((1 + valueInformation.length) - i)),
+							(int) (game.getView().getController().getScreenX(mgridx) + 2),
+							(int) (game.getView().getController().getScreenY(mgridy) - 2 - g.getFont().getSize() * ((1 + valueInformation.length) - i)),
 							Color.white, Color.black);
 					}
 				}
 
 				{
-					double mgridx = game.getView().getController().getCoordinateX(point.x);
-
 					String str = "Re: " + HString.getEffectiveExpression(
 						mgridx, effectiveDigitW + 4);
 
 					g.setFont(font);
 					drawBoldString(g, str,
-						(int) (point.x + 2),
-						(int) (point.y - 2 - g.getFont().getSize()),
+						(int) (game.getView().getController().getScreenX(mgridx) + 2),
+						(int) (game.getView().getController().getScreenY(mgridy) - 2 - g.getFont().getSize()),
 						Color.yellow, Color.black);
 				}
 
 				{
-					double mgridy = game.getView().getController().getCoordinateY(point.y);
-
 					String str = "Im: " + HString.getEffectiveExpression(
 						mgridy, effectiveDigitH + 4);
 
 					g.setFont(font);
 					drawBoldString(g, str,
-						(int) (point.x + 2),
-						(int) (point.y - 2),
+						(int) (game.getView().getController().getScreenX(mgridx) + 2),
+						(int) (game.getView().getController().getScreenY(mgridy) - 2),
 						Color.yellow, Color.black);
 				}
 
