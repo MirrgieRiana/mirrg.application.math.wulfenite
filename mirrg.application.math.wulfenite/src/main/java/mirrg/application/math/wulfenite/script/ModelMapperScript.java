@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import mirrg.application.math.wulfenite.core.ModelMapperBase;
 import mirrg.application.math.wulfenite.core.Wulfenite;
+import mirrg.application.math.wulfenite.core.types.SlotDouble;
 import mirrg.application.math.wulfenite.core.types.Type;
 import mirrg.application.math.wulfenite.script.core.Environment;
 import mirrg.application.math.wulfenite.script.core.Loader;
@@ -128,9 +129,11 @@ public class ModelMapperScript extends ModelMapperBase
 			private ResultOxygen<IWSFormula> result;
 
 			private Environment environment;
-			private Variable<StructureComplex> variable1;
-			private Variable<StructureComplex> variable2;
-			private Variable<StructureComplex> variable3;
+			private Variable<SlotDouble> variableX;
+			private Variable<SlotDouble> variableY;
+			private Variable<StructureComplex> variableZ;
+			private Variable<StructureComplex> variableA;
+			private Variable<StructureComplex> variableB;
 			private boolean isValid;
 
 			private IWSFormula formula;
@@ -138,9 +141,11 @@ public class ModelMapperScript extends ModelMapperBase
 			public Object getValue(StructureComplex coordinate)
 			{
 				if (formula != null) {
-					variable1.value = coordinate;
-					variable2.value = point1;
-					variable3.value = point2;
+					variableX.value.value = coordinate.re;
+					variableY.value.value = coordinate.im;
+					variableZ.value = coordinate;
+					variableA.value = point1;
+					variableB.value = point2;
 					return formula.getValue();
 				}
 				return null;
@@ -159,9 +164,13 @@ public class ModelMapperScript extends ModelMapperBase
 				{
 					resultValidate.environment = new Environment();
 
-					resultValidate.variable1 = resultValidate.environment.addVariable("x", Type.COMPLEX);
-					resultValidate.variable2 = resultValidate.environment.addVariable("a", Type.COMPLEX);
-					resultValidate.variable3 = resultValidate.environment.addVariable("b", Type.COMPLEX);
+					resultValidate.variableX = resultValidate.environment.addVariable("x", Type.DOUBLE);
+					resultValidate.variableX.value = new SlotDouble();
+					resultValidate.variableY = resultValidate.environment.addVariable("y", Type.DOUBLE);
+					resultValidate.variableY.value = new SlotDouble();
+					resultValidate.variableZ = resultValidate.environment.addVariable("z", Type.COMPLEX);
+					resultValidate.variableA = resultValidate.environment.addVariable("a", Type.COMPLEX);
+					resultValidate.variableB = resultValidate.environment.addVariable("b", Type.COMPLEX);
 					Loader.loadEnvironment(resultValidate.environment);
 
 				}
