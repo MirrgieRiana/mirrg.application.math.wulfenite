@@ -179,6 +179,7 @@ public class Loader
 			a("asin", new WSF1<>(D, D, (z, a) -> z.value = FastMath.asin(a.value)));
 			a("acos", new WSF1<>(D, D, (z, a) -> z.value = FastMath.acos(a.value)));
 			a("atan", new WSF1<>(D, D, (z, a) -> z.value = FastMath.atan(a.value)));
+			a("atan2", new WSF2<>(D, D, D, (z, a, b) -> z.value = FastMath.atan2(a.value, b.value)));
 			a("asinh", new WSF1<>(D, D, (z, a) -> z.value = FastMath.asinh(a.value)));
 			a("acosh", new WSF1<>(D, D, (z, a) -> z.value = FastMath.acosh(a.value)));
 			a("atanh", new WSF1<>(D, D, (z, a) -> z.value = FastMath.atanh(a.value)));
