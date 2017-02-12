@@ -20,9 +20,9 @@ import mirrg.helium.swing.phosphorus.canvas.game.render.RectangleCoordinate;
 public class ModelGrid extends ModelEntity<Wulfenite>
 {
 
-	public double unitX = Math.PI;
+	public double unitX = 1;
 	public double unitY = 1;
-	public String unitNameX = "π";
+	public String unitNameX = "";
 	public String unitNameY = "";
 
 	public boolean enabledGrid = true;
