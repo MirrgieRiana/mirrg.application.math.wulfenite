@@ -3,7 +3,6 @@ package mirrg.application.math.wulfenite.core;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -27,6 +26,8 @@ public class ModelGrid extends ModelEntity<Wulfenite>
 	public Color colorGrid = Color.white;
 	public Color colorCursor = Color.yellow;
 
+	public boolean enabledCatch = false;
+
 	@Override
 	public EntityGrid getController()
 	{
@@ -45,7 +46,6 @@ public class ModelGrid extends ModelEntity<Wulfenite>
 	{
 
 		private PointScreen point = new PointScreen(0, 0);
-		private boolean isControl = false;
 
 		public EntityGrid(Wulfenite wulfenite)
 		{
@@ -58,18 +58,6 @@ public class ModelGrid extends ModelEntity<Wulfenite>
 			registerEvent(EventPhosphorusCanvas.EventMouseMotion.Dragged.class, e -> {
 				point = new PointScreen(e.event.getPoint());
 				dirty(game.layerOverlay);
-			});
-			registerEvent(EventPhosphorusCanvas.EventKey.Pressed.class, e -> {
-				if (e.event.getKeyCode() == KeyEvent.VK_CONTROL) {
-					isControl = true;
-					dirty(game.layerOverlay);
-				}
-			});
-			registerEvent(EventPhosphorusCanvas.EventKey.Released.class, e -> {
-				if (e.event.getKeyCode() == KeyEvent.VK_CONTROL) {
-					isControl = false;
-					dirty(game.layerOverlay);
-				}
 			});
 
 			registerGameEvent(EventWulfenite.ChangeFunction.Post.class, e -> {

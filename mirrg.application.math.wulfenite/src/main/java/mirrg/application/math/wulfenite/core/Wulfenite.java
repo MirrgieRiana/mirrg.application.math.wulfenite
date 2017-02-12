@@ -63,6 +63,7 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 		SHOW_GRID,
 		SHOW_CURSOR_INFO,
 		SHOW_EXTRA_INFO,
+		TOGGLE_CATCH,
 		CHANGE_COLOR_GRID,
 		CHANGE_COLOR_CURSOR,
 	}
@@ -327,6 +328,25 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 							menuItem.x.setSelected(!menuItem.x.isSelected());
 						}
 						getModel().grid.enabledExtra = menuItem.x.isSelected();
+						getLayers().forEach(Layer::dirty);
+					}));
+				menuItem.x.setSelected(true);
+				menu.add(menuItem.x);
+			}
+			menu.addSeparator();
+			{
+				Struct1<JMenuItem> menuItem = new Struct1<>();
+				menuItem.x = new JCheckBoxMenuItem(createAction(
+					ActionKey.TOGGLE_CATCH,
+					"カーソル情報をグリッドに吸着(T)",
+					"カーソル情報をグリッドの交点に乗せるか否かを切り替えます。",
+					'T',
+					KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0),
+					e -> {
+						if (!(e.getSource() instanceof JCheckBoxMenuItem)) {
+							menuItem.x.setSelected(!menuItem.x.isSelected());
+						}
+						getModel().grid.enabledCatch = menuItem.x.isSelected();
 						getLayers().forEach(Layer::dirty);
 					}));
 				menuItem.x.setSelected(true);
