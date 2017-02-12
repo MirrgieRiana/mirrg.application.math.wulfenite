@@ -16,7 +16,6 @@ import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -64,7 +63,7 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 		SHOW_CURSOR_INFO,
 	}
 
-	public final JFrame frame;
+	public final FrameWulfenite frame;
 
 	public final Layer layerMath;
 	public final Layer layerOverlay;
@@ -77,7 +76,7 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 
 	private String xml;
 
-	public Wulfenite(JFrame frame, PhosphorusCanvas canvas, JMenuBar menuBar)
+	public Wulfenite(FrameWulfenite frame, PhosphorusCanvas canvas, JMenuBar menuBar)
 	{
 		super(canvas);
 		this.frame = frame;

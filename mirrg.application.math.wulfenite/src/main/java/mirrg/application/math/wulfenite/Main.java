@@ -4,9 +4,9 @@ import javax.swing.ImageIcon;
 import javax.swing.JMenuBar;
 import javax.swing.WindowConstants;
 
+import mirrg.application.math.wulfenite.core.FrameWulfenite;
 import mirrg.application.math.wulfenite.core.Wulfenite;
 import mirrg.helium.swing.nitrogen.util.HSwing;
-import mirrg.helium.swing.phosphorus.canvas.util.FrameCanvas;
 import mirrg.helium.swing.phosphorus.canvas.util.IntervalThread;
 
 public class Main
@@ -16,7 +16,7 @@ public class Main
 	{
 		HSwing.setWindowsLookAndFeel();
 
-		FrameCanvas frame = new FrameCanvas(600, 600);
+		FrameWulfenite frame = new FrameWulfenite(600, 600);
 
 		frame.setTitle("Wulfenite");
 		try {
