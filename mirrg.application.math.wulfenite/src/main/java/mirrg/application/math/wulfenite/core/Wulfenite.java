@@ -328,9 +328,9 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 		action.putValue(Action.NAME, name);
 		action.putValue(Action.MNEMONIC_KEY, Integer.valueOf(mnemonicKey));
 		action.putValue(Action.SHORT_DESCRIPTION, shortDescription);
-		action.putValue(Action.ACCELERATOR_KEY, acceleratorKey);
+		if (acceleratorKey != null) action.putValue(Action.ACCELERATOR_KEY, acceleratorKey);
 		actionMap.put(actionKey, action);
-		inputMap.put(acceleratorKey, actionKey);
+		if (acceleratorKey != null) inputMap.put(acceleratorKey, actionKey);
 
 		return action;
 	}
