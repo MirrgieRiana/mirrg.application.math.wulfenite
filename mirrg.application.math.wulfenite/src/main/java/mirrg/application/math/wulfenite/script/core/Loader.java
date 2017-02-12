@@ -139,6 +139,31 @@ public class Loader
 
 			a("sign", new WSF1<>(I, D, (z, a) -> z.value = (int) FastMath.signum(a.value)));
 
+			a("color", new WSF3<>(Co, I, I, I, (z, a, b, c) -> {
+				int a2 = a.value;
+				int b2 = b.value;
+				int c2 = c.value;
+				if (a2 < 0) a2 = 0;
+				if (b2 < 0) b2 = 0;
+				if (c2 < 0) c2 = 0;
+				if (a2 > 255) a2 = 255;
+				if (b2 > 255) b2 = 255;
+				if (c2 > 255) c2 = 255;
+				z.value = (a2 << 16) | (b2 << 8) | c2;
+			}));
+			a("color", new WSF3<>(Co, D, D, D, (z, a, b, c) -> {
+				int a2 = (int) (a.value * 255);
+				int b2 = (int) (b.value * 255);
+				int c2 = (int) (c.value * 255);
+				if (a2 < 0) a2 = 0;
+				if (b2 < 0) b2 = 0;
+				if (c2 < 0) c2 = 0;
+				if (a2 > 255) a2 = 255;
+				if (b2 > 255) b2 = 255;
+				if (c2 > 255) c2 = 255;
+				z.value = (a2 << 16) | (b2 << 8) | c2;
+			}));
+
 		}
 
 		// 三角関数
