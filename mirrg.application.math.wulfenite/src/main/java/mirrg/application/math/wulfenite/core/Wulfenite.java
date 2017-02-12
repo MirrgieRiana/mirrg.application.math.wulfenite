@@ -252,6 +252,7 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 			JMenu menu = new JMenu("色(C)");
 			menu.setMnemonic('C');
 
+			JColorChooser colorChooser = new JColorChooser();
 			menu.add(new JMenuItem(createAction(
 				ActionKey.CHANGE_COLOR_GRID,
 				"グリッド色の変更(G)",
@@ -259,7 +260,7 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 				'G',
 				null,
 				e -> {
-					toolGrid.colorGrid = JColorChooser.showDialog(new JColorChooser(), "グリッドの色の変更", toolGrid.colorGrid);
+					getModel().grid.colorGrid = JColorChooser.showDialog(colorChooser, "グリッドの色の変更", getModel().grid.colorGrid);
 				})));
 			menu.add(new JMenuItem(createAction(
 				ActionKey.CHANGE_COLOR_CURSOR,
@@ -268,7 +269,7 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 				'C',
 				null,
 				e -> {
-					toolGrid.colorCursor = JColorChooser.showDialog(new JColorChooser(), "カーソルの色の変更", toolGrid.colorCursor);
+					getModel().grid.colorCursor = JColorChooser.showDialog(colorChooser, "カーソルの色の変更", getModel().grid.colorCursor);
 				})));
 
 			menuBar.add(menu);
