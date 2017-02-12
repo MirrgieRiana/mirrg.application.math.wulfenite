@@ -4,14 +4,14 @@ import java.util.function.Consumer;
 
 import mirrg.helium.game.carbon.base.ModelCarbon;
 import mirrg.helium.swing.phosphorus.canvas.game.ModelPhosphorus;
-import mirrg.helium.swing.phosphorus.canvas.game.view.ModelViewSkewed;
+import mirrg.helium.swing.phosphorus.canvas.game.view.ModelViewXYZoomXY;
 
-public class ModelWulfenite extends ModelPhosphorus<Wulfenite, ModelViewSkewed>
+public class ModelWulfenite extends ModelPhosphorus<Wulfenite, ModelViewXYZoomXY>
 {
 
 	public ModelMapperBase mapper;
 
-	public ModelWulfenite(ModelViewSkewed view, ModelMapperBase mapper)
+	public ModelWulfenite(ModelViewXYZoomXY view, ModelMapperBase mapper)
 	{
 		super(view);
 		this.mapper = mapper;

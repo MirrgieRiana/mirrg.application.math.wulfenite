@@ -33,10 +33,10 @@ import mirrg.helium.swing.phosphorus.canvas.game.GamePhosphorus;
 import mirrg.helium.swing.phosphorus.canvas.game.entity.ToolScroll;
 import mirrg.helium.swing.phosphorus.canvas.game.entity.ToolZoom;
 import mirrg.helium.swing.phosphorus.canvas.game.render.Layer;
-import mirrg.helium.swing.phosphorus.canvas.game.view.ModelViewSkewed;
+import mirrg.helium.swing.phosphorus.canvas.game.view.ModelViewXYZoomXY;
 
 // TODO クリプトが無限ループしたときの処理
-public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelViewSkewed>
+public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelViewXYZoomXY>
 {
 
 	public static enum ActionKey
@@ -65,7 +65,7 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 	public final Layer layerOverlay;
 
 	public ToolGrid toolGrid;
-	public ToolZoom toolZoom;
+	public ToolZoomXY toolZoom;
 
 	public final ActionMap actionMap;
 	public final InputMap inputMap;
@@ -302,7 +302,7 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 	public void init()
 	{
 		addTool(new ToolScroll(this, MouseEvent.BUTTON2));
-		addTool(toolZoom = new ToolZoom(this));
+		addTool(toolZoom = new ToolZoomXY(this));
 		addTool(new ToolWulfenitePainter(this, 45));
 		addTool(toolGrid = new ToolGrid(this));
 		addTool(new ToolWulfeniteScrollSaver(this));
@@ -374,7 +374,7 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 
 	public static ModelWulfenite createDefaultData()
 	{
-		ModelViewSkewed view = new ModelViewSkewed();
+		ModelViewXYZoomXY view = new ModelViewXYZoomXY();
 		view.zoomX = 0.01;
 		view.zoomY = -0.01;
 
