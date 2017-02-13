@@ -14,7 +14,7 @@ project.archivesBaseName = 'mirrg.application.math.wulfenite'
 
 // ★成果物のバージョン
 def superversion = '1' // 破壊的なバージョン変更
-def subversion = '1.0' // 破壊的でないバージョン変更
+def subversion = '1.1' // 破壊的でないバージョン変更
 
 // ★依存関係
 dependencies {
