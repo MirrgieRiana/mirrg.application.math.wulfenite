@@ -8,3 +8,4 @@ backup/
 */.classpath
 */*-*-*.png
 */*-*-*.xml
+*/saves*.zip
