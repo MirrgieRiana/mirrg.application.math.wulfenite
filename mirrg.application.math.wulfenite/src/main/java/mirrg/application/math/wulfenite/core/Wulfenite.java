@@ -3,12 +3,21 @@ package mirrg.application.math.wulfenite.core;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Event;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
+import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -28,6 +37,7 @@ import com.thoughtworks.xstream.XStream;
 
 import mirrg.application.math.wulfenite.script.ModelMapperScript;
 import mirrg.helium.standard.hydrogen.struct.Struct1;
+import mirrg.helium.swing.nitrogen.wrapper.artifacts.logging.HLog;
 import mirrg.helium.swing.phosphorus.canvas.PhosphorusCanvas;
 import mirrg.helium.swing.phosphorus.canvas.game.EventGamePhosphorus;
 import mirrg.helium.swing.phosphorus.canvas.game.GamePhosphorus;
@@ -44,6 +54,8 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 		RESET,
 		RESET_COORDINATE,
 		RESET_ASPECT,
+		SCREEN_SHOT,
+		SCREEN_SHOT_WITHOUT_UI,
 		TEMPORARY_SAVE,
 		TEMPORARY_LOAD,
 		OPEN_CONFIG_DIALOG,
@@ -152,6 +164,27 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 					dialog.setLocationByPlatform(true);
 					dialog.setVisible(true);
 				})));
+
+			menu.addSeparator();
+			menu.add(new JMenuItem(createAction(
+				ActionKey.SCREEN_SHOT,
+				"表示画面のエクスポート(P)",
+				"現在の画面を保存します。",
+				'P',
+				KeyStroke.getKeyStroke(KeyEvent.VK_P, 0),
+				e -> {
+					doScreenShot(false);
+				})));
+			menu.add(new JMenuItem(createAction(
+				ActionKey.SCREEN_SHOT_WITHOUT_UI,
+				"数学レイヤーのエクスポート(M)",
+				"現在の数学レイヤーを保存します。",
+				'M',
+				KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.SHIFT_DOWN_MASK),
+				e -> {
+					doScreenShot(true);
+				})));
+
 			menuBar.add(menu);
 		}
 		{
@@ -431,6 +464,48 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 		layerMath.setAutoClear(false);
 		addLayer(layerMath);
 		addLayer(layerOverlay = createLayer());
+	}
+
+	public void doScreenShot(boolean onlyMathLayer)
+	{
+		BufferedImage image = new BufferedImage(canvas.getWidth(), canvas.getHeight(), BufferedImage.TYPE_INT_RGB);
+		Graphics2D graphics = image.createGraphics();
+
+		if (onlyMathLayer) {
+			layerMath.paint(graphics, () -> {
+				of(this::getEntities)
+					.sorted((a, b) -> (int) Math.signum(a.getZOrder() - b.getZOrder()))
+					.forEach(e -> e.render(layerMath));
+			});
+		} else {
+			getLayers().forEach(l -> {
+				l.paint(graphics, () -> {
+					of(this::getEntities)
+						.sorted((a, b) -> (int) Math.signum(a.getZOrder() - b.getZOrder()))
+						.forEach(e -> e.render(l));
+				});
+			});
+		}
+
+		//
+
+		String filename = LocalDateTime.now().format(DateTimeFormatter.ofPattern("uuuuMMdd-HHmmss-SSS"));
+		try {
+			ImageIO.write(image, "png", new File(filename + ".png"));
+		} catch (IOException e) {
+			HLog.processException(e);
+		}
+
+		//
+
+		try {
+			PrintStream out = new PrintStream(new File(filename + ".xml"));
+			out.print(getXML());
+			out.close();
+		} catch (FileNotFoundException e) {
+			HLog.processException(e);
+		}
+
 	}
 
 	public void openDialogCoordinate()
