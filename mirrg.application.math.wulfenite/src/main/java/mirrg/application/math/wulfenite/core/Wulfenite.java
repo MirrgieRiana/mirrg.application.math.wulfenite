@@ -90,6 +90,7 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 		TOGGLE_CATCH,
 		CHANGE_COLOR_GRID,
 		CHANGE_COLOR_CURSOR,
+		CHANGE_COLOR_FUNCTION,
 	}
 
 	public final FrameWulfenite frame;
@@ -103,6 +104,7 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 	public final InputMap inputMap;
 
 	private String xml;
+	public int color; // TODO
 
 	public Wulfenite(FrameWulfenite frame, PhosphorusCanvas canvas, JMenuBar menuBar)
 	{
@@ -325,6 +327,20 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 				null,
 				e -> {
 					getModel().grid.colorCursor = JColorChooser.showDialog(colorChooser, "カーソルの色の変更", getModel().grid.colorCursor);
+				})));
+
+			menu.addSeparator();
+			menu.add(new JMenuItem(createAction(
+				ActionKey.CHANGE_COLOR_FUNCTION,
+				"色関数の変更(F)",
+				"色関数を変更します。",
+				'F',
+				KeyStroke.getKeyStroke(KeyEvent.VK_C, 0),
+				e -> {
+					// TODO
+					fireChangeFunction(() -> {
+						color = (color + 1) % 2;
+					});
 				})));
 
 			menuBar.add(menu);

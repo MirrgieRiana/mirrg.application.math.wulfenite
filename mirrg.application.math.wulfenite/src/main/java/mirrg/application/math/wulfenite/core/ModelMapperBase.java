@@ -26,23 +26,48 @@ public abstract class ModelMapperBase extends ModelCarbon<Wulfenite>
 		{
 			Object value = getValue(coordinate);
 
-			if (value instanceof StructureComplex) {
-				return getColorIntFromComplex((StructureComplex) value);
-			} else if (value instanceof SlotColor) {
-				return ((SlotColor) value).value;
-			} else if (value instanceof SlotInteger) {
-				return HColor.createColor(getBrightness(((SlotInteger) value).value) * 255, 0, 0).getRGB();
-			} else if (value instanceof SlotDouble) {
-				return HColor.createColor(getBrightness(((SlotDouble) value).value) * 255, 0, 0).getRGB();
-			} else if (value instanceof SlotBoolean) {
-				return ((SlotBoolean) value).value ? 0xffffff : 0x404040;
-			} else if (value instanceof SlotString) {
-				return ((SlotString) value).value.hashCode();
-			} else if (value == null) {
-				return 0x000000;
-			} else {
-				return value.hashCode();
+			// TODO
+			switch (game.color) {
+				case 0:
+					if (value instanceof StructureComplex) {
+						return getColorIntFromComplex((StructureComplex) value);
+					} else if (value instanceof SlotColor) {
+						return ((SlotColor) value).value;
+					} else if (value instanceof SlotInteger) {
+						return HColor.createColor(getBrightness(((SlotInteger) value).value) * 255, 0, 0).getRGB();
+					} else if (value instanceof SlotDouble) {
+						return HColor.createColor(getBrightness(((SlotDouble) value).value) * 255, 0, 0).getRGB();
+					} else if (value instanceof SlotBoolean) {
+						return ((SlotBoolean) value).value ? 0xffffff : 0x404040;
+					} else if (value instanceof SlotString) {
+						return ((SlotString) value).value.hashCode();
+					} else if (value == null) {
+						return 0x000000;
+					} else {
+						return value.hashCode();
+					}
+				case 1:
+					if (value instanceof StructureComplex) {
+						return getColorIntFromComplex2((StructureComplex) value);
+					} else if (value instanceof SlotColor) {
+						return ((SlotColor) value).value;
+					} else if (value instanceof SlotInteger) {
+						return HColor.createColor(getBrightness(((SlotInteger) value).value) * 255, 0, 0).getRGB();
+					} else if (value instanceof SlotDouble) {
+						return HColor.createColor(getBrightness(((SlotDouble) value).value) * 255, 0, 0).getRGB();
+					} else if (value instanceof SlotBoolean) {
+						return ((SlotBoolean) value).value ? 0xffffff : 0x404040;
+					} else if (value instanceof SlotString) {
+						return ((SlotString) value).value.hashCode();
+					} else if (value == null) {
+						return 0x000000;
+					} else {
+						return value.hashCode();
+					}
+				default:
+					return 0x000000;
 			}
+
 		}
 
 		private double getBrightness(double value)
@@ -82,6 +107,27 @@ public abstract class ModelMapperBase extends ModelCarbon<Wulfenite>
 			double B = Math.cos(arg - 240.0 / 180 * Math.PI);
 
 			double brightness = 0.5 - 0.5 * Math.cos(abs * 2 * Math.PI);
+
+			brightness = 1 - brightness * brightness;
+
+			return HColor.getColorInt(
+				(int) ((128 + (126 * R)) * brightness),
+				(int) ((128 + (126 * G)) * brightness),
+				(int) ((128 + (126 * B)) * brightness));
+		}
+
+		public int getColorIntFromComplex2(StructureComplex coordinate)
+		{
+			return getColorIntFromPolar2(coordinate.getAbstract(), coordinate.getArgument());
+		}
+
+		public int getColorIntFromPolar2(double abs, double arg)
+		{
+			double R = Math.cos(arg);
+			double G = Math.cos(arg - 120.0 / 180 * Math.PI);
+			double B = Math.cos(arg - 240.0 / 180 * Math.PI);
+
+			double brightness = abs > 1 ? 1 : 1 - ((1 - abs) * (1 - abs) * (1 - abs) * (1 - abs));
 
 			brightness = 1 - brightness * brightness;
 
