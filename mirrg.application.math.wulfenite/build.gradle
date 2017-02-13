@@ -24,13 +24,14 @@ dependencies {
 	//compile group: 'mirrg', name: 'mirrg.struct.hydrogen', version: '2.0.0'
 	//compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
 	//compile group: 'mirrg', name: 'mirrg.struct.hydrogen-1.0', version: '+'
-	compile group: 'mirrg', name: 'mirrg.helium.standard.hydrogen.struct', version: '+'
-	compile group: 'mirrg', name: 'mirrg.helium.standard.hydrogen.event', version: '+'
-	compile group: 'mirrg', name: 'mirrg.helium.standard.hydrogen.util', version: '+'
-	compile group: 'mirrg', name: 'mirrg.helium.swing.phosphorus.canvas.game', version: '2.0.0+'
-	compile group: 'mirrg', name: 'mirrg.helium.swing.nitrogen.util', version: '+'
-	compile group: 'mirrg', name: 'mirrg.helium.math.hydrogen.complex', version: '+'
-	compile group: 'mirrg', name: 'mirrg.helium.compile.oxygen.editor', version: '1.0.5+'
+	compile group: 'mirrg', name: 'mirrg.helium.standard.hydrogen.struct', version: '0.0.1'
+	compile group: 'mirrg', name: 'mirrg.helium.standard.hydrogen.event', version: '0.0.1'
+	compile group: 'mirrg', name: 'mirrg.helium.standard.hydrogen.util', version: '0.0.3'
+	compile group: 'mirrg', name: 'mirrg.helium.swing.phosphorus.canvas.game', version: '2.0.0'
+	compile group: 'mirrg', name: 'mirrg.helium.swing.nitrogen.util', version: '0.0.2'
+	compile group: 'mirrg', name: 'mirrg.helium.math.hydrogen.complex', version: '0.0.1'
+	compile group: 'mirrg', name: 'mirrg.helium.compile.oxygen.editor', version: '1.0.5'
+	compile group: 'mirrg', name: 'mirrg.helium.compile.oxygen.parser', version: '1.1.4'
 
 }
 

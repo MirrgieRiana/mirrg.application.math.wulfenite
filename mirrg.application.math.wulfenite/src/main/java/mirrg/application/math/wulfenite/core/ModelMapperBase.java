@@ -127,9 +127,7 @@ public abstract class ModelMapperBase extends ModelCarbon<Wulfenite>
 			double G = Math.cos(arg - 120.0 / 180 * Math.PI);
 			double B = Math.cos(arg - 240.0 / 180 * Math.PI);
 
-			double brightness = abs > 1 ? 1 : 1 - ((1 - abs) * (1 - abs) * (1 - abs) * (1 - abs));
-
-			brightness = 1 - brightness * brightness;
+			double brightness = abs > game.color2_a ? game.color2_c : abs * (game.color2_c - game.color2_b) / game.color2_a + game.color2_b;
 
 			return HColor.getColorInt(
 				(int) ((128 + (126 * R)) * brightness),

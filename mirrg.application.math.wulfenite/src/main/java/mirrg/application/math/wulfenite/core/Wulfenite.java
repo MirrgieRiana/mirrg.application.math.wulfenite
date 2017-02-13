@@ -24,6 +24,7 @@ import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
@@ -45,6 +46,9 @@ import javax.swing.WindowConstants;
 
 import com.thoughtworks.xstream.XStream;
 
+import mirrg.application.math.wulfenite.core.dialogs.DialogColor2;
+import mirrg.application.math.wulfenite.core.dialogs.DialogCoordinate;
+import mirrg.application.math.wulfenite.core.dialogs.DialogUnit;
 import mirrg.application.math.wulfenite.script.ModelMapperScript;
 import mirrg.helium.standard.hydrogen.struct.Struct1;
 import mirrg.helium.swing.nitrogen.wrapper.artifacts.logging.HLog;
@@ -105,6 +109,9 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 
 	private String xml;
 	public int color; // TODO
+	public double color2_a = 1; // TODO
+	public double color2_b = 0; // TODO
+	public double color2_c = 1; // TODO
 
 	public Wulfenite(FrameWulfenite frame, PhosphorusCanvas canvas, JMenuBar menuBar)
 	{
@@ -301,7 +308,7 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 				"座標の設定ウィンドウを開きます。",
 				'D',
 				KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0),
-				e -> openDialogCoordinate())));
+				e -> openDialog(DialogCoordinate::new))));
 
 			menuBar.add(menu);
 		}
@@ -342,6 +349,15 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 						color = (color + 1) % 2;
 					});
 				})));
+
+			menu.addSeparator();
+			menu.add(new JMenuItem(createAction(
+				null,
+				"色関数2の設定...(2)",
+				"",
+				'2',
+				null,
+				e -> openDialog(DialogColor2::new))));
 
 			menuBar.add(menu);
 		}
@@ -447,7 +463,7 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 				"表示単位の設定ウィンドウを開きます。",
 				'D',
 				KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0),
-				e -> openDialogUnit())));
+				e -> openDialog(DialogUnit::new))));
 
 			menuBar.add(menu);
 		}
@@ -590,19 +606,9 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 
 	}
 
-	public void openDialogCoordinate()
+	public void openDialog(BiFunction<Wulfenite, FrameWulfenite, JDialog> constructor)
 	{
-		JDialog dialog = new DialogCoordinate(this, frame);
-
-		dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		dialog.pack();
-		dialog.setLocationByPlatform(true);
-		dialog.setVisible(true);
-	}
-
-	public void openDialogUnit()
-	{
-		JDialog dialog = new DialogUnit(this, frame);
+		JDialog dialog = constructor.apply(this, frame);
 
 		dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		dialog.pack();
@@ -639,8 +645,8 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 		action.putValue(Action.MNEMONIC_KEY, Integer.valueOf(mnemonicKey));
 		action.putValue(Action.SHORT_DESCRIPTION, shortDescription);
 		if (acceleratorKey != null) action.putValue(Action.ACCELERATOR_KEY, acceleratorKey);
-		actionMap.put(actionKey, action);
-		if (acceleratorKey != null) inputMap.put(acceleratorKey, actionKey);
+		if (actionKey != null) actionMap.put(actionKey, action);
+		if (acceleratorKey != null && actionKey != null) inputMap.put(acceleratorKey, actionKey);
 
 		return action;
 	}
