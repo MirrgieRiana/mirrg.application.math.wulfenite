@@ -4,18 +4,27 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.Graphics2D;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
@@ -31,6 +40,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
+import javax.swing.TransferHandler;
 import javax.swing.WindowConstants;
 
 import com.thoughtworks.xstream.XStream;
@@ -460,6 +470,60 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 			menuBar.add(menu);
 		}
 
+		canvas.setTransferHandler(new TransferHandler() {
+
+			@Override
+			public boolean canImport(TransferSupport transferSupport)
+			{
+				if (!transferSupport.isDrop()) return false;
+				return transferSupport.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
+			}
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public boolean importData(TransferSupport transferSupport)
+			{
+				if (!canImport(transferSupport)) return false;
+
+				// ファイル名取得
+				Transferable transferable = transferSupport.getTransferable();
+				List<File> files;
+				try {
+					files = (List<File>) transferable.getTransferData(DataFlavor.javaFileListFlavor);
+				} catch (UnsupportedFlavorException | IOException e) {
+					HLog.processException(e);
+					return false;
+				}
+				if (files.size() != 1) return false;
+				File file = files.get(0);
+
+				// PNG画像なら同名XMLを参照
+				String path = file.getAbsolutePath();
+				if (path.endsWith(".png")) {
+					path = path.substring(0, path.length() - 4) + ".xml";
+				}
+				file = new File(path);
+				if (!file.isFile()) return false;
+
+				// XMLコード読み取り
+				String xml;
+				try {
+					BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "utf8"));
+					xml = in.lines()
+						.collect(Collectors.joining(System.lineSeparator()));
+					in.close();
+				} catch (IOException e) {
+					HLog.processException(e);
+					return true;
+				}
+
+				// セット
+				setXML(xml);
+
+				return true;
+			}
+		});
+
 		layerMath = createLayer();
 		layerMath.setAutoClear(false);
 		addLayer(layerMath);
@@ -499,10 +563,12 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 		//
 
 		try {
-			PrintStream out = new PrintStream(new File(filename + ".xml"));
+			PrintStream out = new PrintStream(new File(filename + ".xml"), "utf8");
 			out.print(getXML());
 			out.close();
 		} catch (FileNotFoundException e) {
+			HLog.processException(e);
+		} catch (UnsupportedEncodingException e) {
 			HLog.processException(e);
 		}
 
