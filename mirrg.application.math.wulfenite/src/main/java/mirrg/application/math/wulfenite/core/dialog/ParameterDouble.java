@@ -10,12 +10,9 @@ import javax.swing.JFormattedTextField;
 public class ParameterDouble extends Parameter<Double, JFormattedTextField>
 {
 
-	protected Supplier<Double> getter;
-
 	public ParameterDouble(String name, Supplier<Double> getter, Consumer<Double> setter, Runnable pre, Runnable post)
 	{
-		super(name, setter, pre, post);
-		this.getter = getter;
+		super(name, getter, setter, pre, post);
 	}
 
 	@Override

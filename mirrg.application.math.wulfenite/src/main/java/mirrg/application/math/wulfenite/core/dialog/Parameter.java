@@ -4,6 +4,7 @@ import static mirrg.helium.swing.nitrogen.util.HSwing.*;
 
 import java.awt.Component;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import javax.swing.JLabel;
 
@@ -11,15 +12,17 @@ public abstract class Parameter<T, C extends Component>
 {
 
 	protected String name;
+	protected Supplier<T> getter;
 	protected Consumer<T> setter;
 	protected Runnable pre;
 	protected Runnable post;
 
 	protected C component;
 
-	public Parameter(String name, Consumer<T> setter, Runnable pre, Runnable post)
+	public Parameter(String name, Supplier<T> getter, Consumer<T> setter, Runnable pre, Runnable post)
 	{
 		this.name = name;
+		this.getter = getter;
 		this.setter = setter;
 		this.pre = pre;
 		this.post = post;

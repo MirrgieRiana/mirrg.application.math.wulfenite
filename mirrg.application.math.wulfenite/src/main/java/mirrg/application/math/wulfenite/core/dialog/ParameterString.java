@@ -9,12 +9,9 @@ import javax.swing.JTextField;
 public class ParameterString extends Parameter<String, JTextField>
 {
 
-	protected Supplier<String> getter;
-
 	public ParameterString(String name, Supplier<String> getter, Consumer<String> setter, Runnable pre, Runnable post)
 	{
-		super(name, setter, pre, post);
-		this.getter = getter;
+		super(name, getter, setter, pre, post);
 	}
 
 	@Override
