@@ -7,10 +7,10 @@ import java.util.function.Supplier;
 
 import javax.swing.JFormattedTextField;
 
-public class ParameterDouble extends ParameterTextFieldBase<Double, JFormattedTextField>
+public class ParameterInteger extends ParameterTextFieldBase<Integer, JFormattedTextField>
 {
 
-	public ParameterDouble(String name, Supplier<Double> getter, Consumer<Double> setter, Runnable pre, Runnable post)
+	public ParameterInteger(String name, Supplier<Integer> getter, Consumer<Integer> setter, Runnable pre, Runnable post)
 	{
 		super(name, getter, setter, pre, post);
 	}
@@ -18,7 +18,7 @@ public class ParameterDouble extends ParameterTextFieldBase<Double, JFormattedTe
 	@Override
 	protected JFormattedTextField createComponent()
 	{
-		JFormattedTextField component = new JFormattedTextField(new DecimalFormat("0.00000000"));
+		JFormattedTextField component = new JFormattedTextField(new DecimalFormat("0"));
 		component.setValue(getter.get());
 		component.setColumns(10);
 		component.setAlignmentX(TextField.RIGHT_ALIGNMENT);
@@ -31,15 +31,15 @@ public class ParameterDouble extends ParameterTextFieldBase<Double, JFormattedTe
 	}
 
 	@Override
-	protected void setToComponent(Double t)
+	protected void setToComponent(Integer t)
 	{
 		component.setValue(t);
 	}
 
 	@Override
-	protected Double getFromComponent()
+	protected Integer getFromComponent()
 	{
-		return ((Number) component.getValue()).doubleValue();
+		return ((Number) component.getValue()).intValue();
 	}
 
 }

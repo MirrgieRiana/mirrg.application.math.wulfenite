@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 
 import javax.swing.JTextField;
 
-public class ParameterString extends Parameter<String, JTextField>
+public class ParameterString extends ParameterTextFieldBase<String, JTextField>
 {
 
 	public ParameterString(String name, Supplier<String> getter, Consumer<String> setter, Runnable pre, Runnable post)

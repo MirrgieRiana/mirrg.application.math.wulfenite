@@ -1,14 +1,10 @@
 package mirrg.application.math.wulfenite.core.dialog;
 
-import static mirrg.helium.swing.nitrogen.util.HSwing.*;
-
 import java.awt.Component;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import javax.swing.JLabel;
-
-public abstract class Parameter<T, C extends Component>
+public abstract class ParameterBase<T, C extends Component>
 {
 
 	protected String name;
@@ -19,7 +15,7 @@ public abstract class Parameter<T, C extends Component>
 
 	protected C component;
 
-	public Parameter(String name, Supplier<T> getter, Consumer<T> setter, Runnable pre, Runnable post)
+	public ParameterBase(String name, Supplier<T> getter, Consumer<T> setter, Runnable pre, Runnable post)
 	{
 		this.name = name;
 		this.getter = getter;
@@ -28,20 +24,9 @@ public abstract class Parameter<T, C extends Component>
 		this.post = post;
 	}
 
-	public Component initRecord()
-	{
-		return createBorderPanelRight(
-			createBorderPanelLeft(
-				new JLabel(name),
-				initTextField()),
-			createButton("設定", e -> {
-				pre.run();
-				update();
-				post.run();
-			}));
-	}
+	public abstract Component initRecord();
 
-	public C initTextField()
+	public C initComponent()
 	{
 		component = createComponent();
 		return component;
