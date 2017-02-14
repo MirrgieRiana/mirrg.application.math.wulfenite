@@ -104,7 +104,7 @@ public class ModelMapperScript extends ModelMapperBase
 			if (layer == game.layerOverlay) {
 				Graphics2D g = layer.getImageLayer().getGraphics();
 
-				if (game.getModel().grid.enabledExtra) {
+				if (game.getModel().grid.enableExtra) {
 					{
 						PointScreen point = game.getView().getController().convert(new PointCoordinate(point1.re, point1.im));
 						g.setColor(Color.red);

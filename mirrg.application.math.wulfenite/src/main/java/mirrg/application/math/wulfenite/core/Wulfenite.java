@@ -33,8 +33,6 @@ import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JColorChooser;
 import javax.swing.JDialog;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -48,9 +46,8 @@ import com.thoughtworks.xstream.XStream;
 
 import mirrg.application.math.wulfenite.core.dialogs.DialogColor2;
 import mirrg.application.math.wulfenite.core.dialogs.DialogCoordinate;
-import mirrg.application.math.wulfenite.core.dialogs.DialogUnit;
+import mirrg.application.math.wulfenite.core.dialogs.DialogGrid;
 import mirrg.application.math.wulfenite.script.ModelMapperScript;
-import mirrg.helium.standard.hydrogen.struct.Struct1;
 import mirrg.helium.swing.nitrogen.wrapper.artifacts.logging.HLog;
 import mirrg.helium.swing.phosphorus.canvas.PhosphorusCanvas;
 import mirrg.helium.swing.phosphorus.canvas.game.EventGamePhosphorus;
@@ -77,7 +74,8 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 		MIRROR_VERTICAL,
 		MIRROR_HORIZONTAL,
 		DIALOG_COORDINATE,
-		DIALOG_UNIT,
+		DIALOG_GRID,
+		DIALOG_COLOR2,
 		ZOOM_IN,
 		ZOOM_IN_X,
 		ZOOM_IN_Y,
@@ -313,134 +311,9 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 			menuBar.add(menu);
 		}
 		{
-			JMenu menu = new JMenu("色(C)");
-			menu.setMnemonic('C');
-
-			JColorChooser colorChooser = new JColorChooser();
-			menu.add(new JMenuItem(createAction(
-				ActionKey.CHANGE_COLOR_GRID,
-				"グリッド色の変更(G)",
-				"グリッドの色を変更します。",
-				'G',
-				null,
-				e -> {
-					getModel().grid.colorGrid = JColorChooser.showDialog(colorChooser, "グリッドの色の変更", getModel().grid.colorGrid);
-				})));
-			menu.add(new JMenuItem(createAction(
-				ActionKey.CHANGE_COLOR_CURSOR,
-				"カーソル色の変更(C)",
-				"カーソル線の色を変更します。",
-				'C',
-				null,
-				e -> {
-					getModel().grid.colorCursor = JColorChooser.showDialog(colorChooser, "カーソルの色の変更", getModel().grid.colorCursor);
-				})));
-
-			menu.addSeparator();
-			menu.add(new JMenuItem(createAction(
-				ActionKey.CHANGE_COLOR_FUNCTION,
-				"色関数の変更(F)",
-				"色関数を変更します。",
-				'F',
-				KeyStroke.getKeyStroke(KeyEvent.VK_C, 0),
-				e -> {
-					// TODO
-					fireChangeFunction(() -> {
-						color = (color + 1) % 2;
-					});
-				})));
-
-			menu.addSeparator();
-			menu.add(new JMenuItem(createAction(
-				null,
-				"色関数2の設定...(2)",
-				"",
-				'2',
-				null,
-				e -> openDialog(DialogColor2::new))));
-
-			menuBar.add(menu);
-		}
-		{
 			JMenu menu = new JMenu("表示(V)");
 			menu.setMnemonic('V');
 
-			{
-				Struct1<JMenuItem> menuItem = new Struct1<>();
-				menuItem.x = new JCheckBoxMenuItem(createAction(
-					ActionKey.SHOW_GRID,
-					"グリッドの表示(G)",
-					"グリッド線の表示を切り替えます。",
-					'G',
-					KeyStroke.getKeyStroke(KeyEvent.VK_G, 0),
-					e -> {
-						if (!(e.getSource() instanceof JCheckBoxMenuItem)) {
-							menuItem.x.setSelected(!menuItem.x.isSelected());
-						}
-						getModel().grid.enabledGrid = menuItem.x.isSelected();
-						getLayers().forEach(Layer::dirty);
-					}));
-				menuItem.x.setSelected(true);
-				menu.add(menuItem.x);
-			}
-			{
-				Struct1<JMenuItem> menuItem = new Struct1<>();
-				menuItem.x = new JCheckBoxMenuItem(createAction(
-					ActionKey.SHOW_CURSOR_INFO,
-					"カーソル情報の表示(C)",
-					"カーソル情報の表示を切り替えます。",
-					'C',
-					KeyStroke.getKeyStroke(KeyEvent.VK_G, Event.CTRL_MASK),
-					e -> {
-						if (!(e.getSource() instanceof JCheckBoxMenuItem)) {
-							menuItem.x.setSelected(!menuItem.x.isSelected());
-						}
-						getModel().grid.enabledCursor = menuItem.x.isSelected();
-						getLayers().forEach(Layer::dirty);
-					}));
-				menuItem.x.setSelected(true);
-				menu.add(menuItem.x);
-			}
-			{
-				Struct1<JMenuItem> menuItem = new Struct1<>();
-				menuItem.x = new JCheckBoxMenuItem(createAction(
-					ActionKey.SHOW_EXTRA_INFO,
-					"追加情報の表示(E)",
-					"関数プラグインによって追加される表示を切り替えます。",
-					'E',
-					KeyStroke.getKeyStroke(KeyEvent.VK_G, Event.SHIFT_MASK),
-					e -> {
-						if (!(e.getSource() instanceof JCheckBoxMenuItem)) {
-							menuItem.x.setSelected(!menuItem.x.isSelected());
-						}
-						getModel().grid.enabledExtra = menuItem.x.isSelected();
-						getLayers().forEach(Layer::dirty);
-					}));
-				menuItem.x.setSelected(true);
-				menu.add(menuItem.x);
-			}
-
-			menu.addSeparator();
-			{
-				Struct1<JMenuItem> menuItem = new Struct1<>();
-				menuItem.x = new JCheckBoxMenuItem(createAction(
-					ActionKey.TOGGLE_CATCH,
-					"カーソル情報をグリッドに吸着(T)",
-					"カーソル情報をグリッドの交点に乗せるか否かを切り替えます。",
-					'T',
-					KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0),
-					e -> {
-						if (!(e.getSource() instanceof JCheckBoxMenuItem)) {
-							menuItem.x.setSelected(!menuItem.x.isSelected());
-						}
-						getModel().grid.enabledCatch = menuItem.x.isSelected();
-						getLayers().forEach(Layer::dirty);
-					}));
-				menuItem.x.setSelected(true);
-				menu.add(menuItem.x);
-			}
-
-			menu.addSeparator();
 			menu.add(new JMenuItem(createAction(
 				ActionKey.MIRROR_HORIZONTAL,
 				"水平方向に反転(H)",
@@ -458,12 +331,40 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 
 			menu.addSeparator();
 			menu.add(new JMenuItem(createAction(
-				ActionKey.DIALOG_UNIT,
-				"単位設定...(D)",
-				"表示単位の設定ウィンドウを開きます。",
+				ActionKey.DIALOG_GRID,
+				"グリッド設定...(D)",
+				"グリッドの設定ウィンドウを開きます。",
 				'D',
 				KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0),
-				e -> openDialog(DialogUnit::new))));
+				e -> openDialog(DialogGrid::new))));
+
+			menuBar.add(menu);
+		}
+		{
+			JMenu menu = new JMenu("色(C)");
+			menu.setMnemonic('C');
+
+			menu.add(new JMenuItem(createAction(
+				ActionKey.CHANGE_COLOR_FUNCTION,
+				"色関数の変更(F)",
+				"色関数を変更します。",
+				'F',
+				KeyStroke.getKeyStroke(KeyEvent.VK_C, 0),
+				e -> {
+					// TODO
+					fireChangeFunction(() -> {
+						color = (color + 1) % 2;
+					});
+				})));
+
+			menu.addSeparator();
+			menu.add(new JMenuItem(createAction(
+				ActionKey.DIALOG_COLOR2,
+				"色関数2の設定...(2)",
+				"",
+				'2',
+				null,
+				e -> openDialog(DialogColor2::new))));
 
 			menuBar.add(menu);
 		}

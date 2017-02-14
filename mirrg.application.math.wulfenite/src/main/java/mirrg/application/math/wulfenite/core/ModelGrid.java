@@ -1,8 +1,10 @@
 package mirrg.application.math.wulfenite.core;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -21,17 +23,29 @@ public class ModelGrid extends ModelEntity<Wulfenite>
 {
 
 	public double unitX = 1;
-	public double unitY = 1;
 	public String unitNameX = "";
-	public String unitNameY = "";
+	public double unitY = 1;
+	public String unitNameY = "i";
 
-	public boolean enabledGrid = true;
-	public boolean enabledCursor = true;
-	public boolean enabledExtra = true;
+	public boolean enableGrid = true;
+	public boolean enableAxis = true;
+	public boolean enableCursor = true;
+	public boolean enableOrigin = true;
+	public boolean enableExtra = true;
 	public Color colorGrid = Color.white;
+	public Color colorAxis = Color.white;
 	public Color colorCursor = Color.yellow;
 
 	public boolean enabledCatch = false;
+
+	public int fontSizeGrid = 14;
+	public int fontSizeCursor = 14;
+	public Color fontColorFill = Color.white;
+	public Color fontColorBorder = Color.black;
+	public Color fontColorFillStrong = Color.yellow;
+	public Color fontColorBorderStrong = Color.black;
+	public double borderWidthGrid = 1;
+	public double borderWidthAxis = 2;
 
 	@Override
 	public EntityGrid getController()
@@ -44,8 +58,6 @@ public class ModelGrid extends ModelEntity<Wulfenite>
 	{
 		return new EntityGrid(game);
 	}
-
-	private static final Font font = new Font("MS Gothic", Font.BOLD, 14);
 
 	public class EntityGrid extends Entity<Wulfenite>
 	{
@@ -76,8 +88,6 @@ public class ModelGrid extends ModelEntity<Wulfenite>
 		{
 			if (layer == game.layerOverlay) {
 				Graphics2D g = layer.getImageLayer().getGraphics();
-
-				if (!(enabledGrid || enabledCursor)) return;
 
 				// 画面の頂点における数学的座標の取得
 				double mx1 = game.getView().getController().getCoordinateX(0) / unitX;
@@ -157,21 +167,46 @@ public class ModelGrid extends ModelEntity<Wulfenite>
 				}
 
 				// lines
-				if (enabledGrid) {
+				if (enableGrid) {
 					// TODO アンダーフロー
 					g.setColor(colorGrid);
-					for (double x : linesX) {
-						int dx = (int) game.getView().getController().getScreenX(x * unitX);
-						g.drawLine(dx, 0, dx, game.canvas.getHeight());
+
+					Stroke stroke = g.getStroke();
+					g.setStroke(new BasicStroke((float) borderWidthGrid));
+					{
+						for (double x : linesX) {
+							int dx = (int) game.getView().getController().getScreenX(x * unitX);
+							g.drawLine(dx, 0, dx, game.canvas.getHeight());
+						}
+						for (double y : linesY) {
+							int dy = (int) game.getView().getController().getScreenY(y * unitY);
+							g.drawLine(0, dy, game.canvas.getWidth(), dy);
+						}
 					}
-					for (double y : linesY) {
-						int dy = (int) game.getView().getController().getScreenY(y * unitY);
+					g.setStroke(stroke);
+
+				}
+
+				// lines
+				if (enableAxis) {
+					// TODO アンダーフロー
+					g.setColor(colorAxis);
+
+					Stroke stroke = g.getStroke();
+					g.setStroke(new BasicStroke((float) borderWidthAxis));
+					{
+						int dx = (int) game.getView().getController().getScreenX(0 * unitY);
+						g.drawLine(dx, 0, dx, game.canvas.getHeight());
+
+						int dy = (int) game.getView().getController().getScreenY(0 * unitY);
 						g.drawLine(0, dy, game.canvas.getWidth(), dy);
 					}
+					g.setStroke(stroke);
+
 				}
 
 				// lines cursor
-				if (enabledCursor) {
+				if (enableCursor) {
 					g.setColor(colorCursor);
 
 					{
@@ -186,17 +221,31 @@ public class ModelGrid extends ModelEntity<Wulfenite>
 
 				}
 
+				// dot origin
+				if (enableOrigin) {
+					// X座標ラベルの描画位置カウンタ
+					int dx = (int) game.getView().getController().getScreenX(0 * unitX);
+					int dy = (int) game.getView().getController().getScreenY(0 * unitY);
+					String str = "O";
+
+					Font font = new Font("MS Gothic", Font.BOLD, fontSizeGrid);
+					g.setFont(font);
+					int textLength = g.getFontMetrics().stringWidth(str);
+					drawBoldString(g, str, dx - 2 - textLength, dy + 2 + g.getFont().getSize(), fontColorFill, fontColorBorder);
+				}
+
 				// labels
-				if (enabledGrid) {
+				if (enableGrid) {
 					// X座標ラベルの描画位置カウンタ
 					int drawY = 0;
+					Font font = new Font("MS Gothic", Font.BOLD, fontSizeGrid);
 
 					for (double x : linesX) {
 						int dx = (int) game.getView().getController().getScreenX(x * unitX);
 						String str = HString.getEffectiveExpression(x, effectiveDigitW) + unitNameX;
 
 						g.setFont(font);
-						drawBoldString(g, str, dx, (1 + drawY) * g.getFont().getSize(), Color.white, Color.black);
+						drawBoldString(g, str, dx, (1 + drawY) * g.getFont().getSize(), fontColorFill, fontColorBorder);
 
 						int textLength = g.getFontMetrics().stringWidth(str);
 						drawY = (drawY + 1) % (1 + (int) (textLength / gridSpaceDispW));
@@ -207,12 +256,13 @@ public class ModelGrid extends ModelEntity<Wulfenite>
 						String str = HString.getEffectiveExpression(y, effectiveDigitH) + unitNameY;
 
 						g.setFont(font);
-						drawBoldString(g, str, 0, dy + g.getFont().getSize(), Color.white, Color.black);
+						drawBoldString(g, str, 0, dy + g.getFont().getSize(), fontColorFill, fontColorBorder);
 					}
 				}
 
 				// labels cursor
-				if (enabledCursor) {
+				if (enableCursor) {
+					Font font = new Font("MS Gothic", Font.BOLD, fontSizeCursor);
 
 					{
 						StructureComplex buffer = new StructureComplex(
@@ -227,7 +277,7 @@ public class ModelGrid extends ModelEntity<Wulfenite>
 							drawBoldString(g, str,
 								(int) (game.getView().getController().getScreenX(mgridx * unitX) + 2),
 								(int) (game.getView().getController().getScreenY(mgridy * unitY) - 2 - g.getFont().getSize() * ((1 + valueInformation.length) - i)),
-								Color.white, Color.black);
+								fontColorFill, fontColorBorder);
 						}
 					}
 
@@ -239,7 +289,7 @@ public class ModelGrid extends ModelEntity<Wulfenite>
 						drawBoldString(g, str,
 							(int) (game.getView().getController().getScreenX(mgridx * unitX) + 2),
 							(int) (game.getView().getController().getScreenY(mgridy * unitY) - 2 - g.getFont().getSize()),
-							Color.yellow, Color.black);
+							fontColorFillStrong, fontColorBorderStrong);
 					}
 
 					{
@@ -250,7 +300,7 @@ public class ModelGrid extends ModelEntity<Wulfenite>
 						drawBoldString(g, str,
 							(int) (game.getView().getController().getScreenX(mgridx * unitX) + 2),
 							(int) (game.getView().getController().getScreenY(mgridy * unitY) - 2),
-							Color.yellow, Color.black);
+							fontColorFillStrong, fontColorBorderStrong);
 					}
 
 				}
