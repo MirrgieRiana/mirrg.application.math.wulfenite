@@ -44,7 +44,6 @@ import javax.swing.WindowConstants;
 
 import com.thoughtworks.xstream.XStream;
 
-import mirrg.application.math.wulfenite.core.dialogs.DialogColor2;
 import mirrg.application.math.wulfenite.core.dialogs.DialogCoordinate;
 import mirrg.application.math.wulfenite.core.dialogs.DialogGrid;
 import mirrg.application.math.wulfenite.script.ModelMapperScript;
@@ -75,7 +74,7 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 		MIRROR_HORIZONTAL,
 		DIALOG_COORDINATE,
 		DIALOG_GRID,
-		DIALOG_COLOR2,
+		DIALOG_COLOR,
 		ZOOM_IN,
 		ZOOM_IN_X,
 		ZOOM_IN_Y,
@@ -106,10 +105,6 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 	public final InputMap inputMap;
 
 	private String xml;
-	public int color; // TODO
-	public double color2_a = 1; // TODO
-	public double color2_b = 0; // TODO
-	public double color2_c = 1; // TODO
 
 	public Wulfenite(FrameWulfenite frame, PhosphorusCanvas canvas, JMenuBar menuBar)
 	{
@@ -274,28 +269,28 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 				ActionKey.MOVE_UP,
 				"↑(W)",
 				"上方向に50ピクセル分スクロールします。",
-				'E',
+				'W',
 				KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),
 				e -> getView().getController().setY(getView().getController().getY() - 50 * getView().getController().getZoomY()))));
 			menu.add(new JMenuItem(createAction(
 				ActionKey.MOVE_DOWN,
 				"↓(S)",
 				"下方向に50ピクセル分スクロールします。",
-				'Q',
+				'S',
 				KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
 				e -> getView().getController().setY(getView().getController().getY() + 50 * getView().getController().getZoomY()))));
 			menu.add(new JMenuItem(createAction(
 				ActionKey.MOVE_LEFT,
 				"←(A)",
 				"左方向に50ピクセル分スクロールします。",
-				'E',
+				'A',
 				KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0),
 				e -> getView().getController().setX(getView().getController().getX() - 50 * getView().getController().getZoomX()))));
 			menu.add(new JMenuItem(createAction(
 				ActionKey.MOVE_RIGHT,
 				"→(D)",
 				"右方向に50ピクセル分スクロールします。",
-				'Q',
+				'D',
 				KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0),
 				e -> getView().getController().setX(getView().getController().getX() + 50 * getView().getController().getZoomX()))));
 
@@ -305,14 +300,84 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 				"座標設定...(D)",
 				"座標の設定ウィンドウを開きます。",
 				'D',
-				KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0),
+				KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0),
 				e -> openDialog(DialogCoordinate::new))));
 
 			menuBar.add(menu);
 		}
 		{
-			JMenu menu = new JMenu("表示(V)");
-			menu.setMnemonic('V');
+			JMenu menu = new JMenu("関数(S)");
+			menu.setMnemonic('S');
+
+			menu.add(new JMenuItem(createAction(
+				null,
+				"Script(1)",
+				null,
+				'1',
+				null,
+				e -> setFunction(new ModelMapperScript()))));
+			menu.add(new JMenuItem(createAction(
+				null,
+				"Complex(2)",
+				null,
+				'2',
+				null,
+				e -> setFunction(new ModelMapperComplex()))));
+			menu.add(new JMenuItem(createAction(
+				null,
+				"Mandelbrot(3)",
+				null,
+				'3',
+				null,
+				e -> setFunction(new ModelMapperMandelbrot()))));
+
+			menu.addSeparator();
+			menu.add(new JMenuItem(createAction(
+				ActionKey.OPEN_CONFIG_DIALOG,
+				"関数設定(D)...",
+				"関数の設定画面を表示します。",
+				'D',
+				KeyStroke.getKeyStroke(KeyEvent.VK_F4, 0),
+				e -> getFunction().toggleDialog())));
+
+			menuBar.add(menu);
+		}
+		{
+			JMenu menu = new JMenu("色関数(C)");
+			menu.setMnemonic('C');
+
+			menu.add(new JMenuItem(createAction(
+				null,
+				"Default(1)",
+				null,
+				'1',
+				null,
+				e -> setColorMapper(new ModelColorMapperDefault()))));
+			menu.add(new JMenuItem(createAction(
+				null,
+				"ZeroPoint(2)",
+				null,
+				'2',
+				null,
+				e -> setColorMapper(new ModelColorMapper2()))));
+
+			menu.addSeparator();
+			menu.add(new JMenuItem(createAction(
+				ActionKey.DIALOG_COLOR,
+				"色関数設定...(D)",
+				"色関数の設定ウィンドウを開きます。",
+				'D',
+				KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0),
+				e -> {
+					JDialog dialog = getModel().colorMapper.getController().createDialog(frame);
+					if (dialog != null) openDialog(dialog);
+				})));
+
+			menuBar.add(menu);
+		}
+		{
+			JMenu menu = new JMenu("グリッド(G)");
+			menu.setMnemonic('G');
 
 			menu.add(new JMenuItem(createAction(
 				ActionKey.MIRROR_HORIZONTAL,
@@ -338,68 +403,6 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 				KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0),
 				e -> openDialog(DialogGrid::new))));
 
-			menuBar.add(menu);
-		}
-		{
-			JMenu menu = new JMenu("色(C)");
-			menu.setMnemonic('C');
-
-			menu.add(new JMenuItem(createAction(
-				ActionKey.CHANGE_COLOR_FUNCTION,
-				"色関数の変更(F)",
-				"色関数を変更します。",
-				'F',
-				KeyStroke.getKeyStroke(KeyEvent.VK_C, 0),
-				e -> {
-					// TODO
-					fireChangeFunction(() -> {
-						color = (color + 1) % 2;
-					});
-				})));
-
-			menu.addSeparator();
-			menu.add(new JMenuItem(createAction(
-				ActionKey.DIALOG_COLOR2,
-				"色関数2の設定...(2)",
-				"",
-				'2',
-				null,
-				e -> openDialog(DialogColor2::new))));
-
-			menuBar.add(menu);
-		}
-		{
-			JMenu menu = new JMenu("関数(S)");
-			menu.setMnemonic('S');
-			menu.add(new JMenuItem(createAction(
-				ActionKey.OPEN_CONFIG_DIALOG,
-				"設定画面(C)...",
-				"関数の設定画面を表示します。",
-				'C',
-				KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0),
-				e -> getFunction().toggleDialog())));
-			menu.addSeparator();
-			menu.add(new JMenuItem(createAction(
-				null,
-				"Script(1)...",
-				"関数を設定します。",
-				'1',
-				KeyStroke.getKeyStroke(KeyEvent.VK_1, 0),
-				e -> setFunction(new ModelMapperScript()))));
-			menu.add(new JMenuItem(createAction(
-				null,
-				"Complex(2)...",
-				"関数を設定します。",
-				'2',
-				KeyStroke.getKeyStroke(KeyEvent.VK_2, 0),
-				e -> setFunction(new ModelMapperComplex()))));
-			menu.add(new JMenuItem(createAction(
-				null,
-				"Mandelbrot(3)...",
-				"関数を設定します。",
-				'3',
-				KeyStroke.getKeyStroke(KeyEvent.VK_3, 0),
-				e -> setFunction(new ModelMapperMandelbrot()))));
 			menuBar.add(menu);
 		}
 
@@ -509,8 +512,11 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 
 	public void openDialog(BiFunction<Wulfenite, FrameWulfenite, JDialog> constructor)
 	{
-		JDialog dialog = constructor.apply(this, frame);
+		openDialog(constructor.apply(this, frame));
+	}
 
+	public void openDialog(JDialog dialog)
+	{
 		dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		dialog.pack();
 		dialog.setLocationByPlatform(true);
@@ -544,7 +550,7 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 		};
 		action.putValue(Action.NAME, name);
 		action.putValue(Action.MNEMONIC_KEY, Integer.valueOf(mnemonicKey));
-		action.putValue(Action.SHORT_DESCRIPTION, shortDescription);
+		if (shortDescription != null) action.putValue(Action.SHORT_DESCRIPTION, shortDescription);
 		if (acceleratorKey != null) action.putValue(Action.ACCELERATOR_KEY, acceleratorKey);
 		if (actionKey != null) actionMap.put(actionKey, action);
 		if (acceleratorKey != null && actionKey != null) inputMap.put(acceleratorKey, actionKey);
@@ -577,6 +583,16 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 			ModelMapperBase tmp = getModel().mapper;
 			wulfeniteFunction.initialize(this);
 			getModel().mapper = wulfeniteFunction;
+			tmp.dispose();
+		});
+	}
+
+	public void setColorMapper(ModelColorMapperBase modelColorMapper)
+	{
+		fireChangeFunction(() -> {
+			ModelColorMapperBase tmp = getModel().colorMapper;
+			modelColorMapper.initialize(this);
+			getModel().colorMapper = modelColorMapper;
 			tmp.dispose();
 		});
 	}

@@ -12,6 +12,7 @@ public class ModelWulfenite extends ModelPhosphorus<Wulfenite, ModelViewXYZoomXY
 
 	public ModelMapperBase mapper;
 	public ModelGrid grid;
+	public ModelColorMapperBase colorMapper;
 
 	public static ModelWulfenite create()
 	{
@@ -30,6 +31,8 @@ public class ModelWulfenite extends ModelPhosphorus<Wulfenite, ModelViewXYZoomXY
 		this.mapper = mapper;
 
 		this.grid = new ModelGrid();
+
+		this.colorMapper = new ModelColorMapperDefault();
 	}
 
 	@Override
@@ -38,6 +41,7 @@ public class ModelWulfenite extends ModelPhosphorus<Wulfenite, ModelViewXYZoomXY
 		super.getChildModels(dest);
 		dest.accept(mapper);
 		dest.accept(grid);
+		dest.accept(colorMapper);
 	}
 
 }
