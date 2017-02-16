@@ -362,11 +362,11 @@ public class Wulfenite extends GamePhosphorus<Wulfenite, ModelWulfenite, ModelVi
 				e -> setColorMapper(new ModelColorMapperZeroPoint()))));
 			menu.add(new JMenuItem(createAction(
 				null,
-				"ZeroPointGlay(3)",
+				"ZeroPointGray(3)",
 				null,
 				'3',
 				null,
-				e -> setColorMapper(new ModelColorMapperZeroPointGlay()))));
+				e -> setColorMapper(new ModelColorMapperZeroPointGray()))));
 
 			menu.addSeparator();
 			menu.add(new JMenuItem(createAction(
