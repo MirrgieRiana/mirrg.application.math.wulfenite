@@ -5,12 +5,12 @@ import static mirrg.helium.swing.nitrogen.util.HSwing.*;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 
-import mirrg.application.math.wulfenite.core.ModelColorMapper2;
+import mirrg.application.math.wulfenite.core.ModelColorMapperZeroPoint;
 import mirrg.application.math.wulfenite.core.Wulfenite;
 import mirrg.application.math.wulfenite.core.dialog.ParameterDouble;
 import mirrg.helium.swing.phosphorus.canvas.game.EventGamePhosphorus;
 
-public class DialogColor2 extends JDialog
+public class DialogColorZeroPoint extends JDialog
 {
 
 	private Wulfenite game;
@@ -19,9 +19,9 @@ public class DialogColor2 extends JDialog
 	private ParameterDouble b;
 	private ParameterDouble c;
 
-	public DialogColor2(Wulfenite game, JFrame frame, ModelColorMapper2 model)
+	public DialogColorZeroPoint(Wulfenite game, JFrame frame, ModelColorMapperZeroPoint model)
 	{
-		super(frame, "色2設定");
+		super(frame, "色設定");
 		this.game = game;
 
 		a = new ParameterDouble("色変化閾値", () -> model.color2_a, a -> model.color2_a = a, this::pre, this::post);

@@ -70,18 +70,53 @@ public class ModelColorMapperDefault extends ModelColorMapperBase
 
 		protected int getColorIntFromPolar(double abs, double arg)
 		{
-			double R = Math.cos(arg);
-			double G = Math.cos(arg - 120.0 / 180 * Math.PI);
-			double B = Math.cos(arg - 240.0 / 180 * Math.PI);
+			double R = getComplexR(abs, arg);
+			double G = getComplexG(abs, arg);
+			double B = getComplexB(abs, arg);
 
+			double brightness = getComplexBrightness(abs, arg);
+
+			return createColor(
+				255 * R * brightness,
+				255 * G * brightness,
+				255 * B * brightness);
+		}
+
+		protected double getComplexBrightness(double abs, double arg)
+		{
 			double brightness = 0.5 - 0.5 * Math.cos(abs * 2 * Math.PI);
-
 			brightness = 1 - brightness * brightness;
+			return brightness;
+		}
 
-			return HColor.getColorInt(
-				(int) ((128 + (126 * R)) * brightness),
-				(int) ((128 + (126 * G)) * brightness),
-				(int) ((128 + (126 * B)) * brightness));
+		protected double getComplexR(double abs, double arg)
+		{
+			return 0.5 + 0.5 * Math.cos(arg);
+		}
+
+		protected double getComplexG(double abs, double arg)
+		{
+			return 0.5 + 0.5 * Math.cos(arg - 120.0 / 180 * Math.PI);
+		}
+
+		protected double getComplexB(double abs, double arg)
+		{
+			return 0.5 + 0.5 * Math.cos(arg - 240.0 / 180 * Math.PI);
+		}
+
+		// TODO mirrg
+		protected int createColor(double r, double g, double b)
+		{
+			int r2 = (int) r;
+			int g2 = (int) g;
+			int b2 = (int) b;
+			if (r2 < 0) r2 = 0;
+			if (g2 < 0) g2 = 0;
+			if (b2 < 0) b2 = 0;
+			if (r2 > 255) r2 = 255;
+			if (g2 > 255) g2 = 255;
+			if (b2 > 255) b2 = 255;
+			return (r2 << 16) | (g2 << 8) | b2;
 		}
 
 		@Override
