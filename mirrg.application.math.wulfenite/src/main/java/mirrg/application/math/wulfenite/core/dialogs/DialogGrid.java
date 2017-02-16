@@ -3,6 +3,7 @@ package mirrg.application.math.wulfenite.core.dialogs;
 import static mirrg.helium.swing.nitrogen.util.HSwing.*;
 
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Component;
 
 import javax.swing.JDialog;
@@ -107,7 +108,20 @@ public class DialogGrid extends JDialog
 			group("色", createBorderPanelUp(
 				colorGrid.initRecord(),
 				colorAxis.initRecord(),
-				colorCursor.initRecord())),
+				colorCursor.initRecord(),
+				createBorderPanelLeft(
+					createButton("白線", e -> {
+						colorGrid.set(Color.white);
+						colorAxis.set(Color.white);
+						colorCursor.set(Color.yellow);
+						post();
+					}), createButton("黒線", e -> {
+						colorGrid.set(Color.black);
+						colorAxis.set(Color.black);
+						colorCursor.set(Color.blue);
+						post();
+					}),
+					null))),
 			enabledCatch.initRecord(),
 			group("スタイル", createBorderPanelUp(
 				fontSizeGrid.initRecord(),
